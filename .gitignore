@@ -1,0 +1,13 @@
+*__pycache__
+*.egg-info
+*MUJOCO_LOG.TXT
+*build
+*.pyc
+models/3dgs
+scripts
+data
+submodules*
+*.DS_Store
+*.mp4
+*log
+*tmp*
