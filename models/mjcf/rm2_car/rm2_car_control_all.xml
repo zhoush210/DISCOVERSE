@@ -1,0 +1,12 @@
+<mujocoinclude>
+  <motor name='motor_wheel_joint1' joint="wheel_joint1" class='wheel_joint'/>
+  <motor name='motor_wheel_joint2' joint="wheel_joint2" class='wheel_joint'/>
+  <motor name='motor_wheel_joint3' joint="wheel_joint3" class='wheel_joint'/>
+  <motor name='motor_wheel_joint4' joint="wheel_joint4" class='wheel_joint'/>
+
+  <position name='steer_joint1_position' joint='steer_joint1' class='steer_joint' kp="200"/>
+  <position name='steer_joint2_position' joint='steer_joint2' class='steer_joint' kp="200"/>
+  <position name='steer_joint3_position' joint='steer_joint3' class='steer_joint' kp="200"/>
+  <position name='steer_joint4_position' joint='steer_joint4' class='steer_joint' kp='200'/>
+
+</mujocoinclude>

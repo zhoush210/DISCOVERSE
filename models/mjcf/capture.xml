@@ -1,0 +1,74 @@
+<mujoco model="capture">
+
+  <option integrator="RK4" solver="Newton" gravity="0 0 0"/>
+  <compiler angle="radian" meshdir="../meshes" texturedir="../textures/"/>
+
+  <default>
+    <default class="obj_visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
+    </default>
+  </default>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight ambient="0.4 0.4 0.4"/>
+    <scale com="0.05" camera="0.06" framelength="0.5" framewidth="0.02" forcewidth="0.005" contactwidth="0.01" contactheight="0.05"/>
+  </visual>
+
+  <worldbody>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 2' dir='0 0 -1'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 -2' dir='0 0 1'/>
+
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='2 0 0' dir='-1 0 0'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='-2 0 0' dir='1 0 0'/>
+
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 2 0' dir='0 -1 0'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 -2 0' dir='0 1 0'/>
+
+    <camera name="world" pos="0 0 0" xyaxes="0 -1 0 1 0 0"/>
+
+    <geom type="plane" pos="0 0 -3" size="3 3 0.1" rgba="0 1 0 1"/>
+    <geom type="plane" pos="0 0  3" euler="0 3.1415926 0" size="3 3 0.1" rgba="0 1 0 1"/>
+    <geom type="plane" pos="-3 0 0" euler="0 1.5707963267948966 0" size="3 3 0.1" rgba="0 1 0 1"/>
+    <geom type="plane" pos=" 3 0 0" euler="0 -1.5707963267948966 0" size="3 3 0.1" rgba="0 1 0 1"/>
+    <geom type="plane" pos="0  3 0" euler="1.5707963267948966 0 0" size="3 3 0.1" rgba="0 1 0 1"/>
+    <geom type="plane" pos="0 -3 0" euler="-1.5707963267948966 0 0" size="3 3 0.1" rgba="0 1 0 1"/>
+
+    <!-- <geom type="plane" pos="0 0 -3" size="3 3 0.1" rgba="0 0 0 1"/>
+    <geom type="plane" pos="0 0  3" euler="0 3.1415926 0" size="3 3 0.1" rgba="0 0 0 1"/>
+    <geom type="plane" pos="-3 0 0" euler="0 1.5707963267948966 0" size="3 3 0.1" rgba="0 0 0 1"/>
+    <geom type="plane" pos=" 3 0 0" euler="0 -1.5707963267948966 0" size="3 3 0.1" rgba="0 0 0 1"/>
+    <geom type="plane" pos="0  3 0" euler="1.5707963267948966 0 0" size="3 3 0.1" rgba="0 0 0 1"/>
+    <geom type="plane" pos="0 -3 0" euler="-1.5707963267948966 0 0" size="3 3 0.1" rgba="0 0 0 1"/> -->
+
+    <!-- <geom type="plane" pos="0 0 -3" size="3 3 0.1" rgba="1 1 1 1"/>
+    <geom type="plane" pos="0 0  3" euler="0 3.1415926 0" size="3 3 0.1" rgba="1 1 1 1"/>
+    <geom type="plane" pos="-3 0 0" euler="0 1.5707963267948966 0" size="3 3 0.1" rgba="1 1 1 1"/>
+    <geom type="plane" pos=" 3 0 0" euler="0 -1.5707963267948966 0" size="3 3 0.1" rgba="1 1 1 1"/>
+    <geom type="plane" pos="0  3 0" euler="1.5707963267948966 0 0" size="3 3 0.1" rgba="1 1 1 1"/>
+    <geom type="plane" pos="0 -3 0" euler="-1.5707963267948966 0 0" size="3 3 0.1" rgba="1 1 1 1"/> -->
+
+    <!-- <geom type="plane" pos="0 0 -3" size="3 3 0.1" rgba="1 0 0 1"/>
+    <geom type="plane" pos="0 0  3" euler="0 3.1415926 0" size="3 3 0.1" rgba="1 0 0 1"/>
+    <geom type="plane" pos="-3 0 0" euler="0 1.5707963267948966 0" size="3 3 0.1" rgba="1 0 0 1"/>
+    <geom type="plane" pos=" 3 0 0" euler="0 -1.5707963267948966 0" size="3 3 0.1" rgba="1 0 0 1"/>
+    <geom type="plane" pos="0  3 0" euler="1.5707963267948966 0 0" size="3 3 0.1" rgba="1 0 0 1"/>
+    <geom type="plane" pos="0 -3 0" euler="-1.5707963267948966 0 0" size="3 3 0.1" rgba="1 0 0 1"/> -->
+
+    <body name="logo" pos="0 0 -1" euler="0 0 -1.5708">
+      <geom material="airbot_logo" size="0.0625 0.0159 0.0002" type="box" contype="0" conaffinity="0"/>
+    </body>
+    <site pos="0.0 0.0 0.0" quat="4.3297802811774664e-17 0.7071067811865476 -0.7071067811865475 -4.329780281177466e-17" size="0.001" type="sphere"/>
+    
+    <body name="link" pos="0 0 0">
+
+    </body>
+
+
+  </worldbody>
+
+</mujoco>

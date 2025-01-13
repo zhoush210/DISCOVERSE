@@ -1,0 +1,9 @@
+<mujocoinclude>
+
+  <asset>
+    <texture type="2d" name="cooker_texture" file="obj/cooker/texture.png"/>
+    <material name="cooker_texture" texture="cooker_texture" specular="0.5" shininess="0.5"/>
+    <mesh file="obj/cooker/cooker.obj"/>
+  </asset>
+
+</mujocoinclude>

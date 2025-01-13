@@ -1,0 +1,5 @@
+<mujocoinclude>
+  <asset>
+    <mesh name="usb_cam" file="stl/usb_camera.STL"/>
+  </asset>
+</mujocoinclude>

@@ -1,0 +1,18 @@
+<mujocoinclude>
+
+  <tendon>
+    <fixed name='forward'>
+      <joint joint='wheel_joint1' coef='1.'/>
+      <joint joint='wheel_joint2' coef='1.'/>
+      <joint joint='wheel_joint3' coef='1.'/>
+      <joint joint='wheel_joint4' coef='1.'/>
+    </fixed>
+    <fixed name='turn'>
+      <joint joint='wheel_joint1' coef='1.'/>
+      <joint joint='wheel_joint2' coef='-1.'/>
+      <joint joint='wheel_joint3' coef='-1.'/>
+      <joint joint='wheel_joint4' coef='1.'/>
+    </fixed>
+  </tendon>
+
+</mujocoinclude>

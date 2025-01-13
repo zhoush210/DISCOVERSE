@@ -1,0 +1,43 @@
+<mujocoinclude>
+
+  <joint type="free" frictionloss="0.0002"/>
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_0"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_1"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_2"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_3"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_4"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_5"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_6"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_7"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_8"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_9"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_10"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_11"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_12"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_13"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_14"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_15"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_16"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_17"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_18"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_19"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_20"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_21"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_22"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_23"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_24"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_25"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_26"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_27"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_28"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_29"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_30"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_31"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_32"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_33"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_34"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_35"/>
+  <geom condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh" rgba="0.86 0.5 0.533 1" mesh="cup_part_36"/>
+
+</mujocoinclude>

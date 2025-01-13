@@ -1,0 +1,5 @@
+<mujocoinclude>
+  <option integrator="RK4" gravity="0 0 -9.81" density="1" viscosity="1e-5"/>
+  <!-- <compiler inertiafromgeom="true" meshdir="../meshes" texturedir="../textures/"/> -->
+  <compiler coordinate="local" inertiafromgeom="true" meshdir="../meshes" texturedir="../textures/"/>
+</mujocoinclude>

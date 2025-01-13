@@ -1,0 +1,6 @@
+<mujocoinclude>
+  <!-- <joint type="free" frictionloss="0.00001" /> -->
+  <inertial pos="0 0 0" mass="0.0005" diaginertia="0.00002 0.00002 0.00002" />
+  <geom type="cylinder" size="0.123 0.002" material="mouse_pad_texture" class="obj_visual"/>
+  <!-- <geom type="cylinder" size="0.123 0.002" material="mouse_pad_texture" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" /> -->
+</mujocoinclude>

@@ -1,0 +1,30 @@
+<mujocoinclude>
+
+  <asset>
+    <texture type="2d" name="plate_white_texture" file="obj/plate_white/plate_color.png"/>
+    <material name="plate_white_texture" texture="plate_white_texture" specular="0.5" shininess="0.5"/>
+    <mesh file="obj/plate/plate.obj"/>
+
+    <mesh name="plate_white_part_0" file="obj/plate/part_0.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_1" file="obj/plate/part_1.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_2" file="obj/plate/part_2.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_3" file="obj/plate/part_3.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_4" file="obj/plate/part_4.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_5" file="obj/plate/part_5.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_6" file="obj/plate/part_6.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_7" file="obj/plate/part_7.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_8" file="obj/plate/part_8.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_9" file="obj/plate/part_9.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_10" file="obj/plate/part_10.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_11" file="obj/plate/part_11.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_12" file="obj/plate/part_12.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_13" file="obj/plate/part_13.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_14" file="obj/plate/part_14.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_15" file="obj/plate/part_15.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_16" file="obj/plate/part_16.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_17" file="obj/plate/part_17.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_18" file="obj/plate/part_18.obj" scale="1 1 1"/>
+    <mesh name="plate_white_part_19" file="obj/plate/part_19.obj" scale="1 1 1"/>
+  </asset>
+
+</mujocoinclude>

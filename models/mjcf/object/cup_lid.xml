@@ -1,0 +1,8 @@
+<mujocoinclude>
+  <joint type="free" frictionloss="0.00005" />
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="cup_lid_texture" mesh="cup_lid" class="obj_visual"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="cup_lid_part_0" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="cup_lid_part_1" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="cup_lid_part_2" class="obj_collision"/>
+</mujocoinclude>

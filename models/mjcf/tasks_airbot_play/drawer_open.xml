@@ -1,0 +1,65 @@
+<mujoco model="drawer_open">
+
+  <include file="../scene.xml"/>
+  <include file="../airbot_play/airbot_play_options.xml"/>
+  <include file="../airbot_play/airbot_play_dependencies.xml"/>
+  <include file="../object/usb_camera_dependencies.xml"/>
+
+  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <include file="../object/table_cloth_dependencies.xml"/>
+
+  <default>
+    <default class="obj_visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="1 0.005 0.0001" type="mesh"/>
+    </default>
+  </default>
+
+  <worldbody>
+
+    <!-- ======= AITBOT PLAY ======= -->
+    <body name="arm_pose" pos="0.3 0.92 0.71" euler="0 0 3.1416">
+      <include file="../airbot_play/airbot_play.xml"/>
+    </body>
+
+    <!-- ======= EYE SIDE ======= -->
+    <camera name="eye_side" fovy="72.02" pos="0.1 0.5 0.947" xyaxes="0.415 -0.910 0.000 0.233 0.106 0.967"/>
+    <site name="eye_side_site" pos="0.1 0.5 0.947" quat="1 0 0 0"/>
+
+    <body name="cabinet" pos="0.915 0.58 0.01">
+      <include file="../object/cabinet.xml"/>
+    </body>
+
+    <include file="../lab3_env.xml"/>
+
+  </worldbody>
+
+  <equality>
+    <joint joint1='endleft' joint2='endright' polycoef='0 -1 0 0 0 '/>
+  </equality>
+
+  <actuator>
+    <include file="../airbot_play/airbot_play_control.xml"/>
+  </actuator>
+
+  <sensor>
+    <include file="../airbot_play/airbot_play_sensor.xml"/>
+  </sensor>
+
+  <keyframe>
+    <key name="home" qpos='
+       0 0 0  0 0 0  0 0 
+       0 0'
+      ctrl="0 0 0  0 0 0 0"
+    />
+
+    <key name="ready" qpos='
+       1.713 -1.782  0.932  0.107  1.477 -2.426  0 0 
+       0 0'
+      ctrl="1.713 -1.782  0.932  0.107  1.477 -2.426  0."
+    />
+  </keyframe>
+
+</mujoco>

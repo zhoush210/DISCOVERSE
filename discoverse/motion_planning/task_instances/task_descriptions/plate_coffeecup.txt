@@ -1,0 +1,1 @@
+The tabletop environment has a robot arm equipped with a gripper, a coffee cup (obj_name: coffeecup_white), a white plate (obj_name: plate_white), a wood (wood), and a tea cup lid (obj_name: cup_lid). The goal is to place the coffee cup and the tea cup lid on the white plate. For the tea cup lid, make sure it is on the coffee cup.

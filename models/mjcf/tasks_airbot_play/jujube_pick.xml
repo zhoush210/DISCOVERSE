@@ -1,0 +1,68 @@
+<mujoco model="jujube_pick">
+
+  <include file="../scene.xml"/>
+  <include file="../airbot_play/airbot_play_options.xml"/>
+  <include file="../airbot_play/airbot_play_dependencies.xml"/>
+  <include file="../object/usb_camera_dependencies.xml"/>
+
+  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+
+  <include file="../object/coffeecup_dependencies.xml"/>
+  <include file="../object/plate_white_dependencies.xml"/>
+  <include file="../object/jujube_dependencies.xml"/>
+  <include file="../object/table_cloth_dependencies.xml"/>
+
+  <default>
+    <default class="obj_visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="1 0.005 0.0001" type="mesh"/>
+    </default>
+  </default>
+
+  <worldbody>
+
+    <!-- ======= AITBOT PLAY ======= -->
+    <body name="arm_pose" pos="0.3 0.92 0.71" euler="0 0 3.1416">
+      <include file="../airbot_play/airbot_play.xml"/>
+    </body>
+
+    <!-- ======= EYE SIDE ======= -->
+    <camera name="eye_side" fovy="72.02" pos="-0.324 0.697 1.02" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
+
+    <!-- ======= jujube ======= -->
+    <body name="jujube" pos="0 0.92 0.69928" euler="0 0 1.5708">
+      <include file="../object/jujube.xml"/>
+    </body>
+
+    <body name="cabinet" pos="0.915 0.58 0.01">
+      <include file="../object/cabinet.xml"/>
+    </body>
+
+    <include file="../lab3_env.xml"/>
+
+  </worldbody>
+
+  <equality>
+    <joint joint1='endleft' joint2='endright' polycoef='0 -1 0 0 0 '/>
+  </equality>
+
+  <actuator>
+    <include file="../airbot_play/airbot_play_control.xml"/>
+  </actuator>
+
+  <sensor>
+    <include file="../airbot_play/airbot_play_sensor.xml"/>
+  </sensor>
+
+  <keyframe>
+    <key name="ready" qpos='
+     -0.055 -0.547 0.905 1.599 -1.398 -1.599  0 0
+      0 0.92 0.69928 0.707105 0 0 0.707108
+      0 0'
+      ctrl="-0.055 -0.547 0.905 1.599 -1.398 -1.599  0"
+    />
+  </keyframe>
+
+</mujoco>

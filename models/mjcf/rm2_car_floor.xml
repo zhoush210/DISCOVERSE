@@ -1,0 +1,50 @@
+<mujoco model="car_robot">
+
+  <include file="rm2_car/rm2_car_options.xml"/>
+  <include file="rm2_car/rm2_car_dependencies.xml"/>
+  <include file="rm2_car/rm2_car_config.xml"/>
+
+  <include file="airbot_play/airbot_play_dependencies.xml"/>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight diffuse='0.6 0.6 0.6' ambient='.3 .3 .3' specular='0 0 0'/>
+    <scale com="0.05" camera="0.06" framelength="0.5" framewidth="0.02" forcewidth="0.1" contactwidth="0.01" contactheight="0.05"/>
+  </visual>
+
+  <asset>
+    <texture type='2d' name='groundplane' builtin='checker' mark='edge' rgb1='0.2 0.3 0.4' rgb2='0.1 0.2 0.3' markrgb='0.8 0.8 0.8' width='300' height='300'/>
+    <material name='groundplane' texture='groundplane' texuniform='true' texrepeat='5 5' reflectance='0.2'/>
+  </asset>
+
+  <worldbody>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='-1 -1 1' dir='1 1 -1'/>
+    <light directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 1' dir='-1 1 -1'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 1 1' dir='0 -1 -1'/>
+    <geom name='floor' type='plane' size='0 0 0.01' material='groundplane'/>
+
+    <camera name="track_car_1" mode="trackcom" pos="1.014 1.411 1.399" xyaxes="-0.840 0.542 -0.000 -0.241 -0.374 0.895"/>
+    <camera name="track_car_2" mode="trackcom" pos="1.117 -1.168 1.249" xyaxes="0.756 0.654 -0.000 -0.264 0.305 0.915"/>
+
+    <body name='car_robot' pos="0 0 0">
+      <joint type="free" frictionloss="0.0001" />
+      <include file="rm2_car/rm2_car.xml"/>
+    </body>
+
+  </worldbody>
+
+  <equality>
+    <joint joint1='finger_left_joint' joint2='finger_right_joint' polycoef='0 -1 0 0 0 '/>
+  </equality>
+
+  <keyframe>
+    <key name="home" qpos='0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 '/>
+  </keyframe>
+
+  <actuator>
+    <include file="rm2_car/rm2_car_control.xml"/>
+    <include file="rm2_car/rm2_car_arm_control.xml"/>
+  </actuator>
+
+</mujoco>

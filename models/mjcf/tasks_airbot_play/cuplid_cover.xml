@@ -1,0 +1,86 @@
+<mujoco model="cuplid_cover">
+
+  <include file="../scene.xml"/>
+  <include file="../airbot_play/airbot_play_options.xml"/>
+  <include file="../airbot_play/airbot_play_dependencies.xml"/>
+
+  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+
+  <include file="../object/coffeecup_dependencies.xml"/>
+  <include file="../object/plate_white_dependencies.xml"/>
+  <include file="../object/wood_dependencies.xml"/>
+  <include file="../object/cup_lid_dependencies.xml"/>
+  <include file="../object/table_cloth_dependencies.xml"/>
+
+  <default>
+    <default class="obj_visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
+    </default>
+  </default>
+
+  <worldbody>
+
+    <!-- ======= AITBOT PLAY ======= -->
+    <body name="arm_pose" pos="0.3 0.92 0.71" euler="0 0 3.1416">
+      <include file="../airbot_play/airbot_play.xml"/>
+    </body>
+
+    <!-- ======= EYE SIDE ======= -->
+    <camera name="eye_side" fovy="72.02" pos="-0.324 0.697 1.02" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
+
+    <!-- ======= coffeecup_white ======= -->
+    <body name="coffeecup_white" pos="-0.15 1.03 0.700422" quat="0.707 0 0 -0.707">
+      <include file="../object/coffeecup_white.xml"/>
+    </body>
+
+    <!-- ======= plate_white ======= -->
+    <body name="plate_white" pos="-0.0667474 0.825 0.714159">
+      <include file="../object/plate_white.xml"/>
+    </body>
+
+    <!-- ======= wood ======= -->
+    <body name="wood" pos="-0.0683076 0.832 0.701954" euler="0 0 0">
+      <include file="../object/wood.xml"/>
+    </body>
+
+    <!-- ======= cup_lid ======= -->
+    <body name="cup_lid" pos="0. 1.03 0.700422">
+      <include file="../object/cup_lid.xml"/>
+    </body>
+
+    <body name="cabinet" pos="0.915 0.58 0.01">
+      <include file="../object/cabinet.xml"/>
+    </body>
+
+    <include file="../lab3_env.xml"/>
+
+  </worldbody>
+
+  <equality>
+    <joint joint1='endleft' joint2='endright' polycoef='0 -1 0 0 0 '/>
+  </equality>
+
+  <actuator>
+    <include file="../airbot_play/airbot_play_control.xml"/>
+  </actuator>
+
+  <sensor>
+    <include file="../airbot_play/airbot_play_sensor.xml"/>
+  </sensor>
+
+  <keyframe>
+    <key name="ready" qpos='
+     -0.055 -0.547 0.905 1.599 -1.398 -1.599  0 0 
+     -0.15 1.03 0.700422  0.707107 0 0 -0.707107 
+      -0.0667474 0.825 0.714159  1 0 0 0 
+      -0.0683076 0.832 0.701954  1 0 0 0
+       0 1.03 0.700422  1 0 0 0
+      0 0'
+      ctrl="-0.055 -0.547 0.905 1.599 -1.398 -1.599  0"
+    />
+  </keyframe>
+
+</mujoco>

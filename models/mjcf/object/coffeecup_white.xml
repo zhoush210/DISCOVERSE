@@ -1,0 +1,62 @@
+<mujocoinclude>
+  <!-- <body name="coffeecup_white" pos="0 0.2 0.53">
+  <joint type="free" frictionloss="0.00005" />
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="coffeecup_texture" mesh="coffeecup" class="obj_visual"/>
+  <geom mesh="coffeecup" class="obj_collision"/> -->
+
+
+
+  <joint type="free" frictionloss="0.00005" />
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="coffeecup_texture" mesh="coffeecup" class="obj_visual"/>
+
+
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_0" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_1" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_2" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_3" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_4" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_5" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_6" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_7" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_8" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_9" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_10" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_11" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_12" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_13" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_14" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_15" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_16" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_17" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_18" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_19" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_20" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_21" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_22" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_23" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_24" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_25" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_26" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_27" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_28" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_29" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_30" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_31" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_32" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_33" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_34" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_35" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_36" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_37" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_38" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_39" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_40" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_41" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_42" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_43" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_44" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" friction = "1.05 0.005 0.0001" mesh="coffeecup_part_45" class="obj_collision"/>
+<!-- </body> -->
+</mujocoinclude>

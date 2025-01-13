@@ -1,0 +1,50 @@
+<mujocoinclude>
+
+  <asset>
+    <texture type="2d" name="flower_bowl_texture" file="obj/flower_bowl/texture.png"/>
+    <material name="flower_bowl_texture" texture="flower_bowl_texture" specular="0.5" shininess="0.5"/>
+    <mesh name="flower_bowl" file="obj/flower_bowl/flower_bowl.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_0" file="obj/flower_bowl/part_0.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_1" file="obj/flower_bowl/part_1.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_2" file="obj/flower_bowl/part_2.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_3" file="obj/flower_bowl/part_3.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_4" file="obj/flower_bowl/part_4.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_5" file="obj/flower_bowl/part_5.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_6" file="obj/flower_bowl/part_6.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_7" file="obj/flower_bowl/part_7.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_8" file="obj/flower_bowl/part_8.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_9" file="obj/flower_bowl/part_9.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_10" file="obj/flower_bowl/part_10.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_11" file="obj/flower_bowl/part_11.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_12" file="obj/flower_bowl/part_12.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_13" file="obj/flower_bowl/part_13.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_14" file="obj/flower_bowl/part_14.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_15" file="obj/flower_bowl/part_15.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_16" file="obj/flower_bowl/part_16.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_17" file="obj/flower_bowl/part_17.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_18" file="obj/flower_bowl/part_18.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_19" file="obj/flower_bowl/part_19.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_20" file="obj/flower_bowl/part_20.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_21" file="obj/flower_bowl/part_21.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_22" file="obj/flower_bowl/part_22.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_23" file="obj/flower_bowl/part_23.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_24" file="obj/flower_bowl/part_24.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_25" file="obj/flower_bowl/part_25.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_26" file="obj/flower_bowl/part_26.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_27" file="obj/flower_bowl/part_27.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_28" file="obj/flower_bowl/part_28.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_29" file="obj/flower_bowl/part_29.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_30" file="obj/flower_bowl/part_30.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_31" file="obj/flower_bowl/part_31.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_32" file="obj/flower_bowl/part_32.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_33" file="obj/flower_bowl/part_33.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_34" file="obj/flower_bowl/part_34.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_35" file="obj/flower_bowl/part_35.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_36" file="obj/flower_bowl/part_36.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_37" file="obj/flower_bowl/part_37.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_38" file="obj/flower_bowl/part_38.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_39" file="obj/flower_bowl/part_39.obj" scale="1 1 1"/>
+    <mesh name="flower_bowl_part_40" file="obj/flower_bowl/part_40.obj" scale="1 1 1"/>
+  </asset>
+
+</mujocoinclude>

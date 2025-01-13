@@ -1,0 +1,25 @@
+<mujocoinclude>
+  <default>
+    <default class="skyrover_mesh">
+      <geom type="mesh" xyaxes="1 0 0 0 1 0"/>
+    </default>
+  </default>
+
+  <asset>
+    <!-- For SkyRover robot -->
+    <mesh name="base_link" file="skyrover/base_link.STL"/>
+    <mesh name="cover" file="skyrover/cover.stl"/>
+    <mesh name="stretch_link" file="skyrover/stretch_link.STL"/>
+    <mesh name="folder1_link" file="skyrover/folder1_link.STL"/>
+    <mesh name="wheel1_link" file="skyrover/wheel1_link.STL"/>
+    <mesh name="wheel2_link" file="skyrover/wheel2_link.STL"/>
+    <mesh name="rotor1_link" file="skyrover/rotor1_link.STL"/>
+    <mesh name="rotor2_link" file="skyrover/rotor2_link.STL"/>
+    <mesh name="folder2_link" file="skyrover/folder2_link.STL"/>
+    <mesh name="wheel3_link" file="skyrover/wheel3_link.STL"/>
+    <mesh name="wheel4_link" file="skyrover/wheel4_link.STL"/>
+    <mesh name="rotor3_link" file="skyrover/rotor3_link.STL"/>
+    <mesh name="rotor4_link" file="skyrover/rotor4_link.STL"/>
+  </asset>
+
+</mujocoinclude>

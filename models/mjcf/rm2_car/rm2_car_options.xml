@@ -1,0 +1,4 @@
+<mujocoinclude>
+  <option integrator="RK4" solver="Newton" />
+  <compiler angle="radian" meshdir="../meshes/" texturedir="../textures/"/>
+</mujocoinclude>

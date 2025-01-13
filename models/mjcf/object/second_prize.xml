@@ -1,0 +1,8 @@
+<mujocoinclude>
+
+  <joint type="free" frictionloss="0.00005" />
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="second_prize_texture" mesh="second_prize" class="obj_visual"/>
+  <geom mesh="second_prize" class="obj_collision"/>
+
+</mujocoinclude>

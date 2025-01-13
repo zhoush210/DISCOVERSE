@@ -1,0 +1,8 @@
+<mujocoinclude>
+    <!-- ======= PAN ======= -->
+
+  <joint type="free" frictionloss="0.3"/>
+  <inertial pos="0 0 0" mass="0.1" diaginertia="0.00005 0.00005 0.00005" />
+  <geom size="0.06 0.002" pos="0 0 0" quat="1 0 0 0" type="cylinder" rgba="0.4 0.4 1 1"/>
+
+</mujocoinclude>

@@ -1,0 +1,20 @@
+<mujocoinclude>
+  <contact>
+    <exclude body1="skyrover_base_link" body2="skyrover"/>
+    <exclude body1="skyrover_folder1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_folder2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel3_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel4_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor3_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor4_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor1_link" body2="floor"/>
+    <exclude body1="skyrover_rotor2_link" body2="floor"/>
+    <exclude body1="skyrover_rotor3_link" body2="floor"/>
+    <exclude body1="skyrover_rotor4_link" body2="floor"/>
+  </contact>
+</mujocoinclude>
+

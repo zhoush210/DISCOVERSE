@@ -1,0 +1,31 @@
+<mujoco model="capture">
+
+  <option integrator="RK4" solver="Newton" gravity="0 0 0"/>
+  <compiler angle="radian" meshdir="../meshes" texturedir="../textures/"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1=".9 .8 .7" rgb2=".4 .4 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="2 2" texuniform="true" reflectance=".2"/>
+  </asset>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight ambient="0.4 0.4 0.4"/>
+  </visual>
+
+  <include file="object/shark_dependencies.xml"/>
+
+  <worldbody>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 3' dir='0 0 -1'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 -3' dir='0 0 1'/>
+
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='3 0 0' dir='-1 0 0'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='-3 0 0' dir='1 0 0'/>
+
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 3 0' dir='0 -1 0'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 -3 0' dir='0 1 0'/>
+
+  </worldbody>
+
+</mujoco>

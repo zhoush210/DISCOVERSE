@@ -1,0 +1,582 @@
+<!--
+    The Mujoco model of:
+    (1) a hybrid quadrotor-rover robot, namely SkyRover; and
+    (2) a mobile robot, AIRBOT (by Discover Robotics, ALL RIGHTS RESERVED).
+    
+    Author: Weibin Gu, 7-Nov-2024.
+-->
+<mujoco model="aerial_ground_cooperative_sim">
+  <compiler coordinate="local" inertiafromgeom="true" meshdir="../meshes"/>
+
+  <option integrator="RK4" timestep="0.01" gravity="0 0 -9.81" density="1" viscosity="1e-5"/>
+
+  <default>
+    <geom type="mesh" xyaxes="1 0 0 0 1 0"/>
+  </default>
+
+  <default>
+    <default class='car'>
+      <default class="steer_joint">
+        <joint axis="0 0 1" range="-1.5708 1.5708" actuatorfrcrange="-35 35" damping=".5" frictionloss="20"/>
+        <position ctrlrange="-1.5708 1.5708"/>
+      </default>
+
+      <default class="wheel_joint">
+        <joint axis="0 0 -1" damping=".3" frictionloss="10"/>
+        <!-- <motor ctrlrange='-5 5' forcerange='-100 100'/> -->
+        <motor ctrlrange='-15 15' forcerange='-100 100'/>
+      </default>
+    </default>
+  </default>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight diffuse='0.6 0.6 0.6' ambient='.3 .3 .3' specular='0 0 0'/>
+    <scale com="0.05" camera="0.06" framelength="0.5" framewidth="0.02" forcewidth="0.1" contactwidth="0.01" contactheight="0.05"/>
+  </visual>
+
+  <asset>
+    <!-- For environment -->
+    <texture builtin="gradient" height="100" rgb1="1 1 1" rgb2="0 0 0" type="skybox" width="100"/>
+    <texture builtin="flat" height="1278" mark="cross" markrgb="1 1 1" name="texgeom" random="0.01" rgb1="0.8 0.6 0.4" rgb2="0.8 0.6 0.4" type="cube" width="127"/>
+    <texture builtin="checker" height="100" name="texplane" rgb1="0 0 0" rgb2="0.8 0.8 0.8" type="2d" width="100"/>
+    <material name="MatPlane" reflectance="0.5" shininess="1" specular="1" texrepeat="60 60" texture="texplane"/>
+    <!-- For SkyRover robot -->
+    <mesh name="base_link" file="skyrover/base_link_simpl.STL" scale="0.001 0.001 0.001"/>
+    <mesh name="stretch_link" file="skyrover/stretch_link.STL"/>
+    <mesh name="folder1_link" file="skyrover/folder1_link.STL"/>
+    <mesh name="wheel1_link" file="skyrover/wheel1_link.STL"/>
+    <mesh name="wheel2_link" file="skyrover/wheel2_link.STL"/>
+    <mesh name="rotor1_link" file="skyrover/rotor1_link.STL"/>
+    <mesh name="rotor2_link" file="skyrover/rotor2_link.STL"/>
+    <mesh name="folder2_link" file="skyrover/folder2_link.STL"/>
+    <mesh name="wheel3_link" file="skyrover/wheel3_link.STL"/>
+    <mesh name="wheel4_link" file="skyrover/wheel4_link.STL"/>
+    <mesh name="rotor3_link" file="skyrover/rotor3_link.STL"/>
+    <mesh name="rotor4_link" file="skyrover/rotor4_link.STL"/>
+    <mesh name="cover" file="skyrover/cover_300.stl" scale="0.001 0.001 0.001"/>
+    <!-- For AIRBOT -->
+    <mesh name="rm2" file="rm2_car/rm2.STL"/>
+    <mesh name="steering_left_front" file="rm2_car/steering_left_front.STL"/>
+    <mesh name="wheel_fix" file="rm2_car/wheel.obj"/>
+    <mesh name="steering_right_front" file="rm2_car/steering_right_front.STL"/>
+    <!-- Metallic material -->
+    <material name="titanium" rgba="0.9 0.9 0.9 1" specular="0.4" shininess="0.1" reflectance="0.1"/> 
+    <material name="carbon_fiber" rgba="0.1 0.1 0.1 1" specular="0.6" shininess="0.7" reflectance="0.4"/>
+    <material name="brushed_steel" rgba="0.7 0.7 0.75 1" specular="0.8" shininess="0.7" reflectance="0.5"/>
+    <material name="copper" rgba="0.8 0.4 0.2 1" specular="0.7" shininess="0.7" reflectance="0.5"/>
+    <material name="gunmetal_gray" rgba="0.3 0.3 0.35 1" specular="0.7" shininess="0.6" reflectance="0.3"/>
+    <material name="gold_accent" rgba="0.9 0.8 0.3 1" specular="0.8" shininess="0.9" reflectance="0.6"/>
+    <material name="titanium_blue" rgba="0.2 0.4 0.6 1" specular="0.8" shininess="0.7" reflectance="0.5"/>
+  </asset>
+
+  <worldbody>
+    <!-- Light -->
+    <light cutoff="100" diffuse="1 1 1" dir="-0 0 -1.3" directional="true" exponent="1" pos="0 0 1.3" specular=".1 .1 .1"/>
+
+    <!-- Floor -->
+    <body name="floor">
+        <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.8 0.9 0.8 1" size="40 40 40" type="plane"/>
+    </body>
+
+    <!-- SkyRover robot -->
+    <body name="skyrover" pos="0 0 1.122">
+      <camera name="skyrover_track" mode="trackcom" pos="0 -3 0.3" xyaxes="1 0 0 0 0 1"/>
+
+      <body name="camera_link" pos="0.2 0 0">
+        <camera euler="0 -90 -90" name="front_cam" fovy="42.5"/>
+        <camera euler="0 -45 -90" name="front_down_cam" fovy="42.5"/>
+        <camera euler="0 -0 -90" name="down_cam" fovy="42.5"/>
+      </body>
+
+      <!-- Stretch link -->
+      <geom mesh="stretch_link" mass="0.5" pos="0 0 0" euler="0 0 0" friction="1 50 0.1" material="brushed_steel"/> 
+      <joint armature="0" damping="0" limited="false" margin="0.01" name="skyrover_root" pos="0 0 0" type="free"/>
+
+      <!-- Base link -->
+      <body name="skyrover_base_link">
+        <geom mesh="base_link" pos="-0.062 0.17 0.03" euler="0 0 -90" mass="0.5" material="brushed_steel"/>
+        <geom mesh="cover" pos="0 0 0.08" euler="0 0 -90" density="0" material="brushed_steel"/>
+        <joint name="skyrover_stretch_joint" type="slide" pos="-0.062 0.17 0.03" axis="0 0 1" range="-545 0" damping="0.5" limited="true" actuatorfrcrange="-545 0"/>
+
+        <!-- Left folder -->
+        <body name="skyrover_folder1_link" pos="0 0.135 0.08">
+          <geom mesh="folder1_link" pos="0 0 0" euler="0 0 0" mass=".25" material="brushed_steel"/>
+          <joint name="skyrover_folder1_joint" type="hinge" pos="0 0 0" axis="-1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front left wheel -->
+          <body name="skyrover_wheel2_link" pos="0.135 0 0.06"> 
+              <geom mesh="wheel2_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_wheel2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Back left wheel -->
+          <body name="skyrover_wheel4_link" pos="-0.135 0 0.06"> 
+              <geom mesh="wheel4_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_wheel4_joint" type="hinge" pos="0 0 -0.065" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Front left propeller (CCW) -->
+          <body name="skyrover_rotor2_link" pos="0.135 0 -0.04">
+              <geom mesh="rotor2_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_rotor2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_thrust_fl" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back left propeller (CW) -->
+          <body name="skyrover_rotor4_link" pos="-0.135 0 -0.04">
+              <geom mesh="rotor4_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_rotor4_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_thrust_bl" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Left folder ends -->
+
+        <!-- Right folder -->
+        <body name="skyrover_folder2_link" pos="0 -0.135 0.08"> 
+          <geom mesh="folder2_link" pos="0 0 0" euler="0 0 0" mass=".25" material="titanium"/>
+          <joint name="skyrover_folder2_joint" type="hinge" pos="0 0 0" axis="1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front right wheel -->
+          <body name="skyrover_wheel1_link" pos="0.135 0 0.06">
+              <geom mesh="wheel1_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_wheel1_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Back right wheel -->
+          <body name="skyrover_wheel3_link" pos="-0.135 0 0.06">
+              <geom mesh="wheel3_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_wheel3_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Front right propeller (CW) -->
+          <body name="skyrover_rotor1_link" pos="0.135 0 -0.04"> 
+              <geom mesh="rotor1_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_rotor1_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_thrust_fr" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back right propeller (CCW) -->
+          <body name="skyrover_rotor3_link" pos="-0.135 0 -0.04"> 
+              <geom mesh="rotor3_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_rotor3_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_thrust_br" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Right folder ends -->
+      </body><!-- Base link ends -->
+    </body><!-- SkyRover ends -->
+
+    <!-- AIRBOT robot -->
+    <body name="rm2" pos="0 0 0.8">
+      <camera name="rm2_track" mode="trackcom" pos="0 -3 0.3" xyaxes="1 0 0 0 0 1"/>
+
+      <geom type="box" rgba="1 0 0 0" size="0.15 0.15 0.15" pos="0 0 -0.15" density="200.0"/>
+
+      <!-- <body name="rm2_base" pos="0 0 0">
+        <geom quat="1 0 0 0" pos="0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="rm2"/>
+        <geom quat="1 0 0 0" pos="0 0 0" type="mesh" rgba="1 0 0 0" mesh="rm2" density="30.0"/>
+      </body> -->
+
+      <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="rm2"/>
+      <geom type="mesh" rgba="1 1 1 1" mesh="rm2"/>
+      <!-- <geom pos="0.2975 -0.17309 0.3488" quat="1 0 0 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="rm2"/>
+      <geom pos="0.2975 -0.17309 0.3488" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="rm2"/> -->
+      <joint name="rm2_root" type="free"/>
+
+      <body name="rm2_steering1" pos="0.2585 0.184 -0.228">
+        <!-- <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/> -->
+        <joint name="rm2_steer_joint1" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <!-- <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="steering_left_front"/> -->
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_wheel1" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_wheel_joint1" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom quat="-3.67321e-06 0 1 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" quat="-3.67321e-06 0 1 0" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_steering2" pos="0.2585 -0.184 -0.228">
+        <!-- <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/> -->
+        <joint name="rm2_steer_joint2" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <!-- <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="steering_right_front"/> -->
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_wheel2" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_wheel_joint2" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_steering3" pos="-0.238 -0.184 -0.228">
+        <!-- <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/> -->
+        <joint name="rm2_steer_joint3" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <!-- <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="steering_left_front"/> -->
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_wheel3" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_wheel_joint3" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_steering4" pos="-0.238 0.184 -0.228">
+        <!-- <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/> -->
+        <joint name="rm2_steer_joint4" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <!-- <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="steering_right_front"/> -->
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_wheel4" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_wheel_joint4" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+    </body><!-- AIRBOT ends -->
+
+    <!-- AIRBOT robot BG_1 -->
+    <body name="rm2_1" pos="7 0 0.8">
+
+      <geom type="box" rgba="1 0 0 0" size="0.15 0.15 0.15" pos="0 0 -0.15" density="200.0"/>
+
+      <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="rm2"/>
+      <geom type="mesh" rgba="1 1 1 1" mesh="rm2"/>
+      <joint name="rm2_1_root" type="free"/>
+
+      <body name="rm2_1_steering1" pos="0.2585 0.184 -0.228">
+        <joint name="rm2_1_steer_joint1" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_1_wheel1" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_1_wheel_joint1" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom quat="-3.67321e-06 0 1 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" quat="-3.67321e-06 0 1 0" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_1_steering2" pos="0.2585 -0.184 -0.228">
+        <joint name="rm2_1_steer_joint2" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_1_wheel2" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_1_wheel_joint2" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_1_steering3" pos="-0.238 -0.184 -0.228">
+        <joint name="rm2_1_steer_joint3" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_1_wheel3" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_1_wheel_joint3" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_1_steering4" pos="-0.238 0.184 -0.228">
+        <joint name="rm2_1_steer_joint4" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_1_wheel4" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_1_wheel_joint4" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+    </body><!-- AIRBOT BG_1 ends -->
+
+    <!-- AIRBOT robot BG_2 -->
+    <body name="rm2_2" pos="5 0 0.8">
+
+      <geom type="box" rgba="1 0 0 0" size="0.15 0.15 0.15" pos="0 0 -0.15" density="200.0"/>
+
+      <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="rm2"/>
+      <geom type="mesh" rgba="1 1 1 1" mesh="rm2"/>
+      <joint name="rm2_2_root" type="free"/>
+
+      <body name="rm2_2_steering1" pos="0.2585 0.184 -0.228">
+        <joint name="rm2_2_steer_joint1" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_2_wheel1" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_2_wheel_joint1" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom quat="-3.67321e-06 0 1 0" type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" quat="-3.67321e-06 0 1 0" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_2_steering2" pos="0.2585 -0.184 -0.228">
+        <joint name="rm2_2_steer_joint2" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_2_wheel2" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_2_wheel_joint2" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_2_steering3" pos="-0.238 -0.184 -0.228">
+        <joint name="rm2_2_steer_joint3" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 0.028 -0.1" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="steering_left_front"/>
+        <body name="rm2_2_wheel3" pos="0 0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_2_wheel_joint3" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+      <body name="rm2_2_steering4" pos="-0.238 0.184 -0.228">
+        <joint name="rm2_2_steer_joint4" pos="0 0 0" axis="0 0 1" range="-10 10" actuatorfrcrange="-100 100"/>
+        <geom pos="-0.0025 -0.028 -0.1" quat="1 0 0 0" type="mesh" rgba="1 1 1 1" mesh="steering_right_front"/>
+        <body name="rm2_2_wheel4" pos="0 -0.02 -0.185" quat="0.707105 0.707108 0 0">
+          <inertial pos="-0.0124323 -0.000168578 0.0371705" quat="-0.000873283 0.70519 -0.0128331 0.708902" mass="0.36733" diaginertia="0.000891223 0.000726575 0.000459321"/>
+          <joint name="rm2_2_wheel_joint4" pos="0 0 0" axis="0 0 1" damping="0.9" frictionloss="0.85"/>
+          <geom type="mesh" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="wheel_fix" friction="1 0.1 0.001"/>
+          <geom size="0.1 0.05" type="cylinder" rgba="1 1 1 1" friction="1 0.1 0.001"/>
+        </body>
+      </body>
+    </body><!-- AIRBOT BG_2 ends -->
+
+    <!-- SkyRover robot BG_1 -->
+    <body name="skyrover_1" pos="10 10 1.122">
+
+      <!-- Stretch link -->
+      <geom mesh="stretch_link" mass="0.5" pos="0 0 0" euler="0 0 0" friction="1 50 0.1" material="brushed_steel"/> 
+      <joint armature="0" damping="0" limited="false" margin="0.01" name="skyrover_1_root" pos="0 0 0" type="free"/>
+
+      <!-- Base link -->
+      <body name="skyrover_1_base_link">
+        <geom mesh="base_link" pos="-0.062 0.17 0.03" euler="0 0 -90" mass="0.5" material="brushed_steel"/>
+        <geom mesh="cover" pos="0 0 0.08" euler="0 0 -90" density="0" material="brushed_steel"/>
+        <joint name="skyrover_1_stretch_joint" type="slide" pos="-0.062 0.17 0.03" axis="0 0 1" range="-545 0" damping="0.5" limited="true" actuatorfrcrange="-545 0"/>
+
+        <!-- Left folder -->
+        <body name="skyrover_1_folder1_link" pos="0 0.135 0.08">
+          <geom mesh="folder1_link" pos="0 0 0" euler="0 0 0" mass=".25" material="brushed_steel"/>
+          <joint name="skyrover_1_folder1_joint" type="hinge" pos="0 0 0" axis="-1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front left wheel -->
+          <body name="skyrover_1_wheel2_link" pos="0.135 0 0.06"> 
+              <geom mesh="wheel2_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_1_wheel2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Back left wheel -->
+          <body name="skyrover_1_wheel4_link" pos="-0.135 0 0.06"> 
+              <geom mesh="wheel4_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_1_wheel4_joint" type="hinge" pos="0 0 -0.065" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Front left propeller (CCW) -->
+          <body name="skyrover_1_rotor2_link" pos="0.135 0 -0.04">
+              <geom mesh="rotor2_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_1_rotor2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_1_thrust_fl" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back left propeller (CW) -->
+          <body name="skyrover_1_rotor4_link" pos="-0.135 0 -0.04">
+              <geom mesh="rotor4_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_1_rotor4_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_1_thrust_bl" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Left folder ends -->
+
+        <!-- Right folder -->
+        <body name="skyrover_1_folder2_link" pos="0 -0.135 0.08"> 
+          <geom mesh="folder2_link" pos="0 0 0" euler="0 0 0" mass=".25" material="titanium"/>
+          <joint name="skyrover_1_folder2_joint" type="hinge" pos="0 0 0" axis="1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front right wheel -->
+          <body name="skyrover_1_wheel1_link" pos="0.135 0 0.06">
+              <geom mesh="wheel1_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_1_wheel1_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Back right wheel -->
+          <body name="skyrover_1_wheel3_link" pos="-0.135 0 0.06">
+              <geom mesh="wheel3_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_1_wheel3_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Front right propeller (CW) -->
+          <body name="skyrover_1_rotor1_link" pos="0.135 0 -0.04"> 
+              <geom mesh="rotor1_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_1_rotor1_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_1_thrust_fr" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back right propeller (CCW) -->
+          <body name="skyrover_1_rotor3_link" pos="-0.135 0 -0.04"> 
+              <geom mesh="rotor3_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_1_rotor3_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_1_thrust_br" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Right folder ends -->
+      </body><!-- Base link ends -->
+    </body><!-- SkyRover BG_1 ends -->
+
+    <!-- SkyRover robot BG_2 -->
+    <body name="skyrover_2" pos="10 -10 1.122">
+
+      <!-- Stretch link -->
+      <geom mesh="stretch_link" mass="0.5" pos="0 0 0" euler="0 0 0" friction="1 50 0.1" material="brushed_steel"/> 
+      <joint armature="0" damping="0" limited="false" margin="0.01" name="skyrover_2_root" pos="0 0 0" type="free"/>
+
+      <!-- Base link -->
+      <body name="skyrover_2_base_link">
+        <geom mesh="base_link" pos="-0.062 0.17 0.03" euler="0 0 -90" mass="0.5" material="brushed_steel"/>
+        <geom mesh="cover" pos="0 0 0.08" euler="0 0 -90" density="0" material="brushed_steel"/>
+        <joint name="skyrover_2_stretch_joint" type="slide" pos="-0.062 0.17 0.03" axis="0 0 1" range="-545 0" damping="0.5" limited="true" actuatorfrcrange="-545 0"/>
+
+        <!-- Left folder -->
+        <body name="skyrover_2_folder1_link" pos="0 0.135 0.08">
+          <geom mesh="folder1_link" pos="0 0 0" euler="0 0 0" mass=".25" material="brushed_steel"/>
+          <joint name="skyrover_2_folder1_joint" type="hinge" pos="0 0 0" axis="-1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front left wheel -->
+          <body name="skyrover_2_wheel2_link" pos="0.135 0 0.06"> 
+              <geom mesh="wheel2_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_2_wheel2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Back left wheel -->
+          <body name="skyrover_2_wheel4_link" pos="-0.135 0 0.06"> 
+              <geom mesh="wheel4_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_2_wheel4_joint" type="hinge" pos="0 0 -0.065" axis="0 0 1" damping="0.01"/>
+          </body>
+
+          <!-- Front left propeller (CCW) -->
+          <body name="skyrover_2_rotor2_link" pos="0.135 0 -0.04">
+              <geom mesh="rotor2_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_2_rotor2_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_2_thrust_fl" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back left propeller (CW) -->
+          <body name="skyrover_2_rotor4_link" pos="-0.135 0 -0.04">
+              <geom mesh="rotor4_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_2_rotor4_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_2_thrust_bl" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Left folder ends -->
+
+        <!-- Right folder -->
+        <body name="skyrover_2_folder2_link" pos="0 -0.135 0.08"> 
+          <geom mesh="folder2_link" pos="0 0 0" euler="0 0 0" mass=".25" material="titanium"/>
+          <joint name="skyrover_2_folder2_joint" type="hinge" pos="0 0 0" axis="1 0 0" range="0 1" damping="0.5" limited="true" actuatorfrcrange="0 79.8"/>
+
+          <!-- Front right wheel -->
+          <body name="skyrover_2_wheel1_link" pos="0.135 0 0.06">
+              <geom mesh="wheel1_link" pos="0 0 -0.065" euler="0 90 90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_2_wheel1_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Back right wheel -->
+          <body name="skyrover_2_wheel3_link" pos="-0.135 0 0.06">
+              <geom mesh="wheel3_link" pos="0 0 -0.065" euler="0 90 -90" mass=".05" friction="1 0.1 0.01" material="gunmetal_gray"/>
+              <joint name="skyrover_2_wheel3_joint" type="hinge" pos="0 0 -0.065" axis="0 0 -1" damping="0.01"/>
+          </body>
+
+          <!-- Front right propeller (CW) -->
+          <body name="skyrover_2_rotor1_link" pos="0.135 0 -0.04"> 
+              <geom mesh="rotor1_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_2_rotor1_joint" type="hinge" pos="0 0 0" axis="0 0 -1" damping="0.01"/>
+          </body>
+          <site name="skyrover_2_thrust_fr" type="cylinder" pos="0.135 0 -0.04" euler="0 0 90"/>
+
+          <!-- Back right propeller (CCW) -->
+          <body name="skyrover_2_rotor3_link" pos="-0.135 0 -0.04"> 
+              <geom mesh="rotor3_link" pos="0 0 0" euler="0 0 90" mass=".05" material="gunmetal_gray"/>
+              <joint name="skyrover_2_rotor3_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.01"/>
+          </body>
+          <site name="skyrover_2_thrust_br" type="cylinder" pos="-0.135 0 -0.04" euler="0 0 90"/>
+        </body><!-- Right folder ends -->
+      </body><!-- Base link ends -->
+    </body><!-- SkyRover BG_2 ends -->
+
+  </worldbody>
+
+  <actuator>
+    <!-- For SkyRover -->
+    <!-- SkyRover control groups              -->
+    <!--    (1)     X     (4)                 -->
+    <!--    CCW     ^     CW                  -->
+    <!--        \   |    /                    -->
+    <!--          \ |   /                     -->
+    <!--     Y <————                          -->
+    <!--          / |   \                     -->
+    <!--        /   |    \                    -->
+    <!--     CW     ^     CCW                 -->
+    <!--    (2)     X     (3)                 -->
+    <!-- N.B., Rover mode has the same index. -->
+    <motor joint="skyrover_stretch_joint" ctrllimited="true" ctrlrange="-545 0"/>
+    <motor joint="skyrover_folder1_joint" ctrllimited="true" ctrlrange="0 79.8"/>
+    <motor joint="skyrover_wheel2_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_wheel4_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_rotor2_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_rotor4_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_folder2_joint" ctrllimited="true" ctrlrange="0 79.8"/>
+    <motor joint="skyrover_wheel3_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_wheel1_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_rotor3_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor joint="skyrover_rotor1_joint" ctrllimited="true" ctrlrange="-10 10"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_fl" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_bl" gear="0 0 1 0 0  .1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_br" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_fr" gear="0 0 1 0 0  .1"/>
+    <!-- For AIRBOT -->
+    <motor joint= "rm2_wheel_joint1" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_wheel_joint2" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_wheel_joint3" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_wheel_joint4" ctrllimited="true" ctrlrange="-20 20"/>
+    <position name='steer_joint1_position' joint='rm2_steer_joint1' class='steer_joint' kp="200"/>
+    <position name='steer_joint2_position' joint='rm2_steer_joint2' class='steer_joint' kp="200"/>
+    <position name='steer_joint3_position' joint='rm2_steer_joint3' class='steer_joint' kp="200"/>
+    <position name='steer_joint4_position' joint='rm2_steer_joint4' class='steer_joint' kp='200'/>
+
+    <!-- For AIRBOT BG_1 -->
+    <motor joint= "rm2_1_wheel_joint1" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_1_wheel_joint2" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_1_wheel_joint3" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_1_wheel_joint4" ctrllimited="true" ctrlrange="-20 20"/>
+    <!-- For AIRBOT BG_2 -->
+    <motor joint= "rm2_2_wheel_joint1" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_2_wheel_joint2" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_2_wheel_joint3" ctrllimited="true" ctrlrange="-20 20"/>
+    <motor joint= "rm2_2_wheel_joint4" ctrllimited="true" ctrlrange="-20 20"/>
+    <!-- For SkyRover BG_1 -->
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_1_thrust_fl" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_1_thrust_bl" gear="0 0 1 0 0  .1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_1_thrust_br" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_1_thrust_fr" gear="0 0 1 0 0  .1"/>
+    <!-- For SkyRover BG_2 -->
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_2_thrust_fl" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_2_thrust_bl" gear="0 0 1 0 0  .1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_2_thrust_br" gear="0 0 1 0 0 -.1"/>
+    <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_2_thrust_fr" gear="0 0 1 0 0  .1"/>
+  </actuator>
+
+  <contact>
+    <exclude body1="skyrover_base_link" body2="skyrover"/>
+    <exclude body1="skyrover_folder1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_folder2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel3_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_wheel4_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor1_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor2_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor3_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor4_link" body2="skyrover_base_link"/>
+    <exclude body1="skyrover_rotor1_link" body2="floor"/>
+    <exclude body1="skyrover_rotor2_link" body2="floor"/>
+    <exclude body1="skyrover_rotor3_link" body2="floor"/>
+    <exclude body1="skyrover_rotor4_link" body2="floor"/>
+    <exclude body1="skyrover_folder1_link" body2="rm2"/>
+    <exclude body1="skyrover_folder2_link" body2="rm2"/>
+    <exclude body1="skyrover_rotor1_link" body2="rm2"/>
+    <exclude body1="skyrover_rotor2_link" body2="rm2"/>
+    <exclude body1="skyrover_rotor3_link" body2="rm2"/>
+    <exclude body1="skyrover_rotor4_link" body2="rm2"/>
+</contact>
+
+</mujoco>

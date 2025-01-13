@@ -1,0 +1,8 @@
+<mujocoinclude>
+
+  <geom type="box" pos="0 0 0.125" size="0.015 0.015 0.125" rgba="0.1 0.1 0.1 1"/>
+  <body name="side_camera_body" pos="0.09 0 0.22" euler="0 -0.8 -1.5708">
+    <geom type="mesh" mesh="usb_cam" rgba="0.15 0.15 0.15 1"/>
+    <camera name="eye_side" fovy="75" />
+  </body>
+</mujocoinclude>

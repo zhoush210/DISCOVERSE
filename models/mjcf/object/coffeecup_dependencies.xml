@@ -1,0 +1,57 @@
+<mujocoinclude>
+
+
+  <asset>
+    <texture type="2d" name="coffeecup_texture" file="obj/coffeecup/cup_color.png"/>
+    <material name="coffeecup_texture" texture="coffeecup_texture" specular="0.5" shininess="0.5"/>
+    <mesh file="obj/coffeecup/coffeecup.obj"/>
+
+    <mesh name="coffeecup_part_0" file="obj/coffeecup/part_0.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_1" file="obj/coffeecup/part_1.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_2" file="obj/coffeecup/part_2.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_3" file="obj/coffeecup/part_3.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_4" file="obj/coffeecup/part_4.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_5" file="obj/coffeecup/part_5.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_6" file="obj/coffeecup/part_6.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_7" file="obj/coffeecup/part_7.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_8" file="obj/coffeecup/part_8.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_9" file="obj/coffeecup/part_9.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_10" file="obj/coffeecup/part_10.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_11" file="obj/coffeecup/part_11.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_12" file="obj/coffeecup/part_12.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_13" file="obj/coffeecup/part_13.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_14" file="obj/coffeecup/part_14.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_15" file="obj/coffeecup/part_15.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_16" file="obj/coffeecup/part_16.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_17" file="obj/coffeecup/part_17.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_18" file="obj/coffeecup/part_18.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_19" file="obj/coffeecup/part_19.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_20" file="obj/coffeecup/part_20.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_21" file="obj/coffeecup/part_21.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_22" file="obj/coffeecup/part_22.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_23" file="obj/coffeecup/part_23.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_24" file="obj/coffeecup/part_24.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_25" file="obj/coffeecup/part_25.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_26" file="obj/coffeecup/part_26.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_27" file="obj/coffeecup/part_27.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_28" file="obj/coffeecup/part_28.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_29" file="obj/coffeecup/part_29.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_30" file="obj/coffeecup/part_30.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_31" file="obj/coffeecup/part_31.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_32" file="obj/coffeecup/part_32.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_33" file="obj/coffeecup/part_33.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_34" file="obj/coffeecup/part_34.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_35" file="obj/coffeecup/part_35.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_36" file="obj/coffeecup/part_36.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_37" file="obj/coffeecup/part_37.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_38" file="obj/coffeecup/part_38.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_39" file="obj/coffeecup/part_39.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_40" file="obj/coffeecup/part_40.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_41" file="obj/coffeecup/part_41.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_42" file="obj/coffeecup/part_42.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_43" file="obj/coffeecup/part_43.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_44" file="obj/coffeecup/part_44.obj" scale="1 1 1"/>
+    <mesh name="coffeecup_part_45" file="obj/coffeecup/part_45.obj" scale="1 1 1"/>
+  </asset>
+
+</mujocoinclude>

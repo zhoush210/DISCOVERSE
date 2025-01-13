@@ -1,0 +1,64 @@
+<mujoco model="skyrover_on_rm2_car">
+
+  <include file="skyrover/skyrover_options.xml"/>
+  <include file="skyrover/skyrover_dependencies.xml"/>
+  <include file="skyrover/skyrover_config.xml"/>
+
+  <!-- <include file="rm2_car/rm2_car_options.xml"/> -->
+  <include file="rm2_car/rm2_car_dependencies.xml"/>
+  <include file="rm2_car/rm2_car_config.xml"/>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight diffuse='0.6 0.6 0.6' ambient='.3 .3 .3' specular='0 0 0'/>
+    <scale com="0.05" camera="0.06" framelength="0.5" framewidth="0.02" forcewidth="0.1" contactwidth="0.01" contactheight="0.05"/>
+  </visual>
+
+  <asset>
+    <texture type='2d' name='groundplane' builtin='checker' mark='edge' rgb1='0.2 0.3 0.4' rgb2='0.1 0.2 0.3' markrgb='0.8 0.8 0.8' width='300' height='300'/>
+    <material name='groundplane' texture='groundplane' texuniform='true' texrepeat='5 5' reflectance='0.2'/>
+  </asset>
+
+  <asset>
+    <!-- For environment -->
+    <texture builtin="gradient" height="100" rgb1="1 1 1" rgb2="0 0 0" type="skybox" width="100"/>
+    <texture builtin="flat" height="1278" mark="cross" markrgb="1 1 1" name="texgeom" random="0.01" rgb1="0.8 0.6 0.4" rgb2="0.8 0.6 0.4" type="cube" width="127"/>
+    <texture builtin="checker" height="100" name="texplane" rgb1="0 0 0" rgb2="0.8 0.8 0.8" type="2d" width="100"/>
+    <material name="MatPlane" reflectance="0.5" shininess="1" specular="1" texrepeat="60 60" texture="texplane"/>
+    <material name="geom" texture="texgeom" texuniform="true"/>
+  </asset>
+
+  <worldbody>
+    <!-- Light -->
+    <light cutoff="100" diffuse="1 1 1" dir="-0 0 -1.3" directional="true" exponent="1" pos="0 0 1.3" specular=".1 .1 .1"/>
+
+    <!-- Floor -->
+    <body name="floor">
+        <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.8 0.9 0.8 1" size="40 40 40" type="plane"/>
+    </body>
+
+    <!-- SkyRover robot -->
+    <body name="skyrover" pos="0 0 1.122">
+      <include file="skyrover/skyrover.xml"/>
+    </body>
+    <!-- SkyRover ends -->
+
+    <!-- Visualization of the coordinate frame -->
+    <site name="qcX" type="box" pos="0.1 0.0 0.0" size="0.1 0.005 0.005" quat = " 1.0 0.0 0.0 0.0" rgba="1 0 0 1"/>
+    <site name="qcY" type="box" pos="0.0 0.1 0.0" size="0.1 0.005 0.005" quat = " 0.707 0.0 0.0 0.707" rgba="0 1 0 1"/>
+    <site name="qcZ" type="box" pos="0.0 0.0 0.1" size="0.1 0.005 0.005" quat = "-0.707 0.0 0.707 0.0" rgba="0 0 1 1"/>
+
+    <body name='car_robot' pos="0 0 0">
+      <joint type="free" frictionloss="0.0001" />
+      <include file="rm2_car/rm2_car_noarm.xml"/>
+    </body>
+
+  </worldbody>
+
+  <actuator>
+    <include file="skyrover/skyrover_control.xml"/>
+    <include file="rm2_car/rm2_car_control_all.xml"/>
+  </actuator>
+
+</mujoco>

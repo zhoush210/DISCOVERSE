@@ -1,0 +1,35 @@
+<mujocoinclude>
+
+  <default>
+    <default class='car'>
+      <default class="steer_joint">
+        <joint axis="0 0 1" range="-1.5708 1.5708" actuatorfrcrange="-35 35" damping=".5" frictionloss="20"/>
+        <position ctrlrange="-1.5708 1.5708"/>
+      </default>
+
+      <default class="wheel_joint">
+        <joint axis="0 0 -1" damping=".3" frictionloss="10"/>
+        <!-- <motor ctrlrange='-5 5' forcerange='-100 100'/> -->
+        <motor ctrlrange='-50 50' forcerange='-100 100'/>
+      </default>
+
+    </default>
+  </default>
+
+  <asset>
+    <material name="Paint_Metallic_Cool_Grey__1" specular="0.5" shininess="0.5" rgba="0.928523183 0.928523183 0.928523123 1.0"/>
+    <material name="Paint_Matte_Black__1" specular="0.5" shininess="0.5" rgba="0.00111266039 0.00111266039 0.00111266039 1.0"/>
+    <material name="Clear_Shiny_Plastic_Black__1" specular="0.5" shininess="0.5" rgba="0 0 0 1.0"/>
+    <material name="Copper_Textured__1_1" specular="0.5" shininess="0.5" rgba="0.954579771 0.637773752 0.539052486 1.0"/>
+
+    <texture type='2d' name='rm2_color' file='rm2_car/logo.png'/>
+    <material name='rm2' texture='rm2_color' specular="0.5" shininess="0.5"/>
+    <texture type='2d' name='wheel_color' file='rm2_car/TEX1.png'/>
+    <material name='wheel' texture='wheel_color' specular="0.5" shininess="0.5"/>
+    <mesh name="rm2" file="rm2_car/rm2_car.obj"/>
+    <mesh name="steering_left_front" file="rm2_car/steering_left_front.STL"/>
+    <mesh name="wheel_fix" file="rm2_car/wheel.obj"/>
+    <mesh name="steering_right_front" file="rm2_car/steering_right_front.STL"/>
+  </asset>
+
+  </mujocoinclude>

@@ -1,0 +1,8 @@
+<mujocoinclude>
+  <include file="../mmk2/mmk2_dependencies.xml"/>
+
+  <asset>
+    <mesh name="tok2_base" file="tok2/tok2_base.obj"/>
+  </asset>
+
+  </mujocoinclude>

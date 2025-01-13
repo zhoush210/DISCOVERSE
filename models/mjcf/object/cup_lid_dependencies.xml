@@ -1,0 +1,19 @@
+<mujocoinclude>
+
+
+  <asset>
+    <texture type="2d" name="cup_lid_texture" file="obj/cup_lid/cup_lid.png"/>
+    <material name="cup_lid_texture" texture="cup_lid_texture" specular="0.5" shininess="0.5"/>
+    <mesh file="obj/cup_lid/cup_lid.obj"/>
+
+
+    <mesh name="cup_lid_part_0" file="obj/cup_lid/part_0.obj" scale="1 1 1"/>
+    <mesh name="cup_lid_part_1" file="obj/cup_lid/part_1.obj" scale="1 1 1"/>
+    <mesh name="cup_lid_part_2" file="obj/cup_lid/part_2.obj" scale="1 1 1"/>
+
+
+
+
+  </asset>
+
+</mujocoinclude>

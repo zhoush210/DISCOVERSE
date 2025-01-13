@@ -1,0 +1,10 @@
+<mujocoinclude>
+  <motor name='forward' tendon='forward' class='wheel_joint'/>
+  <motor name='turn' tendon='turn' class='wheel_joint'/>
+
+  <position name='steer_joint1_position' joint='steer_joint1' class='steer_joint' kp="50"/>
+  <position name='steer_joint2_position' joint='steer_joint2' class='steer_joint' kp="50"/>
+  <position name='steer_joint3_position' joint='steer_joint3' class='steer_joint' kp="50"/>
+  <position name='steer_joint4_position' joint='steer_joint4' class='steer_joint' kp='50'/>
+
+</mujocoinclude>

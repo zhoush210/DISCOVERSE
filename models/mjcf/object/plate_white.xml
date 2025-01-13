@@ -1,0 +1,28 @@
+<mujocoinclude>
+
+  <joint type="free" frictionloss="0.00005" />
+  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="plate_white_texture" mesh="plate" class="obj_visual"/>
+
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_0" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_1" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_2" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_3" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_4" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_5" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_6" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_7" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_8" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_9" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_10" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_11" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_12" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_13" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_14" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_15" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_16" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_17" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_18" class="obj_collision"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 1" mesh="plate_white_part_19" class="obj_collision"/>
+
+</mujocoinclude>

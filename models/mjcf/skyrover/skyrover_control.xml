@@ -1,0 +1,28 @@
+<mujocoinclude>
+  <!-- SkyRover control groups              -->
+  <!--    (1)     X     (4)                 -->
+  <!--    CCW     ^     CW                  -->
+  <!--        \   |    /                    -->
+  <!--          \ |   /                     -->
+  <!--     Y <————                          -->
+  <!--          / |   \                     -->
+  <!--        /   |    \                    -->
+  <!--     CW     ^     CCW                 -->
+  <!--    (2)     X     (3)                 -->
+  <!-- N.B., Rover mode has the same index. -->
+  <motor joint="skyrover_stretch_joint" ctrllimited="true" ctrlrange="-545 0"/>
+  <motor joint="skyrover_folder1_joint" ctrllimited="true" ctrlrange="0 79.8"/>
+  <motor joint="skyrover_wheel2_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_wheel4_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_rotor2_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_rotor4_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_folder2_joint" ctrllimited="true" ctrlrange="0 79.8"/>
+  <motor joint="skyrover_wheel3_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_wheel1_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_rotor3_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor joint="skyrover_rotor1_joint" ctrllimited="true" ctrlrange="-10 10"/>
+  <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_fl" gear="0 0 1 0 0 -.1"/>
+  <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_bl" gear="0 0 1 0 0  .1"/>
+  <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_br" gear="0 0 1 0 0 -.1"/>
+  <motor ctrlrange="0.0 10.0" ctrllimited="true" site="skyrover_thrust_fr" gear="0 0 1 0 0  .1"/>
+</mujocoinclude>

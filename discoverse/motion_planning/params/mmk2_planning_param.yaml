@@ -1,0 +1,18 @@
+LLPTstatic:
+  use_k_nearest: 0
+  rewire_factor: 1.5
+  informed_sampling: 1
+  cull_neighbors: 0
+  rejection_variant: 0
+
+LLPT:
+  use_k_nearest: 0
+  rewire_factor: 3
+  informed_sampling: 0
+  cull_neighbors: 0
+  rejection_variant: 0
+
+RRTstar:
+  use_k_nearest: 0
+  rewire_factor: 1.1
+  delay_collision_checking: 1

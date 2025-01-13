@@ -1,0 +1,23 @@
+<mujocoinclude>
+  
+  <asset>
+    <mesh name="pan_part_0" file="stl/pan/part_0.STL" scale="1 1 1"/>
+    <mesh name="pan_part_1" file="stl/pan/part_1.STL" scale="1 1 1"/>
+    <mesh name="pan_part_2" file="stl/pan/part_2.STL" scale="1 1 1"/>
+    <mesh name="pan_part_3" file="stl/pan/part_3.STL" scale="1 1 1"/>
+    <mesh name="pan_part_4" file="stl/pan/part_4.STL" scale="1 1 1"/>
+    <mesh name="pan_part_5" file="stl/pan/part_5.STL" scale="1 1 1"/>
+    <mesh name="pan_part_6" file="stl/pan/part_6.STL" scale="1 1 1"/>
+    <mesh name="pan_part_7" file="stl/pan/part_7.STL" scale="1 1 1"/>
+    <mesh name="pan_part_8" file="stl/pan/part_8.STL" scale="1 1 1"/>
+    <mesh name="pan_part_9" file="stl/pan/part_9.STL" scale="1 1 1"/>
+    <mesh name="pan_part_10" file="stl/pan/part_10.STL" scale="1 1 1"/>
+    <mesh name="pan_part_11" file="stl/pan/part_11.STL" scale="1 1 1"/>
+    <mesh name="pan_part_12" file="stl/pan/part_12.STL" scale="1 1 1"/>
+    <mesh name="pan_part_13" file="stl/pan/part_13.STL" scale="1 1 1"/>
+    <mesh name="pan_part_14" file="stl/pan/part_14.STL" scale="1 1 1"/>
+    <mesh name="pan_part_15" file="stl/pan/part_15.STL" scale="1 1 1"/>
+    <mesh name="pan_part_16" file="stl/pan/part_16.STL" scale="1 1 1"/>
+  </asset>
+
+</mujocoinclude>

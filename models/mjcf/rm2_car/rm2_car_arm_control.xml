@@ -1,0 +1,11 @@
+<mujocoinclude>
+
+  <position name='arm_joint1' joint='arm_joint1' class='joint1' kp="1000"/>
+  <position name='arm_joint2' joint='arm_joint2' class='joint2' kp="1000"/>
+  <position name='arm_joint3' joint='arm_joint3' class='joint3' kp="1000"/>
+  <position name='arm_joint4' joint='arm_joint4' class='joint4' kp='350'/>
+  <position name='arm_joint5' joint='arm_joint5' class='joint5' kp='350'/>
+  <position name='arm_joint6' joint='gripper_base_joint' class='joint6' kp='350'/>
+  <position name='arm_finger' joint='finger_right_joint' class='finger2' kp='500'/>
+
+</mujocoinclude>

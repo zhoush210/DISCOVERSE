@@ -1,0 +1,7 @@
+<mujocoinclude>
+
+  <!-- <joint type="free" frictionloss="0.00005" /> -->
+  <inertial pos="0 0 0" mass="0.02" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="tc_texture" mesh="table_cloth" class="obj_visual" />
+
+</mujocoinclude>

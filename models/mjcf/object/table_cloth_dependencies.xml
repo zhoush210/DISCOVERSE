@@ -1,0 +1,9 @@
+<mujocoinclude>
+
+  <asset>
+    <texture type="2d" name="tc_texture" file="obj/table_cloth/texture7.png"/>
+    <material name="tc_texture" texture="tc_texture" specular="0.0" shininess="1.0"/>
+    <mesh name="table_cloth" file="obj/table_cloth/table_cloth.obj" scale="1 1 1"/>
+  </asset>
+
+</mujocoinclude>

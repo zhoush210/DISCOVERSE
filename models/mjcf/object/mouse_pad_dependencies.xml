@@ -1,0 +1,9 @@
+<mujocoinclude>
+
+  <asset>
+    <texture type="2d" name="mouse_pad_texture" file="obj/mouse_pad/texture.png"/>
+    <material name="mouse_pad_texture" texture="mouse_pad_texture" specular="0.5" shininess="0.5"/>
+    <mesh name="mouse_pad" file="obj/mouse_pad/mouse_pad.obj"/>
+  </asset>
+
+</mujocoinclude>
