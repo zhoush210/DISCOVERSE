@@ -1,4 +1,12 @@
-# DISCOVERSE
+<h1 align="center">
+	DISCOVERSE: Efficient Robot Simulation in Complex High-Fidelity Environments
+</h1>
+
+https://air-discoverse.github.io/static/videos/main.mp4
+
+Yufei Jia†, Guangyu Wang†, Yuhang Dong, Junzhe Wu, Yupei Zeng, Haizhou Ge, Kairui Ding,Zike Yan, Weibin Gu, Chuxuan Li, Ziming Wang, Yunjie Cheng, Wei Sui, Ruqi Huang‡, Guyue Zhou‡
+
+[Webpage](https://air-discoverse.github.io/) | [PDF](https://drive.google.com/file/d/1637XPqWMajfC_ZqKfCGxDxzRMrsJQA1g/view?usp=drive_link)
 
 ## 安装
 
