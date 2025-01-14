@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package array;
+
+message SetArrayRequest {
+  repeated float data = 1 [packed=true];
+}
+
+message GetArrayResponse {
+  repeated float data = 1 [packed=true];
+}
+
+message SetArrayResponse {
+  bool success = 1;
+}
+
+service ArrayService {
+  rpc GetArray(GetArrayResponse) returns (GetArrayResponse) {}
+  rpc SetArray(SetArrayRequest) returns (SetArrayResponse) {}
+}

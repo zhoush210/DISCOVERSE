@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='discoverse',
-    version='1.6.0',
+    version='1.6.1',
     author='Yufei Jia',
     license="MIT",
     packages=find_packages(),
