@@ -13,3 +13,4 @@ submodules*
 *.mp4
 *log
 *tmp*
+*_pb2*.py
