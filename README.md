@@ -101,7 +101,7 @@ python3 discoverse/examples/tasks_airbot_play/cuplid_cover.py
 python3 discoverse/examples/tasks_airbot_play/drawer_open.py
 ```
 
-https://air-discoverse.github.io/static/videos/sim2real.mp4
+https://github.com/user-attachments/assets/6d80119a-31e1-4ddf-9af5-ee28e949ea81
 
 There are many examples under the `discoverse/examples` path, including ros1, ros2, grpc, imitation learning, active mapping, etc.
 
