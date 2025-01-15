@@ -83,6 +83,11 @@ If you want to view a single ply model, you can open [SuperSplat](https://playca
 
 <img src="./assets/supersplat.png" alt="supersplat" style="zoom:50%;" />
 
+## 🔨 Real2Sim
+
+<img src="./assets/real2sim.jpg" alt="real2sim"/>
+
+Please refer to our Real2Sim repository [DISCOVERSE-Real2Sim](https://github.com/GuangyuWang99/DISCOVERSE-Real2Sim) for this part of the content.
 
 ## 💡 Usage
 
@@ -140,10 +145,6 @@ We currently provide the entire process of data collection, model training, and 
 - Press 'p' to print the robot state
 - Press 'g' to toggle Gaussian rendering
 - Press 'd' to toggle depth rendering
-
-## 🔨 Real2Sim
-
-Please refer to our Real2Sim repository [DISCOVERSE-Real2Sim](https://github.com/GuangyuWang99/DISCOVERSE-Real2Sim) for this part of the content.
 
 ## ⏩ Updates
 
