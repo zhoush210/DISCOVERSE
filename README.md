@@ -1,27 +1,31 @@
-<h1 align="center">
-	DISCOVERSE: Efficient Robot Simulation in Complex High-Fidelity Environments
-</h1>
+# DISCOVERSE: Efficient Robot Simulation in Complex High-Fidelity Environments
 
 https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 
-Yufei Jia†, Guangyu Wang†, Yuhang Dong, Junzhe Wu, Yupei Zeng, Haizhou Ge, Kairui Ding,Zike Yan, Weibin Gu, Chuxuan Li, Ziming Wang, Yunjie Cheng, Wei Sui, Ruqi Huang‡, Guyue Zhou‡
+Yufei Jia†, Guangyu Wang†, Yuhang Dong, Junzhe Wu, Yupei Zeng, Haizhou Ge, Kairui Ding, Zike Yan, Weibin Gu, Chuxuan Li, Ziming Wang, Yunjie Cheng, Wei Sui, Ruqi Huang‡, Guyue Zhou‡
 
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FTATP-233%2FDISCOVERSE&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23FF0000&title=Repo+Viewers&edge_flat=false)](https://hits.seeyoufarm.com)
 
 [Webpage](https://air-discoverse.github.io/) | [PDF](https://drive.google.com/file/d/1637XPqWMajfC_ZqKfCGxDxzRMrsJQA1g/view?usp=drive_link)
 
-## 安装
+## 🌟 Features
+
++ High-fidelity, hierarchical Real2Sim generation for both background node and interactive scene nodes in various complex real-world scenarios, leveraging advanced laser-scanning, generative models, physically-based re-lighting, and Mesh-Gaussian transfer. 
++ Efficient simulation and user-friendly configuration. By seamlessly integrating 3DGS rendering engine, MuJoCo physical engine, and ROS2 robotic interface, we provide an easy-to-use, massively parallel implementation for rapid deployment and flexible extension. The overall throughput of DISCOVERSE can achieve 650 FPS for 5 cameras rendering RGB-D frames, which is ∼3× faster than ORBIT (Issac Lab). 
++ Compatibilities with existing 3D assets and inclusive supports for robot models (robotic arm, mobile manipulator, quadrocopter, etc.), sensor modalities (RGB, depth, LiDAR), ROS plugins, and a variety of Sim&Real data mixing schemes. DISCOVERSE lays a solid foundation for developing a comprehensive set of Sim2Real robotic benchmarks for end-to-end robot learning, with real-world tasks including manipulation, navigation, multi-agent collaboration, etc., to stimulate further research and practical applications in the related fields.
+
+## 📦 Installation
 
 ```bash
 git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
 cd DISCOVERSE
 pip install -r requirements.txt
-pip install -e .
+pip install -e.
 ```
 
-### 下载资源文件
+### Download Resource Files
 
-下载[网盘](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)中的meshes和textures文件夹，放到models目录下，下载模型文件后`models`目录会包含以下内容。
+Download the `meshes` and `textures` folders from the [network disk](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/) and place them under the `models` directory. After downloading the model files, the `models` directory will contain the following contents.
 
 ```
 models
@@ -31,103 +35,64 @@ models
 └── urdf
 ```
 
-## 真实感渲染
+## 📷 Photorealistic Rendering
 
 ![photorealistic simulation](./assets/img2.png)
 
-### 安装
+### Installation
 
-`DISCOVERSE`的物理引擎为[mujoco](https://github.com/google-deepmind/mujoco)，如果用户无需基于[3DGS](https://github.com/graphdeco-inria/gaussian-splatting)的高保真渲染功能，可跳过这一节。如果需要真实感渲染，请按照本小节说明操作。
+The physical engine of `DISCOVERSE` is [mujoco](https://github.com/google-deepmind/mujoco). If the user does not need the high-fidelity rendering function based on [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), this section can be skipped. If photorealistic rendering is required, please follow the instructions in this subsection.
 
-1.   安装cuda，请根据自己显卡型号安装对应版本的cuda[下载链接](https://developer.nvidia.com/cuda-toolkit-archive)。
-2.   pip install -r requirements_gs.txt
-3.   安装`diff-gaussian-rasterization`
+1. Install CUDA. Please install the corresponding version of CUDA according to your graphics card model from the [download link](https://developer.nvidia.com/cuda-toolkit-archive).
+2. pip install -r requirements_gs.txt
+3. Install `diff-gaussian-rasterization`
 
-     ```bash
-     cd submodules/diff-gaussian-rasterization/
-     git checkout 8829d14
-     ```
-     修改`submodules/diff-gaussian-rasterization/cuda_rasterizer/auxiliary.h`的154行，
-     将 (p_view.z <= 0.2f) 改成 (p_view.z <= 0.01f)。
+    ```bash
+    cd submodules/diff-gaussian-rasterization/
+    git checkout 8829d14
+    ```
+    Modify line 154 of `submodules/diff-gaussian-rasterization/cuda_rasterizer/auxiliary.h`,
+    change `(p_view.z <= 0.2f)` to `(p_view.z <= 0.01f)`.
 
-     ```bash
-     cd ../..
-     pip install submodules/diff-gaussian-rasterization
-     ```
+    ```bash
+    cd../..
+    pip install submodules/diff-gaussian-rasterization
+    ```
 
-4.   准备好3DGS的模型文件。`DISCOVERSE`的视觉高保真效果依赖3DGS技术和对应的模型文件。预先重建好的机器人、物体和场景模型放在百度网盘[链接](https://pan.baidu.com/s/1yIRkHfXLbT5cftuQ5O_sWQ?pwd=rnkt)，清华网盘[链接](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)，下载模型文件后`models`目录会包含以下内容。（注意：并非所有的模型都是必要的，用户可根据自己的需求下载，建议下载除了scene目录以外的所有ply模型，scene文件夹中的模型只下载用到的）
+4. Prepare 3DGS model files. The high-fidelity visual effect of `DISCOVERSE` depends on 3DGS technology and corresponding model files. The pre-reconstructed robot, object, and scene models are placed on Baidu Netdisk [link](https://pan.baidu.com/s/1yIRkHfXLbT5cftuQ5O_sWQ?pwd=rnkt) and Tsinghua Netdisk [link](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/). After downloading the model files, the `models` directory will contain the following contents. (Note: Not all models are necessary. Users can download according to their own needs. It is recommended to download all ply models except those in the `scene` directory, and for the models in the `scene` folder, only download the ones that will be used.)
 
 ```
 models
 ├── 3dgs
-│   ├── airbot_play
-│   ├── mmk2
-│   ├── tok2
-│   ├── skyrover
-│   ├── hinge
-│   ├── object
-│   └── scene
+│   ├── airbot_play
+│   ├── mmk2
+│   ├── tok2
+│   ├── skyrover
+│   ├── hinge
+│   ├── object
+│   └── scene
 ├── meshes
 ├── mjcf
 ├── textures
 └── urdf
 ```
 
-### 在线查看3DGS模型
+### Online Viewing of 3DGS Models
 
-如需查看其中的单个ply模型，可以在网页打开[SuperSplat](https://playcanvas.com/supersplat/editor)，将ply模型拖入网页中，即可查看并进行简单的编辑，网页效果如下。
+If you want to view a single ply model, you can open [SuperSplat](https://playcanvas.com/supersplat/editor) in the browser, drag the ply model into the webpage, and you can view and perform simple editing. The webpage effect is as follows.
 
-![supersplat](./assets/supersplat.png)
-
-## 使用说明
-
-+   class `BaseConfig`
-
-    仿真环境配置，包括以下内容：
-
-    -   `mjcf_file_path`：仿真场景文件，后缀为`.xml`或`.mjb`
-
-    -   `timestep`：物理仿真时间步长，单位为秒
-
-    -   `decimation`：降采样，每次调用step仿真的时间为 $decimation \times timestep$
-
-    -   `sync`：时间同步，设置为`True`在step时会执行sleep保持仿真的时间速度与现实世界一致，建议在遥操作时设置为`True`，在进行数据自动生成时设置为`False`，会加速数据生成的速度
-
-    -   `headless`：无头模型，如果设置为`True`则不会显示可视化窗口，建议在无显示器的设备上使用或进行数据自动生成时设置为`True`
-
-    -   `render_set`：为字典类型，设置渲染图像的帧率、画面的宽和高
-
-    -   `obs_rgb_cam_id`：list of int，设置获取的rgb图像的相机id
-
-    -   obs_depth_cam_id：list of int，设置获取的深度图的相机id
-
-    -   `use_gaussian_renderer`：设置为`True`时，使用3dgs进行高保真渲染，否则使用mujoco原生渲染器
-
-        以下选项是高保真渲染独有的，使用mujoco原生渲染器时无需设置
-
-    -   `rb_link_list`：机器人的body名称
-
-    -   `obj_list`：场景里被操作物体的body名称，只有在`rb_link_list`和`obj_list`里出现的物体才会在3dgs渲染时出现
-
-    -   `gs_model_dict`：字典类型，key为body名称，value为对应的3dgs ply文件的路径
-
-+   `step`
-
-    智能体通过step()函数与环境进行交互，执行一个动作，并接收下一个观测、特权观测、奖励、是否结束的标志以及其他附加信息。
-
-    ```python
-    observation, privileged_observation, reward, done, info = env.step(action)
-    ```
+<img src="./assets/supersplat.png" alt="supersplat" style="zoom:50%;" />
 
 
-### 例程
+## 💡 Usage
 
-+   airbot_play机械臂
++ airbot_play robotic arm
 
 ```shell
 python3 discoverse/envs/airbot_play_base.py
 ```
-+   机械臂桌面操作任务
+
++ Robotic arm desktop manipulation tasks
 
 ```shell
 python3 discoverse/examples/tasks_airbot_play/block_place.py
@@ -135,32 +100,37 @@ python3 discoverse/examples/tasks_airbot_play/coffeecup_place.py
 python3 discoverse/examples/tasks_airbot_play/cuplid_cover.py
 python3 discoverse/examples/tasks_airbot_play/drawer_open.py
 ```
-<img src="./assets/pick_place.jpg" alt="pick and place" style="zoom:33%;" />
 
-https://github.com/user-attachments/assets/08d32e5d-6d7a-4f1c-8e1e-b478a2ea539d
+https://air-discoverse.github.io/static/videos/sim2real.mp4
 
-+ 主动SLAM
+There are many examples under the `discoverse/examples` path, including ros1, ros2, grpc, imitation learning, active mapping, etc.
 
-```shell
-python discoverse/examples/active_slam/dummy_robot.py
-```
-<img src="./assets/active_slam.jpg" alt="active_slam" style="zoom: 33%;" />
-
-+   碰撞检测
++ Active SLAM
 
 ```shell
-python discoverse/examples/collision_detection/mmk2_collision_detection.ipynb
+python3 discoverse/examples/active_slam/dummy_robot.py
+```
+<img src="./assets/active_slam.jpg" alt="active slam" style="zoom: 33%;" />
+
++ Collision Detection
+
+```shell
+python3 discoverse/examples/collision_detection/mmk2_collision_detection.ipynb
 ```
 
-+   车机协同
++ Vehicle and Drone Collaboration
 
 ```bash
-python discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
+python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 ```
 
-<img src="./assets/skyrover.png" alt="Drone_and_car" style="zoom: 50%;" />
+<img src="./assets/skyrover.png" alt="Drone and car" style="zoom: 50%;" />
 
-### 键盘操作
+### Imitation Learning Quick Start
+
+We currently provide the entire process of data collection, model training, and inference of the act algorithm in the simulator. You can refer to [Data Collection and Format Conversion](./doc/data.md), [Training](./doc/training.md), [Inference](./doc/inference.md), and refer to the corresponding tutorials.
+
+### Keyboard Operations
 
 - Press 'h' to print help
 - Press 'F5' to reload the mjcf file
@@ -168,51 +138,47 @@ python discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 - Press '[' or ']' to switch camera view
 - Press 'Esc' to set free camera
 - Press 'p' to print the robot state
-- Press 'g' toggle gaussian render
-- Press 'd' toggle depth render
+- Press 'g' to toggle Gaussian rendering
+- Press 'd' to toggle depth rendering
 
-![airbot play imitation learning & mmk2 builds blocks](./assets/img1.png)
+## 🔨 Real2Sim
 
-## 模仿学习 快速开始
+Please refer to our Real2Sim repository [DISCOVERSE-Real2Sim](https://github.com/GuangyuWang99/DISCOVERSE-Real2Sim) for this part of the content.
 
-我们目前提供了act算法在仿真器中的从数据采集、到训练模型、推理的全部流程。
-可以参考[数据收集和格式转换](./doc/数据.md)，[训练](./doc/训练.md)，[推理](./doc/推理.md)，可参考相应教程。
+## ⏩ Updates
 
-## 如何获取3DGS数据资产
++   2025.01.13: DISCOVERSE is open source
 
-+ 单图生成3维模型
-  + https://github.com/microsoft/TRELLIS
-+ TODO
+## ❔ Frequently Asked Questions
 
-## Tools
+1. `diff-gaussian-rasterization` fails to install due to mismatched pytorch and cuda versions: Please install the specified version of pytorch.
 
-在`scripts`路径下有一些常用的python脚本：
+2. If you want to use it on a server, please specify the environment variable:
 
--   `convex_decomposition.ipynb`：[物体凸分解](doc/凸分解.md)
--   `urdf format`：对urdf文件做格式化
--   `gaussainSplattingConvert.py`：3dgs ply模型进行2进制和ascii编码转换
--   `gaussainSplattingTranspose.py`：对单个3dgs ply模型进行平移、旋转、缩放
-
-其他的工具：
-
--   [`obj2mjcf`](https://github.com/kevinzakka/obj2mjcf)：将obj文件转化成mjcf格式
-
-- 在终端查看mujoco场景
     ```bash
-    python3 -m mujoco.viewer --mjcf=<PATH-TO-MJCF-FILE>
-    e.g.
-    cd models/mjcf
-    python3 -m mujoco.viewer --mjcf=mmk2_floor.xml
+    export MUJOCO_GL=egl
     ```
 
-## 常见问题
+## 📬 Communication
 
-1.   `diff-gaussian-rasterization`因为pytorch和cuda版本不匹配导致安装失败：请安装指定版本的pytorch。
+You are welcome to add the author's contact information. Please add a note when adding.
 
-2.   如果要在服务器上使用，请指定环境变量：
+<img src="./assets/tatp.jpg" alt="tatp wechat" style="zoom:33%;" />
 
-     ```bash
-     export MUJOCO_GL=egl
-     ```
 
-     
+## ⚖️ License
+
+DISCOVERSE is licensed under the MIT License. See [LICENSE](https://github.com/TATP-233/DISCOVERSE/blob/main/LICENSE) for additional details.
+
+## 📜 Citation
+
+If you find this work helpful, please consider citing our paper:
+
+```bibtex
+@misc{discoverse2024,
+      title={DISCOVERSE: Efficient Robot Simulation in Complex High-Fidelity Environments},
+      author={Yufei Jia and Guangyu Wang and Yuhang Dong and Junzhe Wu and Yupei Zeng and Haizhou Ge and Kairui Ding and Zike Yan and Weibin Gu and Chuxuan Li and Ziming Wang and Yunjie Cheng and Wei Sui and Ruqi Huang and Guyue Zhou},
+      url={https://air-discoverse.github.io/},
+      year={2024}
+    }
+```

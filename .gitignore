@@ -14,3 +14,4 @@ submodules*
 *log
 *tmp*
 *_pb2*.py
+.vscode
