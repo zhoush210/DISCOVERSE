@@ -164,8 +164,7 @@ We currently provide the entire process of data collection, model training, and 
 
 You are welcome to add the author's contact information. Please add a note when adding.
 
-<img src="./assets/tatp.jpg" alt="tatp wechat" style="zoom:33%;" />
-
+<img src="./assets/wechat.jpeg" alt="wechat" style="zoom:50%;" />
 
 ## ⚖️ License
 
