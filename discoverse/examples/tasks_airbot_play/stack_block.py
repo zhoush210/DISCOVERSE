@@ -7,11 +7,11 @@ import shutil
 import argparse
 import multiprocessing as mp
 
-from dlabsim.airbot_play import AirbotPlayFIK
-from dlabsim import DLABSIM_ROOT_DIR, DLABSIM_ASSERT_DIR
-from dlabsim.envs.airbot_play_base import AirbotPlayCfg
-from dlabsim.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
-from dlabsim.task_base import AirbotPlayTaskBase, recoder_airbot_play
+from discoverse.airbot_play import AirbotPlayFIK
+from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
+from discoverse.envs.airbot_play_base import AirbotPlayCfg
+from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
+from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play
 
 class SimNode(AirbotPlayTaskBase):
     def __init__(self, config: AirbotPlayCfg):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DLABSIM_ROOT_DIR, "data/block_place")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/stack_block")
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         shutil.copyfile(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
         
-    arm_fik = AirbotPlayFIK(os.path.join(DLABSIM_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_fik = AirbotPlayFIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
 
     trmat = Rotation.from_euler("xyz", [0., np.pi/2, 0.], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))

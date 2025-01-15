@@ -1,4 +1,4 @@
-<mujoco model="block_place">
+<mujoco model="stack_block">
 
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>
