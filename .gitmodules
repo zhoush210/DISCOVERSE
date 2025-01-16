@@ -1,7 +1,6 @@
-[submodule "policies/act"]
-	path = policies/act
-	url = https://github.com/OpenGHz/Imitate-All.git
-
 [submodule "submodules/diff-gaussian-rasterization"]
 	path = submodules/diff-gaussian-rasterization
 	url = https://github.com/ashawkey/diff-gaussian-rasterization.git
+[submodule "policies/act"]
+	path = policies/act
+	url = https://github.com/OpenGHz/Imitate-All.git

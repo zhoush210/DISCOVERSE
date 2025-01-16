@@ -14,9 +14,9 @@ Yufei Jia†, Guangyu Wang†, Yuhang Dong, Junzhe Wu, Yupei Zeng, Haizhou Ge, K
 + Efficient simulation and user-friendly configuration. By seamlessly integrating 3DGS rendering engine, MuJoCo physical engine, and ROS2 robotic interface, we provide an easy-to-use, massively parallel implementation for rapid deployment and flexible extension. The overall throughput of DISCOVERSE can achieve 650 FPS for 5 cameras rendering RGB-D frames, which is ∼3× faster than ORBIT (Issac Lab). 
 + Compatibilities with existing 3D assets and inclusive supports for robot models (robotic arm, mobile manipulator, quadrocopter, etc.), sensor modalities (RGB, depth, LiDAR), ROS plugins, and a variety of Sim&Real data mixing schemes. DISCOVERSE lays a solid foundation for developing a comprehensive set of Sim2Real robotic benchmarks for end-to-end robot learning, with real-world tasks including manipulation, navigation, multi-agent collaboration, etc., to stimulate further research and practical applications in the related fields.
 
-## 🐳Docker
+## 🐳 Docker
 
-Please refer to [docker deployment](doc/docker.md), or directly download [v1.6.1 docker images](https://pan.baidu.com/s/1mLC3Hz-m78Y6qFhurwb8VQ?pwd=xmp9). If docker is used, the `📦 Install` and `📷Photorealistic/Preparation 1-3` parts can be skipped.
+Please refer to [docker deployment](doc/docker.md), or directly download [v1.6.1 docker images](https://pan.baidu.com/s/1mLC3Hz-m78Y6qFhurwb8VQ?pwd=xmp9). If docker is used, the `📦 Install` and `📷 Photorealistic/Preparation 1-3` parts can be skipped.
 
 ## 📦 Installation
 
@@ -29,7 +29,7 @@ pip install -e.
 
 ### Download Resource Files
 
-Download the `meshes` and `textures` folders from the [network disk](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/) and place them under the `models` directory. After downloading the model files, the `models` directory will contain the following contents.
+Download the `meshes` and `textures` folders from [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) or [Tsinghua Netdisk](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/) and place them under the `models` directory. After downloading the model files, the `models` directory will contain the following contents.
 
 ```
 models
@@ -63,7 +63,7 @@ The physical engine of `DISCOVERSE` is [mujoco](https://github.com/google-deepmi
     pip install submodules/diff-gaussian-rasterization
     ```
 
-4. Prepare 3DGS model files. The high-fidelity visual effect of `DISCOVERSE` depends on 3DGS technology and corresponding model files. The pre-reconstructed robot, object, and scene models are placed on Baidu Netdisk [link](https://pan.baidu.com/s/1yIRkHfXLbT5cftuQ5O_sWQ?pwd=rnkt) and Tsinghua Netdisk [link](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/). After downloading the model files, the `models` directory will contain the following contents. (Note: Not all models are necessary. Users can download according to their own needs. It is recommended to download all ply models except those in the `scene` directory, and for the models in the `scene` folder, only download the ones that will be used.)
+4. Prepare 3DGS model files. The high-fidelity visual effect of `DISCOVERSE` depends on 3DGS technology and corresponding model files. The pre-reconstructed robot, object, and scene models are placed on Baidu Netdisk [link](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) and Tsinghua Netdisk [link](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/). After downloading the model files, the `models` directory will contain the following contents. (Note: Not all models are necessary. Users can download according to their own needs. It is recommended to download all ply models except those in the `scene` directory, and for the models in the `scene` folder, only download the ones that will be used.)
 
 ```
 models
