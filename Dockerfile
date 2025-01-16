@@ -4,21 +4,35 @@ FROM nvidia/cuda:12.1.0-devel-ubuntu20.04
 # 设置环境变量
 ENV DEBIAN_FRONTEND=noninteractive
 ENV MUJOCO_GL=egl
-ENV PYTHONPATH=/workspace/DISCOVERSE
+ENV PYTHONPATH=/workspace
 
-# 添加deadsnakes PPA来安装Python 3.9
-RUN apt-get update && apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa
-
-# 安装系统依赖和Python 3.9
-RUN apt-get update && apt-get install -y \
+# 安装系统依赖和OpenGL依赖
+RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y \
     git \
     curl \
+    software-properties-common \
     libgl1-mesa-dev \
-    libglib2.0-0 \
-    ffmpeg \
-    libsm6 \
-    libxext6 \
+    libglew-dev \ 
+    libegl1-mesa-dev \ 
+    libgles2-mesa-dev \ 
+    libnvidia-egl-wayland1 \
+    libosmesa6-dev \
+    xvfb \ 
+    ffmpeg \ 
+    libx11-6 \ 
+    libxext6 \ 
+    libglfw3-dev \ 
+    libglu1-mesa-dev \ 
+    pkg-config \ 
+    && rm -rf /var/lib/apt/lists/*
+
+# 添加deadsnakes PPA来安装Python 3.9
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+# 安装Python 3.9
+RUN apt-get update && apt-get install -y \
     python3.9 \
     python3.9-dev \
     python3.9-distutils \
@@ -45,24 +59,27 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # 安装PyTorch相关依赖
 RUN python3 -m pip install --no-cache-dir \
-    torch==2.2.1+cu121 \
-    torchvision==0.17.1+cu121 \
-    -f https://download.pytorch.org/whl/torch_stable.html
+    torch==2.2.1 \
+    torchvision==0.17.1 \
+    torchaudio==2.2.1 \
+    -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 
-# 安装基础依赖
+# 安装基础依赖，numpy1.24.4支持python3.8-3.11
 RUN python3 -m pip install --no-cache-dir \
-    numpy \
+    numpy==1.24.4\
     scipy \
     mediapy \
     opencv-python \
-    mujoco
+    mujoco \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 安装3DGS相关依赖
 RUN python3 -m pip install --no-cache-dir \
     plyfile \
     PyGlm \
     torch>=2.0.0 \
-    torchvision>=0.14.0
+    torchvision>=0.14.0 \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 设置CUDA架构（支持RTX 30/40系列）
 ENV TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6 8.9 9.0+PTX"

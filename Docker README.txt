@@ -48,6 +48,7 @@ docker run -it --rm \
     --privileged=true \
     -e DISPLAY=$DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
+    -e NVIDIA_DRIVER_CAPABILITIES=all \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v $(pwd):/workspace \
     rbm/discoverse bash
@@ -57,6 +58,7 @@ docker run -it --rm \
 ```bash
 python3 discoverse/envs/airbot_play_base.py --headless
 ```
+
 
 ## 验证安装
 
@@ -86,18 +88,6 @@ python3 discoverse/examples/tasks_airbot_play/drawer_open.py
 
 ```shell
 python3 discoverse/examples/active_slam/dummy_robot.py
-```
-
-+ Collision Detection
-
-```shell
-python3 discoverse/examples/collision_detection/mmk2_collision_detection.ipynb
-```
-
-+ Vehicle and Drone Collaboration
-
-```bash
-python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 ```
 
 
@@ -179,4 +169,9 @@ xhost +local:docker
 5. 删除镜像
 ```bash
 docker rmi rbm/discoverse
+```
+
+6. 清理构建缓存
+```bash
+docker builder prune
 ```
