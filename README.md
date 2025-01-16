@@ -14,6 +14,10 @@ Yufei Jia†, Guangyu Wang†, Yuhang Dong, Junzhe Wu, Yupei Zeng, Haizhou Ge, K
 + Efficient simulation and user-friendly configuration. By seamlessly integrating 3DGS rendering engine, MuJoCo physical engine, and ROS2 robotic interface, we provide an easy-to-use, massively parallel implementation for rapid deployment and flexible extension. The overall throughput of DISCOVERSE can achieve 650 FPS for 5 cameras rendering RGB-D frames, which is ∼3× faster than ORBIT (Issac Lab). 
 + Compatibilities with existing 3D assets and inclusive supports for robot models (robotic arm, mobile manipulator, quadrocopter, etc.), sensor modalities (RGB, depth, LiDAR), ROS plugins, and a variety of Sim&Real data mixing schemes. DISCOVERSE lays a solid foundation for developing a comprehensive set of Sim2Real robotic benchmarks for end-to-end robot learning, with real-world tasks including manipulation, navigation, multi-agent collaboration, etc., to stimulate further research and practical applications in the related fields.
 
+## 🐳Docker
+
+Please refer to [docker deployment](doc/docker.md), or directly download [v1.6.1 docker images](https://pan.baidu.com/s/1mLC3Hz-m78Y6qFhurwb8VQ?pwd=xmp9). If docker is used, the `📦 Install` and `📷Photorealistic/Preparation 1-3` parts can be skipped.
+
 ## 📦 Installation
 
 ```bash
@@ -39,7 +43,7 @@ models
 
 ![photorealistic simulation](./assets/img2.png)
 
-### Installation
+### Preparation
 
 The physical engine of `DISCOVERSE` is [mujoco](https://github.com/google-deepmind/mujoco). If the user does not need the high-fidelity rendering function based on [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), this section can be skipped. If photorealistic rendering is required, please follow the instructions in this subsection.
 
@@ -149,6 +153,7 @@ We currently provide the entire process of data collection, model training, and 
 ## ⏩ Updates
 
 +   2025.01.13: DISCOVERSE is open source
++   2025.01.16: add docker file
 
 ## ❔ Frequently Asked Questions
 

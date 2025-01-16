@@ -25,6 +25,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     libxext6 \ 
     libglfw3-dev \ 
     libglu1-mesa-dev \ 
+    libglm-dev \
     pkg-config \ 
     && rm -rf /var/lib/apt/lists/*
 
