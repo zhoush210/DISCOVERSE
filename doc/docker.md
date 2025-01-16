@@ -2,6 +2,8 @@
 
 ## 安装步骤
 
+注意：将下面的`<YOUR-TAG>`替换成具体的docker image tag名称，如`v1.6.1`。
+
 ### 1. 克隆仓库
 ```bash
 # 克隆子模块
@@ -37,7 +39,7 @@ mkdir -p models/{meshes,textures,3dgs,mjcf,urdf}
 ### 3. 构建和运行Docker容器
 ```bash
 # 构建容器
-docker build -t rbm/discoverse .
+docker build -t discoverse/<YOUR-TAG> .
 
 # 允许Docker访问X11显示服务器
 xhost +local:docker
@@ -51,7 +53,7 @@ docker run -it --rm \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v $(pwd):/workspace \
-    rbm/discoverse bash
+    discoverse/<YOUR-TAG> bash
 ```
 
 注意：如果不需要图形界面，可以在运行Python脚本时添加参数：
@@ -148,7 +150,7 @@ docker run -it --rm \
     -v $(pwd)/models:/workspace/DISCOVERSE/models \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    rbm/discoverse bash
+    discoverse/<YOUR-TAG> bash
 ```
 
 2. 如果遇到权限问题，可以在主机上运行：
@@ -168,7 +170,7 @@ xhost +local:docker
 
 5. 删除镜像
 ```bash
-docker rmi rbm/discoverse
+docker rmi discoverse/<YOUR-TAG>
 ```
 
 6. 清理构建缓存
