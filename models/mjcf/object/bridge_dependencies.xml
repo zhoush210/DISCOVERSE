@@ -1,0 +1,8 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="box_texture" file="obj/box/box.png"/>
+    <material name="box_texture" texture="box_texture" specular="0.1" shininess="0.2"/>
+    <mesh name="bridge" file="stl/bridge.STL" scale="0.001 0.001 0.001"/>
+    <!-- stl默认单位是毫米，xml是米 -->
+  </asset>
+</mujocoinclude>
