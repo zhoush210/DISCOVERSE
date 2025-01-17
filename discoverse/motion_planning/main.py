@@ -116,7 +116,7 @@ def main(input_arguments):
     save_dir = join(motion_planning_dir, "results/")
     if os.path.exists(save_dir):
         shutil.rmtree(save_dir)
-    os.mkdir(save_dir)
+    os.makedirs(save_dir)
     # setup logger
     logger = logging.getLogger()
     setup_global_logger(logger, file= save_dir + "/main_" + str(datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')) + ".log")

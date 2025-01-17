@@ -37,14 +37,6 @@ class TOK2JOY(TOK2Base):
         self.tctr_base[0] = linear_vel
         self.tctr_base[1] = angular_vel
 
-    def printMessage(self):
-        super().printMessage()
-
-        print("    lta local = {}".format(self.lft_arm_target_pose))
-        print("    rta local = {}".format(self.rgt_arm_target_pose))
-        print("       euler  = {}".format(self.lft_end_euler))
-        print("       euler  = {}".format(self.rgt_end_euler))
-
 if __name__ == "__main__":
     rospy.init_node('mmk2_mujoco_node', anonymous=True)
 

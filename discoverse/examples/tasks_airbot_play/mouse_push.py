@@ -72,14 +72,14 @@ if __name__ == "__main__":
     parser.add_argument("--auto", action="store_true", help="auto run")
     args = parser.parse_args()
 
-    data_idx, data_set_size = args.data_idx, args.data_set_size
+    data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mouse_push")
     if not os.path.exists(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:

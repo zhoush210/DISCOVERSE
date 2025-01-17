@@ -32,14 +32,14 @@
 
   <body name="lft_wheel_link" pos="-0.02371 0.16325 0.082" euler="1.5708 0 0">
     <inertial pos="2.9309e-07 5.2077e-06 -0.029871" quat="0.28052 0.649078 -0.280681 0.649018" mass="1.1566" diaginertia="0.0035528 0.0021045 0.0021045"/>
-    <joint name="lft_wheel_joint" class='wheel'/>
+    <joint name="lft_wheel_joint" class='tok2_wheel'/>
     <geom name='lft_wheel' type="mesh" rgba="0.2 0.2 0.2 1" mesh="lft_wheel_link" class="visual"/>
     <geom pos="0 0 0" type="sphere" size='0.0837' rgba="0 1 0 0"/>
   </body>
 
   <body name="rgt_wheel_link" pos="-0.02371 -0.16325 0.082" euler="1.5708 0 0">
     <inertial pos="2.9312e-07 5.2196e-06 0.029871" quat="0.620108 0.339813 -0.620017 0.339959" mass="1.1566" diaginertia="0.0035528 0.0021045 0.0021045"/>
-    <joint name="rgt_wheel_joint" class='wheel'/>
+    <joint name="rgt_wheel_joint" class='tok2_wheel'/>
     <geom name='rgt_wheel' type="mesh" rgba="0.2 0.2 0.2 1" mesh="rgt_wheel_link" class="visual"/>
     <geom pos="0 0 0" type="sphere" size='0.0837' rgba="0 1 0 0"/>
   </body>

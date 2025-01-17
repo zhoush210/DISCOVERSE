@@ -60,7 +60,7 @@
       </body>
 
       <body name="arm_base" pos="0.27 -0.17 0.345" quat="1 0 0 0 ">
-        <geom mesh="arm_base_1" material="Paint_Matte_Black" class="arm_visual"/>
+        <geom mesh="arm_base_1" material="Paint_Matte_Black" class="visual"/>
         <include file="rm2_car/arm_gripper.xml"/>
       </body>
     </body>

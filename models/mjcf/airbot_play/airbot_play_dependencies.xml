@@ -1,6 +1,6 @@
 <mujocoinclude>
   <default>
-    <default class="arm_visual">
+    <default class="visual">
       <geom group="2" type="mesh" contype="0" conaffinity="0"/>
     </default>
 

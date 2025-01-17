@@ -1,7 +1,7 @@
 <mujocoinclude>
 
-  <motor name='forward' tendon='forward' class='wheel'/>
-  <motor name='turn' tendon='turn' class='wheel'/>
+  <motor name='forward' tendon='forward' class='tok2_wheel'/>
+  <motor name='turn' tendon='turn' class='tok2_wheel'/>
 
   <position name='lft_joint1' joint='lft_arm_joint1' class='joint1' kp="1000"/>
   <position name='lft_joint2' joint='lft_arm_joint2' class='joint2' kp="1000"/>

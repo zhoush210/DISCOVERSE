@@ -6,9 +6,7 @@ import mediapy
 import numpy as np
 
 from discoverse.mmk2 import MMK2FIK
-from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import get_body_tmat
-from discoverse.airbot_play import AirbotPlayFIK
 from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
 
 def recoder_mmk2(save_path, act_lst, obs_lst, cfg):
@@ -70,19 +68,13 @@ class MMK2TaskBase(MMK2Base):
         ])
 
         self.lft_arm_target_pose = self.arm_action_init_position[0].copy()
-        self.lft_end_euler = np.zeros(3)
         self.rgt_arm_target_pose = self.arm_action_init_position[1].copy()
-        self.rgt_end_euler = np.zeros(3)
-
-        self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
 
     def resetState(self):
         super().resetState()
         self.target_control[:] = self.init_joint_ctrl.copy()
         self.lft_arm_target_pose = self.arm_action_init_position[0].copy()
-        self.lft_end_euler = np.zeros(3)
         self.rgt_arm_target_pose = self.arm_action_init_position[1].copy()
-        self.rgt_end_euler = np.zeros(3)
         self.set_left_arm_new_target = False
         self.set_right_arm_new_target = False
         self.domain_randomization()

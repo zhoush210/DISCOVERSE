@@ -3,9 +3,9 @@
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
 
   <default>
-    <default class="visual">
+    <!-- <default class="visual">
       <geom group="2" type="mesh" contype="0" conaffinity="0" density="0"/>
-    </default>
+    </default> -->
 
     <default class='slide_joint'>
       <joint range='-0.04 0.87' type='slide' axis='0 0 -1' frictionloss="1000" damping="100" actuatorfrcrange="-1300 1000"/>

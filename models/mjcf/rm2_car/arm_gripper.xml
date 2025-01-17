@@ -6,13 +6,13 @@
     <body name="arm_link2" quat="0.135866 0.135867 -0.69393 0.693932">
       <inertial pos="0.22493 0.0047721 0.008023" quat="-0.210875 0.632473 -0.273056 0.693506" mass="0.64621" diaginertia="0.00516535 0.00505042 0.000418626"/>
       <joint name="arm_joint2" class='joint2'/>
-      <geom mesh="link2_0" material="Paint_Matte_Black" class="arm_visual"/>
-      <geom mesh="link2_1" material="Paint_Metallic_Cool_Grey" class="arm_visual"/>
+      <geom mesh="link2_0" material="Paint_Matte_Black" class="visual"/>
+      <geom mesh="link2_1" material="Paint_Metallic_Cool_Grey" class="visual"/>
       <body name="arm_link3" pos="0.27009 0 0" quat="0.192144 0 0 -0.981367">
         <inertial pos="0.16813 -5.5576e-05 0.0031184" quat="0.511278 0.488423 0.489191 0.510617" mass="0.26829" diaginertia="0.0031527 0.0030951 0.000239403"/>
         <joint name="arm_joint3" class='joint3'/>
-        <geom mesh="link3_0" material="Paint_Matte_Black" class="arm_visual"/>
-        <geom mesh="link3_1" material="Paint_Metallic_Cool_Grey" class="arm_visual"/>
+        <geom mesh="link3_0" material="Paint_Matte_Black" class="visual"/>
+        <geom mesh="link3_1" material="Paint_Metallic_Cool_Grey" class="visual"/>
         <body name="arm_link4" pos="0.29015 0 0" quat="-2.59734e-06 0.707105 2.59735e-06 0.707108">
           <inertial pos="5.2436e-06 0.00040412 -0.03228" quat="0.999969 -0.000174762 -0.00792041 -6.98144e-05" mass="0.34876" diaginertia="0.000423574 0.000412 0.000126826"/>
           <joint name="arm_joint4" class='joint4'/>
@@ -20,8 +20,8 @@
           <body name="arm_link5" quat="0.707105 0.707108 0 0">
             <inertial pos="8.3328e-06 0.026148 0.002525" quat="0.531568 0.4663 0.4663 0.531568" mass="0.36132" diaginertia="0.0004677 0.000432922 0.000178178"/>
             <joint name="arm_joint5" class='joint5'/>
-            <geom mesh="link5_0" material="Paint_Matte_Black" class="arm_visual"/>
-            <geom mesh="link5_1" material="Paint_Metallic_Cool_Grey" class="arm_visual"/>
+            <geom mesh="link5_0" material="Paint_Matte_Black" class="visual"/>
+            <geom mesh="link5_1" material="Paint_Metallic_Cool_Grey" class="visual"/>
             <body name="arm_link6" pos="0 0.23645 0" quat="0.5 -0.5 0.5 0.5">
               <inertial pos="0.020482 2.5483e-05 -0.079685" mass="0.40081" diaginertia="0.00109963 0.00109963 0.00109963"/>
               <joint name="gripper_base_joint" class='joint6'/>
