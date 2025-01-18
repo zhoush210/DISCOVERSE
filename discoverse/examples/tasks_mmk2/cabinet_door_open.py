@@ -15,19 +15,14 @@ from discoverse.utils import get_site_tmat, get_body_tmat, step_func, SimpleStat
 class MMK2TASK(MMK2TaskBase):
 
     def domain_randomization(self):
-        # 随机 抽屉位置
+        # 随机 柜门位置
         self.mj_data.qpos[self.njq+0] += 2.*(np.random.random()-0.5) * 0.05
         self.mj_data.qpos[self.njq+1] += 2.*(np.random.random()-0.5) * 0.025
-
-        # 随机 苹果位置
-        # wood_y_bios = (np.random.random()-0.75) * 0.05
-        # self.mj_data.qpos[self.njq+7+0] += 2.*(np.random.random()-0.5) * 0.05
-        # self.mj_data.qpos[self.njq+7+1] += wood_y_bios
-        # self.mj_data.qpos[self.njq+7+2] += 0.01
+        self.origin_pos=self.mj_data.qpos.copy()
 
     def check_success(self):
-        # :TODO:
-        return True
+        diff=np.sum(np.square(self.mj_data.qpos-self.origin_pos))
+        return diff > 20.0
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
@@ -91,7 +86,18 @@ if __name__ == "__main__":
             stm.reset()
             action[:] = sim_node.target_control[:]
             act_lst, obs_lst = [], []
-
+        
+        """
+        tmat_door 是一个 4x4 的仿射变换矩阵，表示 "cabinet_door_handle" 的变换关系：
+        tmat_door =
+            [[ R11  R12  R13  x ]
+                [ R21  R22  R23  y ]
+                [ R31  R32  R33  z ]
+                [  0    0    0   1 ]]
+        tmat_door[:3, :3]：是一个 3x3 的旋转矩阵，表示门把手的朝向。
+        tmat_door[:3, 3]：是门把手在世界坐标系中的位置 [x, y, z]。
+        """
+        
         try:
             if stm.trigger():
                 if stm.state_idx == 0: #后退并降高度
@@ -107,27 +113,52 @@ if __name__ == "__main__":
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到柜门把手
                     tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
-                    target_posi = tmat_door[:3, 3] + 0.001 * tmat_door[:3, 0]
+                    target_posi = tmat_door[:3, 3] + np.array([-0.1,0.1,0])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
-                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -1.5807]).as_matrix())
-                elif stm.state_idx == 3: # 抓住把手
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.2]).as_matrix())
+                elif stm.state_idx == 3: # 伸到柜门把手
+                    tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
+                    target_posi = tmat_door[:3, 3] + np.array([-0.05,0.1,0])
+                    sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.5]).as_matrix())
+                elif stm.state_idx == 4: # 伸到柜门把手
+                    tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
+                    target_posi = tmat_door[:3, 3] + np.array([-0.05,0.05,0])
+                    sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.5]).as_matrix())
+                elif stm.state_idx == 5: # 伸到柜门把手
+                    tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
+                    target_posi = tmat_door[:3, 3] + np.array([-0.04,0,0])
+                    sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.5]).as_matrix())
+                elif stm.state_idx == 6: # 伸到柜门把手
+                    tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
+                    target_posi = tmat_door[:3, 3] + np.array([-0.04,-0.05,0])
+                    sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.5]).as_matrix())
+                elif stm.state_idx == 7: # 抓住把手
                     sim_node.tctr_lft_gripper[:] = 0.0
                     sim_node.delay_cnt = int(0.5/sim_node.delta_t)
-                elif stm.state_idx == 4: # 打开柜门 第一阶段（半开）
+                elif stm.state_idx == 8: # 打开柜门 第一阶段（半开）# 门把手到铰链的距离=0.195
                     tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
                     target_posi = tmat_door[:3, 3] + np.array([-0.16, 0.085, 0.])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
-                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.7]).as_matrix())
-                elif stm.state_idx == 5: # 打开柜门 第二阶段 （调整位姿）
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, 0.16]).as_matrix()) #0.18
+                elif stm.state_idx == 9: # 打开柜门 第二阶段 （调整位姿）
                     tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
-                    target_posi = tmat_door[:3, 3] + np.array([-0.05, 0.05, 0.])
+                    target_posi = tmat_door[:3, 3] + np.array([-0.04, 0.05, 0])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
-                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.5]).as_matrix())
-                elif stm.state_idx == 6: # 打开柜门 第三阶段（全开）
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, 0.18]).as_matrix()) #0.2
+                elif stm.state_idx == 10: # 打开柜门 第二阶段 （调整位姿）
                     tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
-                    target_posi = tmat_door[:3, 3] + np.array([-0.03, 0.1, 0.])
+                    target_posi = tmat_door[:3, 3] + np.array([-0.04, 0.05, 0])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
-                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -0.05]).as_matrix())
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, 0.18]).as_matrix()) #0.2
+                elif stm.state_idx == 11: # 打开柜门 第三阶段（全开）
+                    tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
+                    target_posi = tmat_door[:3, 3] + np.array([0, 0.05, 0])
+                    sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
+                    sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, 0]).as_matrix())
 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)
@@ -148,8 +179,9 @@ if __name__ == "__main__":
 
         for i in range(2, sim_node.njctrl):
             action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
-        yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
-        action[1] = -10 * yaw
+        # 固定角度
+        # yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
+        # action[1] = -10 * yaw
 
         obs, _, _, _, _ = sim_node.step(action)
         
