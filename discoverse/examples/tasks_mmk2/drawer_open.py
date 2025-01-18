@@ -62,7 +62,7 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_cabinet_door_open")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_drawer_open")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

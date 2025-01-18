@@ -94,7 +94,7 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_plate_coffecup")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_pan")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
