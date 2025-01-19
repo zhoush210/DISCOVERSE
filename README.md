@@ -59,7 +59,7 @@ The physical engine of `DISCOVERSE` is [mujoco](https://github.com/google-deepmi
     change `(p_view.z <= 0.2f)` to `(p_view.z <= 0.01f)`.
 
     ```bash
-    cd../..
+    cd ../..
     pip install submodules/diff-gaussian-rasterization
     ```
 
