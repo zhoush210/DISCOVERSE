@@ -12,7 +12,7 @@ from discoverse.envs.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase, recoder_mmk2
 from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 
-class MMK2TASK(MMK2TaskBase):
+class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
         # 随机 盒子位置
@@ -63,11 +63,11 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_plate_coffecup")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_box")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    sim_node = MMK2TASK(cfg)
+    sim_node = SimNode(cfg)
     sim_node.teleop = None
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
