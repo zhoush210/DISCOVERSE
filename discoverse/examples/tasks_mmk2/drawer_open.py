@@ -16,15 +16,12 @@ class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
         # 随机 抽屉位置
-        self.mj_data.qpos[self.njq+0] += 2.*(np.random.random()-0.5) * 0.05
-        self.mj_data.qpos[self.njq+1] += 2.*(np.random.random()-0.5) * 0.025
-
-        # 随机 苹果位置
-        # todo
+        self.mj_data.qpos[self.njq+1] += 2.*(np.random.random()-0.5) * 0.05 # 随机范围[-0.05,0.05]
+        self.origin_drawer_pos=self.mj_data.qpos[self.njq+1]
 
     def check_success(self):
-        # :TODO:
-        return True
+        diff = abs(self.mj_data.qpos[self.njq+1]-self.origin_drawer_pos)
+        return diff > 0.1
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
@@ -104,7 +101,7 @@ if __name__ == "__main__":
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到抽屉把手
                     tmat_drawer = get_site_tmat(sim_node.mj_data, "cabinet_drawer_handle")
-                    target_posi = tmat_drawer[:3, 3]
+                    target_posi = tmat_drawer[:3, 3] + np.array([0.01,0,0])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [1.5807, 0, 0.6]).as_matrix())
                 elif stm.state_idx == 3: # 抓住把手

@@ -15,19 +15,13 @@ from discoverse.utils import get_site_tmat, get_body_tmat, step_func, SimpleStat
 class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
-        # 随机 抽屉位置
+        # 随机 柜门位置
         self.mj_data.qpos[self.njq+0] += 2.*(np.random.random()-0.5) * 0.05
-        self.mj_data.qpos[self.njq+1] += 2.*(np.random.random()-0.5) * 0.025
-
-        # 随机 苹果位置
-        # wood_y_bios = (np.random.random()-0.75) * 0.05
-        # self.mj_data.qpos[self.njq+7+0] += 2.*(np.random.random()-0.5) * 0.05
-        # self.mj_data.qpos[self.njq+7+1] += wood_y_bios
-        # self.mj_data.qpos[self.njq+7+2] += 0.01
+        self.origin_pos=self.mj_data.qpos.copy()
 
     def check_success(self):
-        # :TODO:
-        return True
+        diff=np.sum(np.square(self.mj_data.qpos-self.origin_pos))
+        return diff > 20.0
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False

@@ -65,12 +65,12 @@ cfg.obj_list    = ["bowl_yellow", "wood", "jujube"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
-    "fps"    : 30,
+    "fps"    : 25,
     "width"  : 640,
     "height" : 480
 }
-cfg.obs_rgb_cam_id = None
-cfg.save_mjb_and_task_config = False
+cfg.obs_rgb_cam_id = [0,1,2]
+cfg.save_mjb_and_task_config = True
 
 if __name__ == "__main__":
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     stm = SimpleStateMachine()
     stm.max_state_cnt = 19
-    max_time = 20.0 #s
+    max_time = 30.0 #s
 
     action = np.zeros_like(sim_node.target_control)
     process_list = []
@@ -178,7 +178,8 @@ if __name__ == "__main__":
                     sim_node.tctr_head[1] = 0.8
                     sim_node.tctr_slide[0] = 0.15
                 elif stm.state_idx == 17: # 放开枣
-                    sim_node.tctr_rgt_gripper[:] = 0.2
+                    sim_node.tctr_rgt_gripper[:] = 1.0
+                    sim_node.delay_cnt = int(0.2/sim_node.delta_t)
                 elif stm.state_idx == 18: # 升高度
                     sim_node.tctr_head[1] = 0.8
                     sim_node.tctr_slide[0] = 0.1
@@ -202,8 +203,8 @@ if __name__ == "__main__":
 
         for i in range(2, sim_node.njctrl):
             action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
-        yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2] + np.pi / 2
-        action[1] = -10 * yaw
+        # yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2] + np.pi / 2
+        # action[1] = -10 * yaw
 
         obs, _, _, _, _ = sim_node.step(action)
         

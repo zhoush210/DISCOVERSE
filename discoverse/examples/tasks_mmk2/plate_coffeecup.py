@@ -34,8 +34,9 @@ class SimNode(MMK2TaskBase):
         self.mj_data.qpos[self.njq+7*3+1] += 2.*(np.random.random()-0.5) * 0.02
 
     def check_success(self):
-        # :TODO:
-        return True
+        tmat_coffeecup = get_body_tmat(self.mj_data, "coffeecup_white")
+        tmat_cup_lid = get_body_tmat(self.mj_data, "cup_lid")
+        return np.hypot(tmat_coffeecup[0, 3] - tmat_cup_lid[0, 3], tmat_coffeecup[1, 3] - tmat_cup_lid[1, 3]) < 0.02
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = True
