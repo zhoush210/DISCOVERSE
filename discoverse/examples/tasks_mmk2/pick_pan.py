@@ -73,11 +73,11 @@ cfg.obj_list    = ["pan", "box"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
-    "fps"    : 30,
-    "width"  : 1920,
-    "height" : 1080
+    "fps"    : 25,
+    "width"  : 640,
+    "height" : 480
 }
-cfg.obs_rgb_cam_id = None
+cfg.obs_rgb_cam_id = [0,1,2]
 cfg.save_mjb_and_task_config = True
 
 if __name__ == "__main__":
@@ -234,6 +234,7 @@ if __name__ == "__main__":
 
         except ValueError as ve:
             # traceback.print_exc()
+            print(ve)
             sim_node.reset()
 
         for i in range(2, sim_node.njctrl):

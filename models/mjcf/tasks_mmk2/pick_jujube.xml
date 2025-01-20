@@ -27,9 +27,6 @@
       <include file="../mmk2/mmk2.xml"/>
     </body>
 
-    <!-- ======= EYE SIDE ======= -->
-    <camera name="eye_side" fovy="72.02" pos="0.8 -2.5 1" xyaxes="  1 0 0 0 0 1"/>
-
     <!-- ======= bowl_green ======= -->
     <body name="bowl_yellow" pos="0.92 -1.17 0.8">
       <include file="../object/bowl_yellow.xml"/>
