@@ -115,5 +115,8 @@ EOF
 
 RUN chmod +x /usr/local/bin/check-versions 
 
+RUN mkdir -p /usr/share/glvnd/egl_vendor.d/ && \
+   echo '{\n    "file_format_version" : "1.0.0",\n    "ICD" : {\n        "library_path" : "libEGL_nvidia.so.0"\n    }\n}' > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
 # Add health check
 HEALTHCHECK CMD python3 -c "import discoverse, torch, numpy, cv2, mujoco; print('All dependencies installed successfully')" 
