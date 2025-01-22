@@ -1,0 +1,13 @@
+<mujocoinclude>
+
+  <joint type="free" frictionloss="0.00005" />
+  <geom mesh="Hybrid_0" material="Windows" class="obj_visual"/>
+  <geom mesh="Hybrid_1" material="Hybrid_Interior" class="obj_visual"/>
+  <geom mesh="Hybrid_2" material="Wheels3" class="obj_visual"/>
+  <geom mesh="Hybrid_3" material="Hybrid" class="obj_visual"/>
+  <geom mesh="Hybrid_0" class="obj_collision"/>
+  <geom mesh="Hybrid_1" class="obj_collision"/>
+  <geom mesh="Hybrid_2" class="obj_collision"/>
+  <geom mesh="Hybrid_3" class="obj_collision"/>
+
+</mujocoinclude>
