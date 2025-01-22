@@ -16,14 +16,15 @@ cfg.render_set = {
 }
 cfg.obj_list = []
 
-# cfg.gs_model_dict[""]        = ""
 cfg.gs_model_dict["background"] = "scene/s2r2025/point_cloud.ply"
+# cfg.gs_model_dict[""]        = ""
 
 cfg.obs_rgb_cam_id   = None
 cfg.obs_depth_cam_id = None
-cfg.use_gaussian_renderer = True
+cfg.use_gaussian_renderer = False
 
 if __name__ == "__main__":
+    np.set_printoptions(precision=3, suppress=True, linewidth=200)
 
     sim_node = MMK2Base(cfg)
     obs = sim_node.reset()
