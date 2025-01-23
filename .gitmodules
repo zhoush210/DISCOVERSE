@@ -3,4 +3,4 @@
 	url = https://github.com/ashawkey/diff-gaussian-rasterization.git
 [submodule "policies/act"]
 	path = policies/act
-	url = https://github.com/OpenGHz/Imitate-All.git
+	url = https://github.com/zhoush210/Imitate-All.git
