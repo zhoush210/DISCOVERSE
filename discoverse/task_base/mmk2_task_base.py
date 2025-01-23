@@ -19,6 +19,7 @@ def recoder_mmk2(save_path, act_lst, obs_lst, cfg):
             "time" : [o['time'] for o in obs_lst],
             "obs"  : {
                 "jq" : [o['jq'] for o in obs_lst],
+                "jf" : [o['jf'] for o in obs_lst],
                 "base_position" : [o['base_position'] for o in obs_lst],
                 "base_orientation_wxyz" : [o['base_orientation'] for o in obs_lst],
             },

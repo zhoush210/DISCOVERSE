@@ -175,7 +175,7 @@ class MMK2Base(SimulatorBase):
             "time" : self.mj_data.time,
             "jq"   : self.sensor_qpos.tolist(),
             # "jv"   : self.sensor_qvel.tolist(),
-            # "jf"   : self.sensor_force.tolist(),
+            "jf"   : self.sensor_force.tolist(),
             "base_position"    : self.sensor_base_position.tolist(),
             "base_orientation" : self.sensor_base_orientation.tolist(),
             "img"  : self.img_rgb_obs_s
