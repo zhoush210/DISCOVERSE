@@ -1,4 +1,4 @@
-from .controllor import PIDController
+from .controllor import PIDController, PIDarray
 from .base_config import BaseConfig
 from .statemachine import SimpleStateMachine
 
