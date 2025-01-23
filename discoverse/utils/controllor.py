@@ -26,6 +26,7 @@ class PIDController:
 
 class PIDarray:
     def __init__(self, kps, kis, kds, integrator_maxs=None):
+        assert len(kps) == len(kis) == len(kds), "kps, kis, kds must have the same length"
         self.kps = kps
         self.kis = kis
         self.kds = kds
