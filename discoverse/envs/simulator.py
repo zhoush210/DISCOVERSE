@@ -4,10 +4,12 @@ import traceback
 from abc import abstractmethod
 from multiprocessing import Process, shared_memory, Value, Array
 
-import cv2
+# import cv2
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
+import glfw
+import OpenGL.GL as gl
 
 from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import BaseConfig
@@ -33,49 +35,62 @@ def setRenderOptions(options):
     options.frame = mujoco.mjtFrame.mjFRAME_BODY.value
     pass
 
-def imshow_loop(render_cfg, shm, key, mouseParam):
-    def mouseCallback(event, x, y, flags, param):
-        mouseParam[0] = event
-        mouseParam[1] = x
-        mouseParam[2] = y
-        mouseParam[3] = flags
+# 使用独立进程imshow_loop 显示图像
+# 通过共享内存在主进程和显示进程间传递图像数据
+# 通过共享内存和键盘事件，实现鼠标和键盘的交互
+# def imshow_loop(render_cfg, shm, key, mouseParam):
+#     # 1. 创建OpenCV窗口
+#     # 鼠标回调函数，记录鼠标事件和位置
+#     def mouseCallback(event, x, y, flags, param):
+#         mouseParam[0] = event
+#         mouseParam[1] = x
+#         mouseParam[2] = y
+#         mouseParam[3] = flags
 
-    cv_windowname = render_cfg["cv_windowname"]
-    cv2.namedWindow(cv_windowname, cv2.WINDOW_GUI_NORMAL)
-    cv2.resizeWindow(cv_windowname, render_cfg["width"], render_cfg["height"])
-    cv2.setMouseCallback(cv_windowname, mouseCallback)
+#     cv_windowname = render_cfg["cv_windowname"]
+#     # 原代码：在子进程当中创建OpenCV窗口，交互式窗口
+#     # cv2.namedWindow(cv_windowname, cv2.WINDOW_GUI_NORMAL)
+#     # cv2.resizeWindow(cv_windowname, render_cfg["width"], render_cfg["height"])
+#     # cv2.setMouseCallback(cv_windowname, mouseCallback)
+#     #创建了数据缓存区，既可以被mshow_loop也可以被主循环使用。多线程调用。
+#     # 原代码：从共享内存读取图像
+#     #img_vis_shared = np.ndarray((render_cfg["height"], render_cfg["width"], 3), dtype=np.uint8, buffer=shm.buf)
 
-    img_vis_shared = np.ndarray((render_cfg["height"], render_cfg["width"], 3), dtype=np.uint8, buffer=shm.buf)
+#     set_fps = min(render_cfg["fps"], 60.)
+#     time_delay = 1./set_fps
+#     time_delay_ms = int(time_delay * 1e3 - 1.0)
+#     # 3. 控制显示帧率, 显示循环
+#     while cv2.getWindowProperty(cv_windowname, cv2.WND_PROP_VISIBLE):
+#         t0 = time.time()
+#         #第二步瓶颈：显示延迟，OpenCV将numpy图像显示在窗口里 5-10ms,★可能后续需要更换显示器
+#         #opengl+c cuda torch 同时兼容cuda .cuXXX  为了适配mujoco opencv
+#         #原代码： 共享内存中的图像显示在窗口中
+#         #cv2.imshow(cv_windowname, img_vis_shared)
+#         #记录键盘操作 返回值。
+#         key.value = cv2.waitKey(time_delay_ms)
+#         t1 = time.time()
+#         time.sleep(max(time_delay - (t1-t0), 0.0))
+#     key.value = -2
+#     # 4. 销毁窗口，释放共享内存
+#     cv2.destroyAllWindows()
+#     print("imshow_loop is terminated")
 
-    set_fps = min(render_cfg["fps"], 60.)
-    time_delay = 1./set_fps
-    time_delay_ms = int(time_delay * 1e3 - 1.0)
-    while cv2.getWindowProperty(cv_windowname, cv2.WND_PROP_VISIBLE):
-        t0 = time.time()
-        cv2.imshow(cv_windowname, img_vis_shared)
-        key.value = cv2.waitKey(time_delay_ms)
-        t1 = time.time()
-        time.sleep(max(time_delay - (t1-t0), 0.0))
-    key.value = -2
-    cv2.destroyAllWindows()
-    print("imshow_loop is terminated")
+#     time.sleep(0.1)
+#     shm.close()
+#     shm.unlink()
+#     shm = None
 
-    time.sleep(0.1)
-    shm.close()
-    shm.unlink()
-    shm = None
-
+# 模拟器基类,其它文件继承这个类，使用这个类的方法，主进程。
 class SimulatorBase:
+    # 核心属性
     running = True
     obs = None
 
-    cam_id = -1
+    # 相机相关
+    cam_id = -1  # -1表示自由视角
     last_cam_id = -1
     render_cnt = 0
     camera_names = []
-    mouse_last_x = 0
-    mouse_last_y = 0
-
     camera_pose_changed = False
     camera_rmat = np.array([
         [ 0,  0, -1],
@@ -83,9 +98,22 @@ class SimulatorBase:
         [ 0,  1,  0],
     ])
 
+    # 鼠标状态
+    mouse_pressed = {
+        'left': False,
+        'right': False,
+        'middle': False
+    }
+    mouse_pos = {
+        'x': 0,
+        'y': 0
+    }
+
+    # Mujoco选项
     options = mujoco.MjvOption()
 
     def __init__(self, config:BaseConfig):
+        # 1. 加载配置
         self.config = config
 
         if self.config.mjcf_file_path.startswith("/"):
@@ -101,10 +129,14 @@ class SimulatorBase:
         self.free_camera.fixedcamid = -1
         self.free_camera.type = mujoco._enums.mjtCamera.mjCAMERA_FREE
 
+        # 2. 加载MJCF模型文件, # 加载物理模型
         self.load_mjcf()
+        # 3. 设置自由视角相机
         mujoco.mjv_defaultFreeCamera(self.mj_model, self.free_camera)
-
+        # 4. 设置高斯渲染器
         self.config.use_gaussian_renderer = self.config.use_gaussian_renderer and DISCOVERSE_GAUSSIAN_RENDERER
+        
+        # 5. 加载高斯渲染器, 初始化渲染器
         if self.config.use_gaussian_renderer:
             self.gs_renderer = GSRenderer(self.config.gs_model_dict, self.config.render_set["width"], self.config.render_set["height"])
             self.last_cam_id = self.cam_id
@@ -114,9 +146,9 @@ class SimulatorBase:
             else:
                 self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[self.cam_id] * np.pi / 180.0)
 
-        self.decimation = self.config.decimation
-        self.delta_t = self.mj_model.opt.timestep * self.decimation
-        self.render_fps = self.config.render_set["fps"]
+        self.decimation = self.config.decimation # 每次step执行的物理仿真次数
+        self.delta_t = self.mj_model.opt.timestep * self.decimation # 每次step执行的物理仿真时间
+        self.render_fps = self.config.render_set["fps"] # 渲染帧率
 
         if self.config.use_gaussian_renderer:
             obj_names_check = True
@@ -129,21 +161,64 @@ class SimulatorBase:
 
         mujoco.mjv_defaultOption(self.options)
 
+        self.window = None  # 明确初始化window为None
+        self.glfw_initialized = False  # 添加GLFW初始化标志
+        
+        # 确保render_set中包含所需的所有配置
+        if not hasattr(self.config.render_set, "window_title"):
+            self.config.render_set["window_title"] = "DISCOVERSE Simulator"
+        
         if not self.config.headless:
-            self.config.render_set["cv_windowname"] = self.mj_model.names.decode().split("\x00")[0].upper()
+            try:
+                if not glfw.init():
+                    raise RuntimeError("无法初始化GLFW")
+                self.glfw_initialized = True
+                
+                # 设置OpenGL版本和窗口属性
+                glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 2)
+                glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 1)
+                glfw.window_hint(glfw.VISIBLE, True)
+                
+                # 创建窗口，使用默认显示器
+                self.window = glfw.create_window(
+                    self.config.render_set["width"],
+                    self.config.render_set["height"],
+                    self.config.render_set.get("window_title", "DISCOVERSE Simulator"),
+                    None, None
+                )
+                
+                if not self.window:
+                    glfw.terminate()
+                    raise RuntimeError("无法创建GLFW窗口")
+                
+                # 设置当前上下文
+                glfw.make_context_current(self.window)
+                
+                # 初始化OpenGL设置
+                gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+                gl.glShadeModel(gl.GL_SMOOTH)
+                gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1)
+                
+                # 设置回调
+                glfw.set_key_callback(self.window, self.on_key)
+                glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
+                glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
+                
+            except Exception as e:
+                print(f"GLFW初始化失败: {e}")
+                if self.glfw_initialized:
+                    glfw.terminate()
+                self.config.headless = True
+                self.window = None
 
-            self.shm = shared_memory.SharedMemory(create=True, size=(self.config.render_set["height"] * self.config.render_set["width"] * 3) * np.uint8().itemsize)
-            self.img_vis_shared = np.ndarray((self.config.render_set["height"], self.config.render_set["width"], 3), dtype=np.uint8, buffer=self.shm.buf)
-            self.key = Value('i', lock=True)
-            self.mouseParam = Array("i", 4, lock=True)
-
-            self.imshow_process = Process(target=imshow_loop, args=(self.config.render_set, self.shm, self.key, self.mouseParam))
-            self.imshow_process.start()
-
+        # 1. 记录最后一次渲染的时间，用于控制帧率
         self.last_render_time = time.time()
+        # 2. 重置物理引擎的数据到初始状态
         mujoco.mj_resetData(self.mj_model, self.mj_data)
+        # 3. 计算物理状态（位置、速度、加速度等）
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
+    # 加载MJCF模型文件
     def load_mjcf(self):
         if self.mjcf_file.endswith(".xml"):
             self.mj_model = mujoco.MjModel.from_xml_path(self.mjcf_file)
@@ -177,47 +252,115 @@ class SimulatorBase:
         self.post_load_mjcf()
 
     def post_load_mjcf(self):
-        pass
+        self.config.render_set["window_title"] = "DISCOVERSE Simulator"  # 添加默认标题
 
     def __del__(self):
-        if not self.config.headless:
-            self.imshow_process.join()
-            self.shm.close()
-            self.shm.unlink()
+        """清理资源"""
         try:
-            self.renderer.close()
-        except AttributeError as ae:
-            pass
+            # 1. 首先清理渲染器
+            if hasattr(self, 'renderer'):
+                try:
+                    self.renderer.close()
+                except:
+                    pass
+            
+            # 2. 然后清理GLFW资源
+            if hasattr(self, 'window') and self.window is not None:
+                try:
+                    glfw.destroy_window(self.window)
+                except:
+                    pass
+                
+            # 3. 最后终止GLFW
+            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+                try:
+                    glfw.terminate()
+                except:
+                    pass
+                
+        except Exception as e:
+            print(f"清理资源时出错: {e}")
         finally:
             print("SimulatorBase is deleted")
 
-    def cv2MouseCallback(self):
-        event = self.mouseParam[0]
-        x = self.mouseParam[1]
-        y = self.mouseParam[2]
-        flags = self.mouseParam[3]
-
-        self.mouseParam[0] = 0
-        self.mouseParam[3] = 0
-
-        if self.cam_id == -1:
+    def on_mouse_move(self, window, xpos, ypos):
+        """鼠标移动事件处理"""
+        if self.cam_id == -1:  # 只在自由视角模式下处理
+            dx = xpos - self.mouse_pos['x']
+            dy = ypos - self.mouse_pos['y']
+            height = self.config.render_set["height"]
+            
             action = None
-            if flags == cv2.EVENT_FLAG_LBUTTON and event == cv2.EVENT_MOUSEMOVE:
+            # 左键拖动：旋转相机
+            if self.mouse_pressed['left']:
                 action = mujoco.mjtMouse.mjMOUSE_ROTATE_V
-            elif flags == cv2.EVENT_FLAG_RBUTTON and event == cv2.EVENT_MOUSEMOVE:
+            # 右键拖动：移动相机
+            elif self.mouse_pressed['right']:
                 action = mujoco.mjtMouse.mjMOUSE_MOVE_V
-            elif flags == cv2.EVENT_FLAG_MBUTTON and event == cv2.EVENT_MOUSEMOVE:
+            # 中键拖动：缩放相机
+            elif self.mouse_pressed['middle']:
                 action = mujoco.mjtMouse.mjMOUSE_ZOOM
-            if not action is None:
+
+            # 更新相机位置
+            if action is not None:
                 self.camera_pose_changed = True
-                height = self.config.render_set["height"]
-                dx = float(x) - self.mouse_last_x
-                dy = float(y) - self.mouse_last_y
-                mujoco.mjv_moveCamera(self.mj_model, action, dx/height, dy/height, self.renderer.scene, self.free_camera)
-        self.mouse_last_x = float(x)
-        self.mouse_last_y = float(y)
+                mujoco.mjv_moveCamera(
+                    self.mj_model, 
+                    action, 
+                    dx/height, 
+                    dy/height,
+                    self.renderer.scene,
+                    self.free_camera
+                )
+
+        self.mouse_pos['x'] = xpos
+        self.mouse_pos['y'] = ypos
+
+    def on_mouse_button(self, window, button, action, mods):
+        """鼠标按键事件处理"""
+        is_pressed = action == glfw.PRESS
+        
+        # 更新按键状态
+        if button == glfw.MOUSE_BUTTON_LEFT:
+            self.mouse_pressed['left'] = is_pressed
+        elif button == glfw.MOUSE_BUTTON_RIGHT:
+            self.mouse_pressed['right'] = is_pressed
+        elif button == glfw.MOUSE_BUTTON_MIDDLE:
+            self.mouse_pressed['middle'] = is_pressed
+
+    def on_key(self, window, key, scancode, action, mods):
+        """键盘事件处理"""
+        if action == glfw.PRESS:
+            if key == glfw.KEY_ESCAPE:
+                glfw.set_window_should_close(window, True)
+            elif key == glfw.KEY_R:
+                self.reset()
+            elif key == glfw.KEY_H:
+                self.printHelp()
+            elif key == glfw.KEY_P:
+                self.printMessage()
+            elif key == glfw.KEY_G and self.config.use_gaussian_renderer:
+                self.show_gaussian_img = not self.show_gaussian_img
+                self.gs_renderer.renderer.need_rerender = True
+            elif key == glfw.KEY_D:
+                if self.config.use_gaussian_renderer:
+                    self.gs_renderer.renderer.need_rerender = True
+                if self.renderer._depth_rendering:
+                    self.renderer.disable_depth_rendering()
+                else:
+                    self.renderer.enable_depth_rendering()
+            elif key == glfw.KEY_ESCAPE:  # ESC
+                self.cam_id = -1
+                self.camera_pose_changed = True
+            elif key == glfw.KEY_RIGHT_BRACKET and self.mj_model.ncam:  # ]
+                self.cam_id += 1
+                self.cam_id = self.cam_id % self.mj_model.ncam
+            elif key == glfw.KEY_LEFT_BRACKET and self.mj_model.ncam:  # [
+                self.cam_id += self.mj_model.ncam - 1
+                self.cam_id = self.cam_id % self.mj_model.ncam
 
     def update_gs_scene(self):
+        # 更新场景状态
         for name in self.config.obj_list + self.config.rb_link_list:
             trans, quat_wxyz = self.getObjPose(name)
             self.gs_renderer.set_obj_pose(name, trans, quat_wxyz)
@@ -229,6 +372,7 @@ class SimulatorBase:
             self.gs_renderer.renderer.gaussians.rot[self.gs_renderer.renderer.gau_env_idx:] = multiple_quaternions(self.gs_renderer.renderer.gau_rot_all_cu[self.gs_renderer.renderer.gau_env_idx:], self.gs_renderer.renderer.gau_ori_rot_all_cu[self.gs_renderer.renderer.gau_env_idx:])
 
     def getRgbImg(self, cam_id):
+        # 获取RGB图像, 3D场景渲染成2D图像 , 使用高斯渲染器
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
             if cam_id == -1:
                 self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
@@ -238,6 +382,7 @@ class SimulatorBase:
             self.last_cam_id = cam_id
             trans, quat_wxyz = self.getCameraPose(cam_id)
             self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
+            # numpy array uint 8 图像
             return self.gs_renderer.render()
         else:
             if cam_id == -1:
@@ -247,7 +392,7 @@ class SimulatorBase:
             else:
                 return None
             rgb_img = self.renderer.render()
-            return rgb_img
+        return rgb_img
 
     def getDepthImg(self, cam_id):
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
@@ -275,6 +420,13 @@ class SimulatorBase:
             return depth_img
 
     def cv2WindowKeyPressCallback(self, key):
+        # 处理键盘事件
+        # - 'h': 显示帮助
+        # - 'r': 重置状态
+        # - '['/']': 切换相机视角
+        # - 'ESC': 切换到自由视角
+        # - 'g': 切换高斯渲染
+        # - 'd': 切换深度渲染
         if key == -1:
             return True
         elif key == -2:
@@ -350,52 +502,97 @@ class SimulatorBase:
             except KeyError:
                 print("Invalid object name: {}".format(name))
                 return None, None
-
+    # 3. ★在类中，只要调用render，就会把图像渲染到GLFW窗口
     def render(self):
+        # 1. 更新场景，只要调用render，就会更新场景
         self.render_cnt += 1
 
+        # 2. 更新高斯场景
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
-            self.update_gs_scene()
+            self.update_gs_scene() # 更新场景状态
 
+        # 3. 获取RGB图像, 渲染RGB ★② 将三维场景通过相机渲染成2D图像
         self.img_rgb_obs_s = {}
         for id in self.config.obs_rgb_cam_id:
-            img = self.getRgbImg(id)
+            img = self.getRgbImg(id) # 获取RGB图像
             self.img_rgb_obs_s[id] = img
 
+        # 4. 获取深度图像
         self.img_depth_obs_s = {}
         for id in self.config.obs_depth_cam_id:
             img = self.getDepthImg(id)
             self.img_depth_obs_s[id] = img
 
+        # 5. 渲染图像
         if not self.renderer._depth_rendering:
             if self.cam_id in self.config.obs_rgb_cam_id:
-                img_vis = cv2.cvtColor(self.img_rgb_obs_s[self.cam_id], cv2.COLOR_RGB2BGR)
+                img_vis = self.img_rgb_obs_s[self.cam_id]  # 直接复制，不转换颜色通道
             else:
                 img_rgb = self.getRgbImg(self.cam_id)
-                img_vis = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+                img_vis = img_rgb  # 直接复制，不转换颜色通道
         else:
+            # 6. 深度图像处理
             if self.cam_id in self.config.obs_depth_cam_id:
                 img_depth = self.img_depth_obs_s[self.cam_id]
             else:
                 img_depth = self.getDepthImg(self.cam_id)
-            if not img_depth is None:
-                img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+            if img_depth is not None:
+                #img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                # 使用numpy操作替代cv2.applyColorMap
+                normalized = np.clip(img_depth * 25.5, 0, 255).astype(np.uint8)
+                # 使用简单的颜色映射
+                colored = self.depth_to_color(normalized)
+                img_vis = colored
 
-        if not self.config.headless:
-            np.copyto(self.img_vis_shared, img_vis)
+        # 7. 如果非headless模式，图像直接渲染到GLFW窗口
+        if not self.config.headless and self.window is not None:
+            try:
+                # 检查窗口是否应该关闭
+                if glfw.window_should_close(self.window):
+                    self.running = False
+                    return
 
-        if self.config.sync:
-            wait_time_s = max(1./self.render_fps - time.time() + self.last_render_time, 0.0)
-            time.sleep(wait_time_s)
-
-        if not self.config.headless:
-            self.cv2MouseCallback()
-            if not self.cv2WindowKeyPressCallback(self.key.value):
-                self.running = False
-            self.key.value = -1
-
-        self.last_render_time = time.time()
-
+                glfw.make_context_current(self.window)
+                # 1. 清除缓冲区
+                gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+                
+                # 2. 设置正确的视口
+                gl.glViewport(0, 0, self.config.render_set["width"], 
+                             self.config.render_set["height"])
+                
+                # 3. 设置正确的光栅化位置
+                gl.glRasterPos2i(-1, -1)
+                if img_vis is not None:
+                    # 将图像转换为opengl坐标，便于可视化
+                    img_vis = img_vis[::-1]
+                    # 确保数据连续性
+                    img_vis = np.ascontiguousarray(img_vis)
+                    # 绘制图像
+                    gl.glDrawPixels(
+                        img_vis.shape[1],
+                        img_vis.shape[0],
+                        gl.GL_RGB,
+                        gl.GL_UNSIGNED_BYTE,
+                        img_vis.tobytes()
+                    )
+                
+                # 6. 交换缓冲区并处理事件 (移动到这里)
+                glfw.swap_buffers(self.window)
+                
+                # 7. 处理所有待处理的事件
+                glfw.poll_events()
+                
+                # 8. 如果需要同步，控制帧率
+                if self.config.sync:
+                    current_time = time.time()
+                    wait_time = max(1.0/self.render_fps - (current_time - self.last_render_time), 0)
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                    self.last_render_time = time.time()
+                
+            except Exception as e:
+                print(f"渲染错误: {e}")
+                
     # ------------------------------------------------------------------------------
     # ---------------------------------- Override ----------------------------------
     def reset(self):
@@ -407,6 +604,7 @@ class SimulatorBase:
     def updateControl(self, action):
         pass
 
+    # 包含了一些需要子类实现的抽象方法
     @abstractmethod
     def post_physics_step(self):
         pass
@@ -434,23 +632,31 @@ class SimulatorBase:
     # ---------------------------------- Override ----------------------------------
     # ------------------------------------------------------------------------------
 
-    def step(self, action=None):
-        for _ in range(self.decimation):
-            self.updateControl(action)
-            mujoco.mj_step(self.mj_model, self.mj_data)
+    def step(self, action=None): # 主要的仿真步进函数
+        # 1. 执行多步物理仿真
+        for _ in range(self.decimation): # decimation是每次step执行的物理仿真次数
+            self.updateControl(action) # 更新控制输入,如机器人关节力矩
+            mujoco.mj_step(self.mj_model, self.mj_data) #★①物理引擎计算出场景状态
 
-        if self.checkTerminated():
+        # 2. 检查是否终止
+        if self.checkTerminated(): # 检查是否终止
             self.resetState()
         
-        self.post_physics_step()
-        if self.render_cnt-1 < self.mj_data.time * self.render_fps:
-            self.render()
+        # 3. 执行后处理,更新渲染
+        self.post_physics_step() # 执行后处理
+        if self.render_cnt-1 < self.mj_data.time * self.render_fps: # 如果需要渲染
+            self.render() # ★②调用render函数，将图像渲染并保存到共享内存
 
+        # 4. 返回观测、私有观测、奖励、终止状态、其他信息
         return self.getObservation(), self.getPrivilegedObservation(), self.getReward(), self.checkTerminated(), {}
 
     def view(self):
+        # 1. 更新时间
         self.mj_data.time += self.delta_t
+        # 2. 设置速度为0
         self.mj_data.qvel[:] = 0
+        # 3. 执行物理仿真
         mujoco.mj_forward(self.mj_model, self.mj_data)
+        # 4. 如果需要渲染，渲染图像
         if self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
