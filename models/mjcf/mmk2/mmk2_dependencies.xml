@@ -8,7 +8,7 @@
     </default> -->
 
     <default class='slide_joint'>
-      <joint range='-0.04 0.87' type='slide' axis='0 0 -1' frictionloss="1000" damping="100" actuatorfrcrange="-1300 1000"/>
+      <joint range='-0.04 0.87' type='slide' axis='0 0 -1' frictionloss="1000" damping="100" actuatorfrcrange="-1600 1000"/>
       <position ctrlrange='-0.04 0.87' kp='50000'/>
     </default>
     <default class='head_yaw_joint'>
