@@ -14,8 +14,12 @@ from discoverse import DISCOVERSE_ASSERT_DIR
 class MMK2JOY(MMK2Base):
     arm_action_init_position = {
         "pick" : {
-            "l" : np.array([0.223,  0.21, 1.07055]),
-            "r" : np.array([0.223, -0.21, 1.07055]),
+            "l" : np.array([0.254,  0.216,  1.069]),
+            "r" : np.array([0.254, -0.216,  1.069]),
+        },
+        "carry" : {
+            "l" : np.array([0.254,  0.216,  1.069]),
+            "r" : np.array([0.254, -0.216,  1.069]),
         },
     }
 
@@ -73,7 +77,7 @@ class MMK2JOY(MMK2Base):
             except ValueError:
                 print("Invalid left arm target position:", tmp_lft_arm_target_pose)
 
-        elif self.teleop.joy_cmd.buttons[5]: # right arm
+        if self.teleop.joy_cmd.buttons[5]: # right arm
             tmp_rgt_arm_target_pose = self.rgt_arm_target_pose.copy()
             tmp_rgt_arm_target_pose[0] += self.teleop.joy_cmd.axes[7] * 0.1 / self.render_fps
             tmp_rgt_arm_target_pose[1] += self.teleop.joy_cmd.axes[6] * 0.1 / self.render_fps
@@ -83,9 +87,9 @@ class MMK2JOY(MMK2Base):
             self.tctr_rgt_gripper[0] += delta_gripper
             self.tctr_rgt_gripper[0] = np.clip(self.tctr_rgt_gripper[0], 0, 1)
             el = self.rgt_end_euler.copy()
-            el[0] += self.teleop.joy_cmd.axes[4] * 0.35 / self.render_fps
+            el[0] -= self.teleop.joy_cmd.axes[4] * 0.35 / self.render_fps
             el[1] += self.teleop.joy_cmd.axes[3] * 0.35 / self.render_fps
-            el[2] += self.teleop.joy_cmd.axes[0] * 0.35 / self.render_fps
+            el[2] -= self.teleop.joy_cmd.axes[0] * 0.35 / self.render_fps
             try:
                 self.tctr_right_arm[:] = MMK2FIK().get_armjoint_pose_wrt_footprint(tmp_rgt_arm_target_pose, self.arm_action, "r", self.tctr_slide[0], self.tctr_right_arm, Rotation.from_euler('zyx', el).as_matrix())
                 self.rgt_arm_target_pose[:] = tmp_rgt_arm_target_pose
@@ -93,7 +97,7 @@ class MMK2JOY(MMK2Base):
             except ValueError:
                 print("Invalid right arm target position:", tmp_rgt_arm_target_pose)
 
-        else:
+        if (not self.teleop.joy_cmd.buttons[4]) and (not self.teleop.joy_cmd.buttons[5]):
             delta_height = (self.teleop.joy_cmd.axes[2] - self.teleop.joy_cmd.axes[5]) * 0.1 / self.render_fps
             if self.tctr_slide[0] + delta_height< self.mj_model.joint("slide_joint").range[0]:
                 delta_height = self.mj_model.joint("slide_joint").range[0] - self.tctr_slide[0]

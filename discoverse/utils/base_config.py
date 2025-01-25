@@ -16,4 +16,4 @@ class BaseConfig:
     obj_list       = []
     gs_model_dict  = {}
     use_gaussian_renderer = False
-    
+    enable_render = True

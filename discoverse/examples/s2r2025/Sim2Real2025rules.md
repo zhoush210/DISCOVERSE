@@ -84,7 +84,6 @@ There are four categories of ONPs listed in Table 1.
 <center>
     Figure 4. The illustration of boxes
 </center>
-
 **Props**: there are three types of props:
 
 1. Sheet (dimensions: 0.08 × 0.06 × 0.0025),

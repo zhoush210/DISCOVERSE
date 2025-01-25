@@ -97,50 +97,51 @@ class SimulatorBase:
         else:
             print("\033[0;31;40mFailed to load mjcf: {}\033[0m".format(self.mjcf_file))
             raise FileNotFoundError("Failed to load mjcf: {}".format(self.mjcf_file))
-        self.free_camera = mujoco.MjvCamera()
-        self.free_camera.fixedcamid = -1
-        self.free_camera.type = mujoco._enums.mjtCamera.mjCAMERA_FREE
-
         self.load_mjcf()
-        mujoco.mjv_defaultFreeCamera(self.mj_model, self.free_camera)
-
-        self.config.use_gaussian_renderer = self.config.use_gaussian_renderer and DISCOVERSE_GAUSSIAN_RENDERER
-        if self.config.use_gaussian_renderer:
-            self.gs_renderer = GSRenderer(self.config.gs_model_dict, self.config.render_set["width"], self.config.render_set["height"])
-            self.last_cam_id = self.cam_id
-            self.show_gaussian_img = True
-            if self.cam_id == -1:
-                self.gs_renderer.set_camera_fovy(self.mj_model.vis.global_.fovy * np.pi / 180.)
-            else:
-                self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[self.cam_id] * np.pi / 180.0)
-
         self.decimation = self.config.decimation
         self.delta_t = self.mj_model.opt.timestep * self.decimation
-        self.render_fps = self.config.render_set["fps"]
 
-        if self.config.use_gaussian_renderer:
-            obj_names_check = True
-            obj_names = self.mj_model.names.decode().split("\x00")
-            for name in self.config.rb_link_list + self.config.obj_list:
-                if not name in obj_names:
-                    print(f"\033[0;31;40mInvalid object name: {name}\033[0m")
-                    obj_names_check = False
-            assert obj_names_check, "ERROR: Invalid object name"
+        if self.config.enable_render:
+            self.free_camera = mujoco.MjvCamera()
+            self.free_camera.fixedcamid = -1
+            self.free_camera.type = mujoco._enums.mjtCamera.mjCAMERA_FREE
+            mujoco.mjv_defaultFreeCamera(self.mj_model, self.free_camera)
 
-        mujoco.mjv_defaultOption(self.options)
+            self.config.use_gaussian_renderer = self.config.use_gaussian_renderer and DISCOVERSE_GAUSSIAN_RENDERER
+            if self.config.use_gaussian_renderer:
+                self.gs_renderer = GSRenderer(self.config.gs_model_dict, self.config.render_set["width"], self.config.render_set["height"])
+                self.last_cam_id = self.cam_id
+                self.show_gaussian_img = True
+                if self.cam_id == -1:
+                    self.gs_renderer.set_camera_fovy(self.mj_model.vis.global_.fovy * np.pi / 180.)
+                else:
+                    self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[self.cam_id] * np.pi / 180.0)
 
-        if not self.config.headless:
-            self.config.render_set["cv_windowname"] = self.mj_model.names.decode().split("\x00")[0].upper()
+            self.render_fps = self.config.render_set["fps"]
+            if self.config.use_gaussian_renderer:
+                obj_names_check = True
+                obj_names = self.mj_model.names.decode().split("\x00")
+                for name in self.config.rb_link_list + self.config.obj_list:
+                    if not name in obj_names:
+                        print(f"\033[0;31;40mInvalid object name: {name}\033[0m")
+                        obj_names_check = False
+                assert obj_names_check, "ERROR: Invalid object name"
 
-            self.shm = shared_memory.SharedMemory(create=True, size=(self.config.render_set["height"] * self.config.render_set["width"] * 3) * np.uint8().itemsize)
-            self.img_vis_shared = np.ndarray((self.config.render_set["height"], self.config.render_set["width"], 3), dtype=np.uint8, buffer=self.shm.buf)
-            self.key = Value('i', lock=True)
-            self.mouseParam = Array("i", 4, lock=True)
+            mujoco.mjv_defaultOption(self.options)
 
-            self.imshow_process = Process(target=imshow_loop, args=(self.config.render_set, self.shm, self.key, self.mouseParam))
-            self.imshow_process.start()
+            if not self.config.headless:
+                self.config.render_set["cv_windowname"] = self.mj_model.names.decode().split("\x00")[0].upper()
 
-        self.last_render_time = time.time()
+                self.shm = shared_memory.SharedMemory(create=True, size=(self.config.render_set["height"] * self.config.render_set["width"] * 3) * np.uint8().itemsize)
+                self.img_vis_shared = np.ndarray((self.config.render_set["height"], self.config.render_set["width"], 3), dtype=np.uint8, buffer=self.shm.buf)
+                self.key = Value('i', lock=True)
+                self.mouseParam = Array("i", 4, lock=True)
+
+                self.imshow_process = Process(target=imshow_loop, args=(self.config.render_set, self.shm, self.key, self.mouseParam))
+                self.imshow_process.start()
+
+            self.last_render_time = time.time()
+
         mujoco.mj_resetData(self.mj_model, self.mj_data)
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
@@ -151,28 +152,29 @@ class SimulatorBase:
             self.mj_model = mujoco.MjModel.from_binary_path(self.mjcf_file)
         self.mj_model.opt.timestep = self.config.timestep
         self.mj_data = mujoco.MjData(self.mj_model)
-        for i in range(self.mj_model.ncam):
-            self.camera_names.append(self.mj_model.camera(i).name)
+        if self.config.enable_render:
+            for i in range(self.mj_model.ncam):
+                self.camera_names.append(self.mj_model.camera(i).name)
 
-        if type(self.config.obs_rgb_cam_id) is int:
-            assert -2 < self.config.obs_rgb_cam_id < len(self.camera_names), "Invalid obs_rgb_cam_id {}".format(self.config.obs_rgb_cam_id)
-            tmp_id = self.config.obs_rgb_cam_id
-            self.config.obs_rgb_cam_id = [tmp_id]
-        elif type(self.config.obs_rgb_cam_id) is list:
-            for cam_id in self.config.obs_rgb_cam_id:
-                assert -2 < cam_id < len(self.camera_names), "Invalid obs_rgb_cam_id {}".format(cam_id)
-        elif self.config.obs_rgb_cam_id is None:
-            self.config.obs_rgb_cam_id = []
-        
-        if type(self.config.obs_depth_cam_id) is int:
-            assert -2 < self.config.obs_depth_cam_id < len(self.camera_names), "Invalid obs_depth_cam_id {}".format(self.config.obs_depth_cam_id)
-        elif type(self.config.obs_depth_cam_id) is list:
-            for cam_id in self.config.obs_depth_cam_id:
-                assert -2 < cam_id < len(self.camera_names), "Invalid obs_depth_cam_id {}".format(cam_id)
-        elif self.config.obs_depth_cam_id is None:
-            self.config.obs_depth_cam_id = []
+            if type(self.config.obs_rgb_cam_id) is int:
+                assert -2 < self.config.obs_rgb_cam_id < len(self.camera_names), "Invalid obs_rgb_cam_id {}".format(self.config.obs_rgb_cam_id)
+                tmp_id = self.config.obs_rgb_cam_id
+                self.config.obs_rgb_cam_id = [tmp_id]
+            elif type(self.config.obs_rgb_cam_id) is list:
+                for cam_id in self.config.obs_rgb_cam_id:
+                    assert -2 < cam_id < len(self.camera_names), "Invalid obs_rgb_cam_id {}".format(cam_id)
+            elif self.config.obs_rgb_cam_id is None:
+                self.config.obs_rgb_cam_id = []
+            
+            if type(self.config.obs_depth_cam_id) is int:
+                assert -2 < self.config.obs_depth_cam_id < len(self.camera_names), "Invalid obs_depth_cam_id {}".format(self.config.obs_depth_cam_id)
+            elif type(self.config.obs_depth_cam_id) is list:
+                for cam_id in self.config.obs_depth_cam_id:
+                    assert -2 < cam_id < len(self.camera_names), "Invalid obs_depth_cam_id {}".format(cam_id)
+            elif self.config.obs_depth_cam_id is None:
+                self.config.obs_depth_cam_id = []
 
-        self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
+            self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
 
         self.post_load_mjcf()
 
@@ -180,7 +182,7 @@ class SimulatorBase:
         pass
 
     def __del__(self):
-        if not self.config.headless:
+        if self.config.enable_render and not self.config.headless:
             self.imshow_process.join()
             self.shm.close()
             self.shm.unlink()
@@ -279,7 +281,9 @@ class SimulatorBase:
             return True
         elif key == -2:
             return False
-        elif key == ord('h'):
+        if not self.config.enable_render:
+            key = ord(chr(key).lower())
+        if key == ord('h'):
             self.printHelp()
         elif key == ord("p"):
             self.printMessage()
@@ -289,10 +293,10 @@ class SimulatorBase:
             self.renderer.close()
             self.load_mjcf()
             self.reset()
-        elif key == ord('g') and self.config.use_gaussian_renderer:
+        elif key == ord('g') and self.config.use_gaussian_renderer and self.config.enable_render:
             self.show_gaussian_img = not self.show_gaussian_img
             self.gs_renderer.renderer.need_rerender = True
-        elif key == ord('d'):
+        elif key == ord('d') and self.config.enable_render:
             if self.config.use_gaussian_renderer:
                 self.gs_renderer.renderer.need_rerender = True
             if self.renderer._depth_rendering:
@@ -302,10 +306,10 @@ class SimulatorBase:
         elif key == 27: # "ESC"
             self.cam_id = -1
             self.camera_pose_changed = True
-        elif key == ord(']') and self.mj_model.ncam:
+        elif key == ord(']') and self.mj_model.ncam and self.config.enable_render:
             self.cam_id += 1
             self.cam_id = self.cam_id % self.mj_model.ncam
-        elif key == ord('[') and self.mj_model.ncam:
+        elif key == ord('[') and self.mj_model.ncam and self.config.enable_render:
             self.cam_id += self.mj_model.ncam - 1
             self.cam_id = self.cam_id % self.mj_model.ncam
         return True
@@ -352,6 +356,9 @@ class SimulatorBase:
                 return None, None
 
     def render(self):
+        if not self.config.enable_render:
+            return
+
         self.render_cnt += 1
 
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
@@ -443,7 +450,7 @@ class SimulatorBase:
             self.resetState()
         
         self.post_physics_step()
-        if self.render_cnt-1 < self.mj_data.time * self.render_fps:
+        if self.config.enable_render and self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
 
         return self.getObservation(), self.getPrivilegedObservation(), self.getReward(), self.checkTerminated(), {}

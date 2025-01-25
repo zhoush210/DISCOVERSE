@@ -23,3 +23,26 @@ class PIDController:
         self.error_sum = np.clip(self.error_sum, -self.integrator_max, self.integrator_max)
         out = self.kp * error + self.ki * self.error_sum + self.kd * d_error
         return np.clip(out, -self.output_max, self.output_max)
+
+class PIDarray:
+    def __init__(self, kps, kis, kds, integrator_maxs=None):
+        assert len(kps) == len(kis) == len(kds), "kps, kis, kds must have the same length"
+        self.kps = kps
+        self.kis = kis
+        self.kds = kds
+        self.integrator_maxs = integrator_maxs
+        self.error_sums = np.zeros_like(kps)
+        self.last_errors = np.zeros_like(kps)
+    
+    def output(self, errors, dt=1.0):
+        self.error_sums += errors * dt
+        if not self.integrator_maxs is None:
+            self.error_sums = np.clip(self.error_sums, -self.integrator_maxs, self.integrator_maxs)
+        error_diffs = (errors - self.last_errors) / dt
+        outs = self.kps * errors + self.kis * self.error_sums + self.kds * error_diffs
+        self.last_errors = errors
+        return outs
+
+    def reset(self):
+        self.error_sums = np.zeros_like(self.kps)
+        self.last_errors = np.zeros_like(self.kps)
