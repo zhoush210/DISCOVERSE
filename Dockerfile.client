@@ -1,0 +1,82 @@
+# 使用Ubuntu 22.04作为基础镜像
+FROM ubuntu:22.04
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONPATH=/workspace
+
+# 安装基本系统依赖
+RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y \
+    curl \
+    gnupg2 \
+    lsb-release \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 添加ROS 2 apt源
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://mirrors.tuna.tsinghua.edu.cn/ros2/ubuntu jammy main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# 安装ROS 2 Humble
+RUN apt-get update && apt-get install -y \
+    ros-humble-desktop \
+    ros-dev-tools \
+    python3-colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置ROS环境
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
+
+# 创建工作目录
+WORKDIR /workspace
+
+# 安装Python依赖
+RUN python3 -m pip install --no-cache-dir \
+    numpy \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 创建版本检查脚本
+COPY <<'EOF' /usr/local/bin/check-versions
+#!/bin/bash
+echo "=== System Environment Check ==="
+echo "Python Version:"
+python3 --version
+echo -e "\n=== ROS 2 Version Check ==="
+source /opt/ros/humble/setup.bash
+ros2 --version
+echo -e "\n=== Python Package Version Check ==="
+python3 -c "import numpy; print(f'Numpy Version: {numpy.__version__}')"
+EOF
+
+RUN chmod +x /usr/local/bin/check-versions
+
+# 健康检查
+HEALTHCHECK CMD python3 -c "import numpy, rclpy; print('All dependencies installed successfully')" 
+
+# # 构建client镜像
+# docker build -t discoverse-client -f Dockerfile.client .
+
+# # 运行client容器
+# docker run -it --rm \
+#     --network=host \
+#     -e ROS_DOMAIN_ID=0 \
+#     -e ROS_LOCALHOST_ONLY=0 \
+#     -v $(pwd):/workspace \
+#     discoverse-client bash
+
+# client容器中发布通信测试
+# source /opt/ros/humble/setup.bash
+# ros2 topic pub /test2 std_msgs/msg/String "data: 'hello from client'"
+
+# 查看所有活动的topics
+# ros2 topic list
+
+# 查看详细信息
+# ros2 topic info /test1
+# ros2 topic info /test2
+
+# 查看topic类型
+# ros2 interface show std_msgs/msg/String
