@@ -4,12 +4,13 @@ import traceback
 from abc import abstractmethod
 from multiprocessing import Process, shared_memory, Value, Array
 
-# import cv2
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 import glfw
 import OpenGL.GL as gl
+import ctypes
+import cv2
 
 from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import BaseConfig
@@ -35,52 +36,7 @@ def setRenderOptions(options):
     options.frame = mujoco.mjtFrame.mjFRAME_BODY.value
     pass
 
-# 使用独立进程imshow_loop 显示图像
-# 通过共享内存在主进程和显示进程间传递图像数据
-# 通过共享内存和键盘事件，实现鼠标和键盘的交互
-# def imshow_loop(render_cfg, shm, key, mouseParam):
-#     # 1. 创建OpenCV窗口
-#     # 鼠标回调函数，记录鼠标事件和位置
-#     def mouseCallback(event, x, y, flags, param):
-#         mouseParam[0] = event
-#         mouseParam[1] = x
-#         mouseParam[2] = y
-#         mouseParam[3] = flags
-
-#     cv_windowname = render_cfg["cv_windowname"]
-#     # 原代码：在子进程当中创建OpenCV窗口，交互式窗口
-#     # cv2.namedWindow(cv_windowname, cv2.WINDOW_GUI_NORMAL)
-#     # cv2.resizeWindow(cv_windowname, render_cfg["width"], render_cfg["height"])
-#     # cv2.setMouseCallback(cv_windowname, mouseCallback)
-#     #创建了数据缓存区，既可以被mshow_loop也可以被主循环使用。多线程调用。
-#     # 原代码：从共享内存读取图像
-#     #img_vis_shared = np.ndarray((render_cfg["height"], render_cfg["width"], 3), dtype=np.uint8, buffer=shm.buf)
-
-#     set_fps = min(render_cfg["fps"], 60.)
-#     time_delay = 1./set_fps
-#     time_delay_ms = int(time_delay * 1e3 - 1.0)
-#     # 3. 控制显示帧率, 显示循环
-#     while cv2.getWindowProperty(cv_windowname, cv2.WND_PROP_VISIBLE):
-#         t0 = time.time()
-#         #第二步瓶颈：显示延迟，OpenCV将numpy图像显示在窗口里 5-10ms,★可能后续需要更换显示器
-#         #opengl+c cuda torch 同时兼容cuda .cuXXX  为了适配mujoco opencv
-#         #原代码： 共享内存中的图像显示在窗口中
-#         #cv2.imshow(cv_windowname, img_vis_shared)
-#         #记录键盘操作 返回值。
-#         key.value = cv2.waitKey(time_delay_ms)
-#         t1 = time.time()
-#         time.sleep(max(time_delay - (t1-t0), 0.0))
-#     key.value = -2
-#     # 4. 销毁窗口，释放共享内存
-#     cv2.destroyAllWindows()
-#     print("imshow_loop is terminated")
-
-#     time.sleep(0.1)
-#     shm.close()
-#     shm.unlink()
-#     shm = None
-
-# 模拟器基类,其它文件继承这个类，使用这个类的方法，主进程。
+#主进程
 class SimulatorBase:
     # 核心属性
     running = True
@@ -112,8 +68,8 @@ class SimulatorBase:
     # Mujoco选项
     options = mujoco.MjvOption()
 
+    # 初始化
     def __init__(self, config:BaseConfig):
-        # 1. 加载配置
         self.config = config
 
         if self.config.mjcf_file_path.startswith("/"):
@@ -175,11 +131,12 @@ class SimulatorBase:
                 self.glfw_initialized = True
                 
                 # 设置OpenGL版本和窗口属性
-                glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 2)
-                glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 1)
+                glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)  # 改为OpenGL 3.3
+                glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+                glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
                 glfw.window_hint(glfw.VISIBLE, True)
                 
-                # 创建窗口，使用默认显示器
+                # 创建窗口
                 self.window = glfw.create_window(
                     self.config.render_set["width"],
                     self.config.render_set["height"],
@@ -191,17 +148,89 @@ class SimulatorBase:
                     glfw.terminate()
                     raise RuntimeError("无法创建GLFW窗口")
                 
-                # 设置当前上下文
                 glfw.make_context_current(self.window)
                 
-                # 初始化OpenGL设置
-                gl.glClearColor(0.0, 0.0, 0.0, 1.0)
-                gl.glShadeModel(gl.GL_SMOOTH)
-                gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1)
+                # 初始化纹理
+                self.texture_id = gl.glGenTextures(1)
+                gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_id)
+                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE)
+                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE)
                 
+                # 创建和配置VAO、VBO
+                self.vao = gl.glGenVertexArrays(1)
+                self.vbo = gl.glGenBuffers(1)
+                
+                # 定义顶点数据（包含位置和纹理坐标）
+                vertices = np.array([
+                    # positions        # texture coords
+                    -1.0, -1.0, 0.0,  0.0, 1.0,  # 左下
+                     1.0, -1.0, 0.0,  1.0, 1.0,  # 右下
+                     1.0,  1.0, 0.0,  1.0, 0.0,  # 右上
+                    -1.0,  1.0, 0.0,  0.0, 0.0   # 左上
+                ], dtype=np.float32)
+                
+                gl.glBindVertexArray(self.vao)
+                gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
+                gl.glBufferData(gl.GL_ARRAY_BUFFER, vertices.nbytes, vertices, gl.GL_STATIC_DRAW)
+                
+                # 设置顶点属性
+                # 位置属性
+                gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 5 * vertices.itemsize, None)
+                gl.glEnableVertexAttribArray(0)
+                # 纹理坐标属性
+                gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, gl.GL_FALSE, 5 * vertices.itemsize, 
+                                       ctypes.c_void_p(3 * vertices.itemsize))
+                gl.glEnableVertexAttribArray(1)
+                
+                # 初始化PBO
+                self.pbo_ids = gl.glGenBuffers(2)  # 创建两个PBO
+                self.current_pbo_index = 0
+                
+                # 初始化PBO缓冲区
+                buffer_size = self.config.render_set["width"] * self.config.render_set["height"] * 3
+                for i in range(2):
+                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[i])
+                    gl.glBufferData(gl.GL_PIXEL_UNPACK_BUFFER, buffer_size, None, gl.GL_STREAM_DRAW)
+                
+                # 解绑PBO
+                gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
+                
+                # 简化的顶点着色器保持不变
+                vertex_shader = """
+                #version 330 core
+                layout (location = 0) in vec3 position;
+                layout (location = 1) in vec2 texCoord;
+                out vec2 TexCoord;
+                
+                void main() {
+                    gl_Position = vec4(position, 1.0);
+                    TexCoord = texCoord;
+                }
+                """
+                
+                # 简化的片段着色器，直接输出纹理颜色
+                fragment_shader = """
+                #version 330 core
+                in vec2 TexCoord;
+                out vec4 FragColor;
+                uniform sampler2D screenTexture;
+                
+                void main() {
+                    FragColor = texture(screenTexture, TexCoord);
+                }
+                """
+                
+                # 编译着色器
+                self.shader_program = self.create_shader_program(vertex_shader, fragment_shader)
+            
                 # 设置回调
+                # 设置键盘回调
                 glfw.set_key_callback(self.window, self.on_key)
+                # 设置鼠标移动回调
                 glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
+                # 设置鼠标按键回调
                 glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
                 
             except Exception as e:
@@ -251,38 +280,159 @@ class SimulatorBase:
 
         self.post_load_mjcf()
 
+    # 加载MJCF模型文件后，设置窗口标题
     def post_load_mjcf(self):
         self.config.render_set["window_title"] = "DISCOVERSE Simulator"  # 添加默认标题
 
-    def __del__(self):
-        """清理资源"""
-        try:
-            # 1. 首先清理渲染器
-            if hasattr(self, 'renderer'):
-                try:
-                    self.renderer.close()
-                except:
-                    pass
+    # 3. ★在类中，只要调用render，就会把图像渲染到GLFW窗口
+    def render(self):
+        # 1. 更新高斯场景
+        if self.config.use_gaussian_renderer and self.show_gaussian_img:
+            self.update_gs_scene()
+        
+        # 2. 获取RGB图像
+        self.img_rgb_obs_s = {}
+        for id in self.config.obs_rgb_cam_id:
+            img = self.getRgbImg(id)
+            self.img_rgb_obs_s[id] = img
+        
+        # 3. 获取深度图像
+        self.img_depth_obs_s = {}
+        for id in self.config.obs_depth_cam_id:
+            img = self.getDepthImg(id)
+            self.img_depth_obs_s[id] = img
+        
+        # 4. 准备渲染图像
+        if not self.renderer._depth_rendering:
+            if self.cam_id in self.config.obs_rgb_cam_id:
+                img_vis = self.img_rgb_obs_s[self.cam_id]
+            else:
+                img_rgb = self.getRgbImg(self.cam_id)
+                img_vis = img_rgb
+        else:
+            if self.cam_id in self.config.obs_depth_cam_id:
+                img_depth = self.img_depth_obs_s[self.cam_id]
+            else:
+                img_depth = self.getDepthImg(self.cam_id)
             
-            # 2. 然后清理GLFW资源
-            if hasattr(self, 'window') and self.window is not None:
-                try:
-                    glfw.destroy_window(self.window)
-                except:
-                    pass
-                
-            # 3. 最后终止GLFW
-            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
-                try:
-                    glfw.terminate()
-                except:
-                    pass
-                
-        except Exception as e:
-            print(f"清理资源时出错: {e}")
-        finally:
-            print("SimulatorBase is deleted")
+            if img_depth is not None:
+                #测试下来，还是cv2更快
+                img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+            else:
+                img_vis = None
 
+        # 5. GLFW渲染
+        if not self.config.headless and self.window is not None:
+            try:
+                if glfw.window_should_close(self.window):
+                    self.running = False
+                    return
+                    
+                glfw.make_context_current(self.window)
+                gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+                
+                if img_vis is not None:
+                    # 确保图像数据连续
+                    img_vis = np.ascontiguousarray(img_vis)
+                    
+                    # 使用PBO更新纹理
+                    next_pbo_index = (self.current_pbo_index + 1) % 2
+                    
+                    # 绑定下一个PBO用于更新数据
+                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[next_pbo_index])
+                    gl.glBufferSubData(gl.GL_PIXEL_UNPACK_BUFFER, 0, img_vis.nbytes, img_vis)
+                    
+                    # 使用当前PBO更新纹理
+                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[self.current_pbo_index])
+                    gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_id)
+                    gl.glTexImage2D(
+                        gl.GL_TEXTURE_2D, 0, gl.GL_RGB,
+                        img_vis.shape[1], img_vis.shape[0],
+                        0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE,
+                        None  # 使用当前绑定的PBO
+                    )
+                    
+                    # 切换PBO索引
+                    self.current_pbo_index = next_pbo_index
+                    
+                    # 使用着色器程序
+                    gl.glUseProgram(self.shader_program)
+                    
+                    # 绘制四边形
+                    gl.glBindVertexArray(self.vao)
+                    gl.glDrawArrays(gl.GL_TRIANGLE_FAN, 0, 4)
+                    
+                    # 解绑PBO
+                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
+                
+                # 交换缓冲区并处理事件
+                glfw.swap_buffers(self.window)
+                glfw.poll_events()
+                
+                # 帧率控制
+                if self.config.sync:
+                    current_time = time.time()
+                    wait_time = max(1.0/self.render_fps - (current_time - self.last_render_time), 0)
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                    self.last_render_time = time.time()
+                    
+            except Exception as e:
+                print(f"渲染错误: {e}")
+
+    # 基于mujoco与高斯渲染器获取RGB图像，按G切换
+    def getRgbImg(self, cam_id):
+        # 获取RGB图像, 3D场景渲染成2D图像
+        if self.config.use_gaussian_renderer and self.show_gaussian_img:
+            # 1.使用高斯渲染器
+            if cam_id == -1:
+                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
+                self.gs_renderer.set_camera_fovy(self.mj_model.vis.global_.fovy * np.pi / 180.0)
+            if self.last_cam_id != cam_id and cam_id > -1:
+                self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[cam_id] * np.pi / 180.0)
+            self.last_cam_id = cam_id
+            trans, quat_wxyz = self.getCameraPose(cam_id)
+            self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
+            # torch.Tensor: RGB图像 (H,W,3) 或深度图 (H,W,1)，保持在GPU上
+            return self.gs_renderer.render()
+        else:
+            if cam_id == -1:
+                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
+            elif cam_id > -1:
+                self.renderer.update_scene(self.mj_data, self.camera_names[cam_id], self.options)
+            else:
+                return None
+            # 2. 使用mujoco渲染器
+            rgb_img = self.renderer.render()
+            # 返回numpy array uint 8 图像
+            return rgb_img
+
+    # 基于mujoco与高斯渲染器获取深度图像，按D切换
+    def getDepthImg(self, cam_id):
+        if self.config.use_gaussian_renderer and self.show_gaussian_img:
+            if cam_id == -1:
+                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
+            if self.last_cam_id != cam_id:
+                if cam_id == -1:
+                    self.gs_renderer.set_camera_fovy(np.pi * 0.25)
+                elif cam_id > -1:
+                    self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[cam_id] * np.pi / 180.0)
+                else:
+                    return None
+            self.last_cam_id = cam_id
+            trans, quat_wxyz = self.getCameraPose(cam_id)
+            self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
+            return self.gs_renderer.render(render_depth=True)
+        else:
+            if cam_id == -1:
+                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
+            elif cam_id > -1:
+                self.renderer.update_scene(self.mj_data, self.camera_names[cam_id], self.options)
+            else:
+                return None
+            depth_img = self.renderer.render()
+            return depth_img
+        
     def on_mouse_move(self, window, xpos, ypos):
         """鼠标移动事件处理"""
         if self.cam_id == -1:  # 只在自由视角模式下处理
@@ -329,35 +479,105 @@ class SimulatorBase:
             self.mouse_pressed['middle'] = is_pressed
 
     def on_key(self, window, key, scancode, action, mods):
-        """键盘事件处理"""
-        if action == glfw.PRESS:
-            if key == glfw.KEY_ESCAPE:
-                glfw.set_window_should_close(window, True)
-            elif key == glfw.KEY_R:
-                self.reset()
-            elif key == glfw.KEY_H:
-                self.printHelp()
-            elif key == glfw.KEY_P:
-                self.printMessage()
-            elif key == glfw.KEY_G and self.config.use_gaussian_renderer:
-                self.show_gaussian_img = not self.show_gaussian_img
-                self.gs_renderer.renderer.need_rerender = True
-            elif key == glfw.KEY_D:
-                if self.config.use_gaussian_renderer:
-                    self.gs_renderer.renderer.need_rerender = True
-                if self.renderer._depth_rendering:
-                    self.renderer.disable_depth_rendering()
-                else:
-                    self.renderer.enable_depth_rendering()
-            elif key == glfw.KEY_ESCAPE:  # ESC
-                self.cam_id = -1
-                self.camera_pose_changed = True
-            elif key == glfw.KEY_RIGHT_BRACKET and self.mj_model.ncam:  # ]
-                self.cam_id += 1
-                self.cam_id = self.cam_id % self.mj_model.ncam
-            elif key == glfw.KEY_LEFT_BRACKET and self.mj_model.ncam:  # [
-                self.cam_id += self.mj_model.ncam - 1
-                self.cam_id = self.cam_id % self.mj_model.ncam
+        """GLFW键盘回调函数"""
+        if action == glfw.PRESS:  # 只在按下时触发，避免持续触发
+            # 检查是否按下Ctrl键
+            is_ctrl_pressed = (mods & glfw.MOD_CONTROL)
+            
+            # 处理组合键
+            if is_ctrl_pressed:
+                if key == glfw.KEY_G:  # Ctrl + G
+                    print("我想切换高斯模式")
+                    if self.config.use_gaussian_renderer:
+                        self.show_gaussian_img = not self.show_gaussian_img
+                        self.gs_renderer.renderer.need_rerender = True
+                        
+                elif key == glfw.KEY_D:  # Ctrl + D
+                    print("我想切换深度图模式")
+                    if self.config.use_gaussian_renderer:
+                        self.gs_renderer.renderer.need_rerender = True
+                    if self.renderer._depth_rendering:
+                        self.renderer.disable_depth_rendering()
+                    else:
+                        self.renderer.enable_depth_rendering()
+                        
+            # 处理单个按键
+            else:
+                if key == glfw.KEY_H:  # 'h': 显示帮助
+                    self.printHelp()
+                    
+                elif key == glfw.KEY_P:  # 'p': 打印信息
+                    self.printMessage()
+                    
+                elif key == glfw.KEY_R:  # 'r': 重置状态
+                    self.reset()
+                    
+                elif key == glfw.KEY_G:  # 'g': 切换高斯渲染
+                    if self.config.use_gaussian_renderer:
+                        self.show_gaussian_img = not self.show_gaussian_img
+                        self.gs_renderer.renderer.need_rerender = True
+                        
+                elif key == glfw.KEY_D:  # 'd': 切换深度渲染
+                    if self.config.use_gaussian_renderer:
+                        self.gs_renderer.renderer.need_rerender = True
+                    if self.renderer._depth_rendering:
+                        self.renderer.disable_depth_rendering()
+                    else:
+                        self.renderer.enable_depth_rendering()
+                        
+                elif key == glfw.KEY_ESCAPE:  # ESC: 切换到自由视角
+                    self.cam_id = -1
+                    self.camera_pose_changed = True
+                    
+                elif key == glfw.KEY_RIGHT_BRACKET:  # ']': 下一个相机
+                    if self.mj_model.ncam:
+                        self.cam_id += 1
+                        self.cam_id = self.cam_id % self.mj_model.ncam
+                        
+                elif key == glfw.KEY_LEFT_BRACKET:  # '[': 上一个相机
+                    if self.mj_model.ncam:
+                        self.cam_id += self.mj_model.ncam - 1
+                        self.cam_id = self.cam_id % self.mj_model.ncam
+                        
+                elif key == glfw.KEY_Q:  # 'q': 退出程序
+                    self.running = False
+                    glfw.set_window_should_close(window, True)
+
+    def printHelp(self):
+        """打印帮助信息"""
+        print("\n=== 键盘控制说明 ===")
+        print("H: 显示此帮助信息")
+        print("P: 打印当前状态信息")
+        print("R: 重置模拟器状态")
+        print("G: 切换高斯渲染（如果可用）")
+        print("D: 切换深度渲染")
+        print("Ctrl+G: 组合键切换高斯模式")
+        print("Ctrl+D: 组合键切换深度图模式")
+        print("ESC: 切换到自由视角")
+        print("[: 切换到上一个相机")
+        print("]: 切换到下一个相机")
+        print("Q: 退出程序")
+        print("\n=== 鼠标控制说明 ===")
+        print("左键拖动: 旋转视角")
+        print("右键拖动: 平移视角")
+        print("中键拖动: 缩放视角")
+        print("================\n")
+
+    def printMessage(self):
+        """打印当前状态信息"""
+        print("\n=== 当前状态 ===")
+        print(f"当前相机ID: {self.cam_id}")
+        if self.cam_id >= 0:
+            print(f"相机名称: {self.camera_names[self.cam_id]}")
+        print(f"高斯渲染: {'开启' if self.show_gaussian_img else '关闭'}")
+        print(f"深度渲染: {'开启' if self.renderer._depth_rendering else '关闭'}")
+        print("==============\n")
+
+    def resetState(self):
+        mujoco.mj_resetData(self.mj_model, self.mj_data)
+        mujoco.mj_forward(self.mj_model, self.mj_data)
+        self.camera_pose_changed = True
+
 
     def update_gs_scene(self):
         # 更新场景状态
@@ -370,124 +590,6 @@ class SimulatorBase:
             self.gs_renderer.renderer.need_rerender = True
             self.gs_renderer.renderer.gaussians.xyz[self.gs_renderer.renderer.gau_env_idx:] = multiple_quaternion_vector3d(self.gs_renderer.renderer.gau_rot_all_cu[self.gs_renderer.renderer.gau_env_idx:], self.gs_renderer.renderer.gau_ori_xyz_all_cu[self.gs_renderer.renderer.gau_env_idx:]) + self.gs_renderer.renderer.gau_xyz_all_cu[self.gs_renderer.renderer.gau_env_idx:]
             self.gs_renderer.renderer.gaussians.rot[self.gs_renderer.renderer.gau_env_idx:] = multiple_quaternions(self.gs_renderer.renderer.gau_rot_all_cu[self.gs_renderer.renderer.gau_env_idx:], self.gs_renderer.renderer.gau_ori_rot_all_cu[self.gs_renderer.renderer.gau_env_idx:])
-
-    def getRgbImg(self, cam_id):
-        # 获取RGB图像, 3D场景渲染成2D图像 , 使用高斯渲染器
-        if self.config.use_gaussian_renderer and self.show_gaussian_img:
-            if cam_id == -1:
-                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
-                self.gs_renderer.set_camera_fovy(self.mj_model.vis.global_.fovy * np.pi / 180.0)
-            if self.last_cam_id != cam_id and cam_id > -1:
-                self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[cam_id] * np.pi / 180.0)
-            self.last_cam_id = cam_id
-            trans, quat_wxyz = self.getCameraPose(cam_id)
-            self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
-            # numpy array uint 8 图像
-            return self.gs_renderer.render()
-        else:
-            if cam_id == -1:
-                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
-            elif cam_id > -1:
-                self.renderer.update_scene(self.mj_data, self.camera_names[cam_id], self.options)
-            else:
-                return None
-            rgb_img = self.renderer.render()
-        return rgb_img
-
-    def getDepthImg(self, cam_id):
-        if self.config.use_gaussian_renderer and self.show_gaussian_img:
-            if cam_id == -1:
-                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
-            if self.last_cam_id != cam_id:
-                if cam_id == -1:
-                    self.gs_renderer.set_camera_fovy(np.pi * 0.25)
-                elif cam_id > -1:
-                    self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[cam_id] * np.pi / 180.0)
-                else:
-                    return None
-            self.last_cam_id = cam_id
-            trans, quat_wxyz = self.getCameraPose(cam_id)
-            self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
-            return self.gs_renderer.render(render_depth=True)
-        else:
-            if cam_id == -1:
-                self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
-            elif cam_id > -1:
-                self.renderer.update_scene(self.mj_data, self.camera_names[cam_id], self.options)
-            else:
-                return None
-            depth_img = self.renderer.render()
-            return depth_img
-
-    def cv2WindowKeyPressCallback(self, key):
-        # 处理键盘事件
-        # - 'h': 显示帮助
-        # - 'r': 重置状态
-        # - '['/']': 切换相机视角
-        # - 'ESC': 切换到自由视角
-        # - 'g': 切换高斯渲染
-        # - 'd': 切换深度渲染
-        if key == -1:
-            return True
-        elif key == -2:
-            return False
-        elif key == ord('h'):
-            self.printHelp()
-        elif key == ord("p"):
-            self.printMessage()
-        elif key == ord('r'):
-            self.reset()
-        elif key == 194: #F5
-            self.renderer.close()
-            self.load_mjcf()
-            self.reset()
-        elif key == ord('g') and self.config.use_gaussian_renderer:
-            self.show_gaussian_img = not self.show_gaussian_img
-            self.gs_renderer.renderer.need_rerender = True
-        elif key == ord('d'):
-            if self.config.use_gaussian_renderer:
-                self.gs_renderer.renderer.need_rerender = True
-            if self.renderer._depth_rendering:
-                self.renderer.disable_depth_rendering()
-            else:
-                self.renderer.enable_depth_rendering()
-        elif key == 27: # "ESC"
-            self.cam_id = -1
-            self.camera_pose_changed = True
-        elif key == ord(']') and self.mj_model.ncam:
-            self.cam_id += 1
-            self.cam_id = self.cam_id % self.mj_model.ncam
-        elif key == ord('[') and self.mj_model.ncam:
-            self.cam_id += self.mj_model.ncam - 1
-            self.cam_id = self.cam_id % self.mj_model.ncam
-        return True
-    
-    def printHelp(self):
-        print("Press 'h' to print help")
-        print("Press 'r' to reset the state")
-        print("Press '[' or ']' to switch camera view")
-        print("Press 'Esc' to set free camera")
-        print("Press 'p' to print the rotot state")
-        print("Press 'g' toggle gaussian render")
-        print("Press 'd' toggle depth render")
-
-    def printMessage(self):
-        pass
-
-    def resetState(self):
-        mujoco.mj_resetData(self.mj_model, self.mj_data)
-        mujoco.mj_forward(self.mj_model, self.mj_data)
-        self.camera_pose_changed = True
-
-    def getCameraPose(self, cam_id):
-        if cam_id == -1:
-            rotation_matrix = self.camera_rmat @ Rotation.from_euler('xyz', [self.free_camera.elevation * np.pi / 180.0, self.free_camera.azimuth * np.pi / 180.0, 0.0]).as_matrix()
-            camera_position = self.free_camera.lookat + self.free_camera.distance * rotation_matrix[:3,2]
-        else:
-            rotation_matrix = np.array(self.mj_data.camera(self.camera_names[cam_id]).xmat).reshape((3,3))
-            camera_position = self.mj_data.camera(self.camera_names[cam_id]).xpos
-
-        return camera_position, Rotation.from_matrix(rotation_matrix).as_quat()[[3,0,1,2]]
 
     def getObjPose(self, name):
         try:
@@ -502,97 +604,58 @@ class SimulatorBase:
             except KeyError:
                 print("Invalid object name: {}".format(name))
                 return None, None
-    # 3. ★在类中，只要调用render，就会把图像渲染到GLFW窗口
-    def render(self):
-        # 1. 更新场景，只要调用render，就会更新场景
-        self.render_cnt += 1
-
-        # 2. 更新高斯场景
-        if self.config.use_gaussian_renderer and self.show_gaussian_img:
-            self.update_gs_scene() # 更新场景状态
-
-        # 3. 获取RGB图像, 渲染RGB ★② 将三维场景通过相机渲染成2D图像
-        self.img_rgb_obs_s = {}
-        for id in self.config.obs_rgb_cam_id:
-            img = self.getRgbImg(id) # 获取RGB图像
-            self.img_rgb_obs_s[id] = img
-
-        # 4. 获取深度图像
-        self.img_depth_obs_s = {}
-        for id in self.config.obs_depth_cam_id:
-            img = self.getDepthImg(id)
-            self.img_depth_obs_s[id] = img
-
-        # 5. 渲染图像
-        if not self.renderer._depth_rendering:
-            if self.cam_id in self.config.obs_rgb_cam_id:
-                img_vis = self.img_rgb_obs_s[self.cam_id]  # 直接复制，不转换颜色通道
-            else:
-                img_rgb = self.getRgbImg(self.cam_id)
-                img_vis = img_rgb  # 直接复制，不转换颜色通道
+    
+    def getCameraPose(self, cam_id):
+        if cam_id == -1:
+            rotation_matrix = self.camera_rmat @ Rotation.from_euler('xyz', [self.free_camera.elevation * np.pi / 180.0, self.free_camera.azimuth * np.pi / 180.0, 0.0]).as_matrix()
+            camera_position = self.free_camera.lookat + self.free_camera.distance * rotation_matrix[:3,2]
         else:
-            # 6. 深度图像处理
-            if self.cam_id in self.config.obs_depth_cam_id:
-                img_depth = self.img_depth_obs_s[self.cam_id]
-            else:
-                img_depth = self.getDepthImg(self.cam_id)
-            if img_depth is not None:
-                #img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
-                # 使用numpy操作替代cv2.applyColorMap
-                normalized = np.clip(img_depth * 25.5, 0, 255).astype(np.uint8)
-                # 使用简单的颜色映射
-                colored = self.depth_to_color(normalized)
-                img_vis = colored
+            rotation_matrix = np.array(self.mj_data.camera(self.camera_names[cam_id]).xmat).reshape((3,3))
+            camera_position = self.mj_data.camera(self.camera_names[cam_id]).xpos
 
-        # 7. 如果非headless模式，图像直接渲染到GLFW窗口
-        if not self.config.headless and self.window is not None:
+        return camera_position, Rotation.from_matrix(rotation_matrix).as_quat()[[3,0,1,2]]
+
+    def __del__(self):
+        """清理资源"""
+        try:
+            # 1. 首先清理OpenGL资源
+            if glfw.get_current_context() is not None:  # 确保OpenGL上下文仍然有效
+                if hasattr(self, 'shader_program'):
+                    gl.glDeleteProgram(self.shader_program)
+                if hasattr(self, 'vao'):
+                    gl.glDeleteVertexArrays([self.vao])
+                if hasattr(self, 'vbo'):
+                    gl.glDeleteBuffers([self.vbo])
+                if hasattr(self, 'pbo_ids'):
+                    gl.glDeleteBuffers(self.pbo_ids)
+                if hasattr(self, 'texture_id'):
+                    gl.glDeleteTextures([self.texture_id])
+            
+            # 2. 清理GLFW资源
+            if hasattr(self, 'window') and self.window is not None:
+                # 确保在主线程中执行
+                if glfw.get_current_context() is not None:
+                    glfw.destroy_window(self.window)
+                    self.window = None
+            
+            # 3. 最后终止GLFW
+            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+                try:
+                    if glfw.get_current_context() is not None:
+                        glfw.terminate()
+                except Exception:
+                    pass  # 忽略GLFW终止时的错误
+            
+        except Exception as e:
+            print(f"清理资源时出错: {str(e)}")
+        
+        finally:
+            # 确保基类的__del__被调用
             try:
-                # 检查窗口是否应该关闭
-                if glfw.window_should_close(self.window):
-                    self.running = False
-                    return
+                super().__del__()
+            except Exception:
+                pass
 
-                glfw.make_context_current(self.window)
-                # 1. 清除缓冲区
-                gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-                
-                # 2. 设置正确的视口
-                gl.glViewport(0, 0, self.config.render_set["width"], 
-                             self.config.render_set["height"])
-                
-                # 3. 设置正确的光栅化位置
-                gl.glRasterPos2i(-1, -1)
-                if img_vis is not None:
-                    # 将图像转换为opengl坐标，便于可视化
-                    img_vis = img_vis[::-1]
-                    # 确保数据连续性
-                    img_vis = np.ascontiguousarray(img_vis)
-                    # 绘制图像
-                    gl.glDrawPixels(
-                        img_vis.shape[1],
-                        img_vis.shape[0],
-                        gl.GL_RGB,
-                        gl.GL_UNSIGNED_BYTE,
-                        img_vis.tobytes()
-                    )
-                
-                # 6. 交换缓冲区并处理事件 (移动到这里)
-                glfw.swap_buffers(self.window)
-                
-                # 7. 处理所有待处理的事件
-                glfw.poll_events()
-                
-                # 8. 如果需要同步，控制帧率
-                if self.config.sync:
-                    current_time = time.time()
-                    wait_time = max(1.0/self.render_fps - (current_time - self.last_render_time), 0)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
-                    self.last_render_time = time.time()
-                
-            except Exception as e:
-                print(f"渲染错误: {e}")
-                
     # ------------------------------------------------------------------------------
     # ---------------------------------- Override ----------------------------------
     def reset(self):
@@ -660,3 +723,36 @@ class SimulatorBase:
         # 4. 如果需要渲染，渲染图像
         if self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
+
+    def create_shader_program(self, vertex_source, fragment_source):
+        """创建和编译着色器程序"""
+        # 编译顶点着色器
+        vertex_shader = gl.glCreateShader(gl.GL_VERTEX_SHADER)
+        gl.glShaderSource(vertex_shader, vertex_source)
+        gl.glCompileShader(vertex_shader)
+        if not gl.glGetShaderiv(vertex_shader, gl.GL_COMPILE_STATUS):
+            error = gl.glGetShaderInfoLog(vertex_shader)
+            raise RuntimeError(f"Vertex shader compilation failed: {error}")
+
+        # 编译片段着色器
+        fragment_shader = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
+        gl.glShaderSource(fragment_shader, fragment_source)
+        gl.glCompileShader(fragment_shader)
+        if not gl.glGetShaderiv(fragment_shader, gl.GL_COMPILE_STATUS):
+            error = gl.glGetShaderInfoLog(fragment_shader)
+            raise RuntimeError(f"Fragment shader compilation failed: {error}")
+
+        # 链接着色器程序
+        program = gl.glCreateProgram()
+        gl.glAttachShader(program, vertex_shader)
+        gl.glAttachShader(program, fragment_shader)
+        gl.glLinkProgram(program)
+        if not gl.glGetProgramiv(program, gl.GL_LINK_STATUS):
+            error = gl.glGetProgramInfoLog(program)
+            raise RuntimeError(f"Shader program linking failed: {error}")
+
+        # 清理
+        gl.glDeleteShader(vertex_shader)
+        gl.glDeleteShader(fragment_shader)
+
+        return program
