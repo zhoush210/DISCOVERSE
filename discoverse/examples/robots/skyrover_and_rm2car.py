@@ -1,5 +1,7 @@
 import os
 import cv2
+import glfw
+import time
 import numpy as np
 
 from discoverse import DISCOVERSE_ROOT_DIR
@@ -148,17 +150,16 @@ class SkyRoverOnCarBase(SimulatorBase):
     def getReward(self):
         return None
     
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
-        if key == ord('s'):
-            for camid, img in self.obs["img"].items():
-                print(self.getCameraPose(camid))
-                cv2.imwrite(os.path.join(DISCOVERSE_ROOT_DIR, f"img_{camid}.png"), cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-            for camid, img in self.obs["dep"].items():
-                np.save(os.path.join(DISCOVERSE_ROOT_DIR, f"dep_{camid}.npy"), img)
-                print(img.max(), img.min())
-
-        return ret
+    def on_key(self, window, key, scancode, action, mods):
+        super().on_key(window, key, scancode, action, mods)
+        if action == glfw.PRESS:
+            if key == glfw.KEY_S:
+                for camid, img in self.obs["img"].items():
+                    print(self.getCameraPose(camid))
+                    cv2.imwrite(os.path.join(DISCOVERSE_ROOT_DIR, f"img_{camid}.png"), cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+                for camid, img in self.obs["dep"].items():
+                    np.save(os.path.join(DISCOVERSE_ROOT_DIR, f"dep_{camid}.npy"), img)
+                    print(img.max(), img.min())
 
 if __name__ == "__main__":
 
