@@ -52,7 +52,7 @@ if __name__ == "__main__":
             func_while_running()
             rate.sleep()
     else:
-        with mujoco.viewer.launch_passive(exec_node.mj_model, exec_node.mj_data, key_callback=exec_node.cv2WindowKeyPressCallback) as viewer:
+        with mujoco.viewer.launch_passive(exec_node.mj_model, exec_node.mj_data, key_callback=exec_node.windowKeyPressCallback) as viewer:
             while viewer.is_running():
                 func_while_running()
                 viewer.sync()

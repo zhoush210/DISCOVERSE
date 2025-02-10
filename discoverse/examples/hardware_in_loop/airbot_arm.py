@@ -94,11 +94,9 @@ class AirbotArm(SimulatorBase):
         self.control_mode = target_control_mode
         print("Control mode: {}".format(self.control_mode))
 
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
+    def windowKeyPressCallback(self, key):
         if key == ord('M') or key == ord("m"):
             self.swith_control_mode(ArmControlMode((self.control_mode.value + 1) % len(ArmControlMode)))
-        return ret
 
     def resetState(self):
         mujoco.mj_resetData(self.mj_model, self.mj_data)
@@ -178,7 +176,7 @@ if __name__ == "__main__":
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
     else:
-        with mujoco.viewer.launch_passive(exec_node.mj_model, exec_node.mj_data, key_callback=exec_node.cv2WindowKeyPressCallback) as viewer:
+        with mujoco.viewer.launch_passive(exec_node.mj_model, exec_node.mj_data, key_callback=exec_node.windowKeyPressCallback) as viewer:
             while viewer.is_running():
                 step_start = time.time()
                 func_while_running()

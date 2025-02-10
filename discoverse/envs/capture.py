@@ -49,16 +49,6 @@ class CaptureBase(SimulatorBase):
                 self.config.render_set["width"]/2,
                 self.config.render_set["height"]/2))
 
-    def cv2WindowKeyPressCallback(self, key):
-        if key == ord("s"):
-            self.capImg()
-            print("Captured image: img_{:03d}.png".format(self.cap_id))
-        elif key == ord("q"):
-            self.ext_fp.close()
-            self.ext_cam_fp.close()
-            self.obj_posi_fp.close()
-        return super().cv2WindowKeyPressCallback(key)
-
     def capImg(self):
         self.cap_id += 1
         img_name = "img_{:03d}.png".format(self.cap_id)

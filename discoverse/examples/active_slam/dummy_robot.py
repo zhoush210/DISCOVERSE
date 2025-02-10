@@ -1,4 +1,5 @@
 import cv2
+import glfw
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -56,29 +57,20 @@ class DummyRobot(SimulatorBase):
     def getReward(self):
         return None
 
-    def cv2MouseCallback(self):
-        global action
-        if self.mouseParam[3] & cv2.EVENT_FLAG_SHIFTKEY:
-            self.move_step_ratio = 5.0
-        else:
-            self.move_step_ratio = 1.0
-
+    def on_mouse_move(self, window, xpos, ypos):
         if self.cam_id == -1:
-            super().cv2MouseCallback()
+            super().on_mouse_move(window, xpos, ypos)
         else:
-            event = self.mouseParam[0]
-            x = self.mouseParam[1]
-            y = self.mouseParam[2]
-            flags = self.mouseParam[3]
-            if flags == cv2.EVENT_FLAG_LBUTTON and event == cv2.EVENT_MOUSEMOVE:
+            if self.mouse_pressed['left']:
                 self.camera_pose_changed = True
                 height = self.config.render_set["height"]
-                dx = float(x) - self.mouse_last_x
-                dy = float(y) - self.mouse_last_y
+                dx = float(xpos) - self.mouse_pos["x"]
+                dy = float(ypos) - self.mouse_pos["y"]
                 self.base_move(0.0, 0.0, -dx/height, 0.0)
                 self.move_camera_pitch(dy/height)
-            self.mouse_last_x = float(x)
-            self.mouse_last_y = float(y)
+
+            self.mouse_pos['x'] = xpos
+            self.mouse_pos['y'] = ypos
 
     def move_camera_pitch(self, d_pitch):
         self.mj_data.qpos[self.pitch_joint_id] += d_pitch
@@ -102,40 +94,50 @@ class DummyRobot(SimulatorBase):
     def teleopProcess(self):
         pass
 
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
-        step = 1.0 / float(self.config.render_set["fps"]) * 5. * self.move_step_ratio
+    def on_key(self, window, key, scancode, action, mods):
+        super().on_key(window, key, scancode, action, mods)
+
+        is_shift_pressed = (mods & glfw.MOD_SHIFT)
+        move_step_ratio = 3.0 if is_shift_pressed else 1.0
+
+        step = 1.0 / float(self.config.render_set["fps"]) * 5. * move_step_ratio
         dx = 0.0
         dy = 0.0
         dz = 0.0
         dpitch = 0.0
-        if key == 82:
-            dx = step
-        elif key == 84:
-            dx = -step
-        if key == 81:
-            dy = step
-        elif key == 83:
-            dy = -step
-        elif key == ord("q"):
-            dpitch = 0.05
-        elif key == ord("w"):
-            dpitch = -0.05
-        elif key == ord("z"):
-            self.mj_model.body(self.config.robot_name).pos[2] += 0.02
-        elif key == ord("x"):
-            self.mj_model.body(self.config.robot_name).pos[2] -= 0.02
+
+        if action == glfw.PRESS or action == glfw.REPEAT:
+            # 同时监控多个按键
+            if glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
+                dx = step
+            elif glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
+                dx = -step
+            
+            if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+                dy = step
+            elif glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
+                dy = -step
+
+            if glfw.get_key(window, glfw.KEY_Q) == glfw.PRESS:
+                dpitch = 0.05
+            elif glfw.get_key(window, glfw.KEY_E) == glfw.PRESS:
+                dpitch = -0.05
+
+            if glfw.get_key(window, glfw.KEY_UP) == glfw.PRESS:
+                self.mj_model.body(self.config.robot_name).pos[2] += 0.02
+            elif glfw.get_key(window, glfw.KEY_DOWN) == glfw.PRESS:
+                self.mj_model.body(self.config.robot_name).pos[2] -= 0.02
+
         self.base_move(dx, dy, dz, dpitch)
-        return ret
 
     def printHelp(self):
         super().printHelp()
         print("-------------------------------------")
         print("dummy robot control:")
-        print("arrow up/arrow down    : move forward/backward")
-        print("arrow left/arrow right : move left/right")
-        print("q/w : pitch up/down")
-        print("z/x : height up/down")
+        print("w/s down    : move forward/backward")
+        print("a/d right : move left/right")
+        print("q/e : pitch up/down")
+        print("arrow up/down : height up/down")
         print("left mouse drag : camera move yaw and pitch")
         print("press shift key to move faster")
 
