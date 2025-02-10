@@ -15,3 +15,4 @@ submodules*
 *tmp*
 *_pb2*.py
 .vscode
+.json

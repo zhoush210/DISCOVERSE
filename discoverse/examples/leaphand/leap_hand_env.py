@@ -1,6 +1,6 @@
-import numpy as np
+import glfw
 import mujoco
-import matplotlib.pyplot as plt
+import numpy as np
 from discoverse.envs.leaphand_sensor_env_base import LeapHandCfg, LeapHandBase 
 
 action = np.zeros(16)
@@ -28,17 +28,17 @@ class SimNode(LeapHandBase):
         dif = np.abs(action - self.target_action)
         self.joint_move_ratio = dif / (np.max(dif) + 1e-6)
 
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
+    def on_key(self, window, key, scancode, action, mods):
+        super().on_key(window, key, scancode, action, mods)
         # press space to switch to 12 keyframes
-        print("key:", key)
-        if key == ord(' '):
-            self.key_id += 1
-            if self.key_id > 12:
-                self.key_id = 12
-                print("key_id is out of range")
-            self.update_control_from_keyframe(self.key_id)
-        return ret
+        if action == glfw.PRESS:
+            print("key:", key)
+            if key == glfw.KEY_SPACE:
+                self.key_id += 1
+                if self.key_id > 12:
+                    self.key_id = 12
+                    print("key_id is out of range")
+                self.update_control_from_keyframe(self.key_id)
     
     def getObservation(self):
         self.obs = {

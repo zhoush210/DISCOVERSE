@@ -1,3 +1,4 @@
+import glfw
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -219,22 +220,21 @@ class S2RNode(MMK2Base):
         print(f"    scoring : {tinfo.scoring}")
         return ret
 
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
-        if key == ord("c"):
-            print(np.array2string(self.mj_data.contact.geom, separator=',', suppress_small=True))
-            
-            round_str = f"round{self.round_id}"
-            prop_name = self.taskInfos[round_str].target_prop_name
+    def on_key(self, window, key, scancode, action, mods):
+        super().on_key(window, key, scancode, action, mods)
+        if action == glfw.PRESS:
+            if key == glfw.KEY_C:
+                print(np.array2string(self.mj_data.contact.geom, separator=',', suppress_small=True))
+                
+                round_str = f"round{self.round_id}"
+                prop_name = self.taskInfos[round_str].target_prop_name
 
-            for bd in [prop_name, "lft_finger_left_link", "lft_finger_right_link", "rgt_finger_left_link", "rgt_finger_right_link"]:
-                bd_gemo_id_range = (self.mj_model.body(bd).geomadr[0], self.mj_model.body(bd).geomadr[0]+self.mj_model.body(bd).geomnum[0])
-                print(bd, bd_gemo_id_range)
+                for bd in [prop_name, "lft_finger_left_link", "lft_finger_right_link", "rgt_finger_left_link", "rgt_finger_right_link"]:
+                    bd_gemo_id_range = (self.mj_model.body(bd).geomadr[0], self.mj_model.body(bd).geomadr[0]+self.mj_model.body(bd).geomnum[0])
+                    print(bd, bd_gemo_id_range)
 
-            print(self.check_contact(prop_name, "lft_finger_right_link"), self.check_contact(prop_name, "lft_finger_left_link"))
-            print(self.check_contact(prop_name, "rgt_finger_right_link"), self.check_contact(prop_name, "rgt_finger_left_link"))
-
-        return ret
+                print(self.check_contact(prop_name, "lft_finger_right_link"), self.check_contact(prop_name, "lft_finger_left_link"))
+                print(self.check_contact(prop_name, "rgt_finger_right_link"), self.check_contact(prop_name, "rgt_finger_left_link"))
 
     def check_contact(self, body1, body2):
         body1_gemo_id_range = (self.mj_model.body(body1).geomadr[0], self.mj_model.body(body1).geomadr[0]+self.mj_model.body(body1).geomnum[0])
