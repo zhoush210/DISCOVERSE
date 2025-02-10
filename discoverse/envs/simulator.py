@@ -118,6 +118,7 @@ class SimulatorBase:
                 glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)  # 改为OpenGL 3.3
                 glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
                 glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+                glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, True)  # Add this line
                 glfw.window_hint(glfw.VISIBLE, True)
                 
                 # 创建窗口
