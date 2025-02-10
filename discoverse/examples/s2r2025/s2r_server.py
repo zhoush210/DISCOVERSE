@@ -47,7 +47,7 @@ cfg.gs_model_dict["cabinet_drawer"] = "s2r2025/cabinet_drawer.ply"
 
 cfg.obs_rgb_cam_id   = None
 cfg.obs_depth_cam_id = None
-cfg.use_gaussian_renderer = False
+cfg.use_gaussian_renderer = True
 
 # import rospy
 # from discoverse.examples.ros1.mmk2_joy_ros1 import MMK2JOY
@@ -351,6 +351,6 @@ if __name__ == "__main__":
     action = sim_node.init_joint_ctrl.copy()
 
     while sim_node.running:
-        sim_node.teleopProcess()
-        obs, _, _, _, _ = sim_node.step(sim_node.target_control)
-        # obs, _, _, _, _ = sim_node.step(action)
+        # sim_node.teleopProcess()
+        # obs, _, _, _, _ = sim_node.step(sim_node.target_control)
+        obs, _, _, _, _ = sim_node.step(action)
