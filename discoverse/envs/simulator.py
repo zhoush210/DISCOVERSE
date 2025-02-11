@@ -203,16 +203,20 @@ class SimulatorBase:
             self.update_gs_scene()
         
         # 2. 获取RGB图像
+        depth_rendering = self.renderer._depth_rendering
+        self.renderer.disable_depth_rendering()
         self.img_rgb_obs_s = {}
         for id in self.config.obs_rgb_cam_id:
             img = self.getRgbImg(id)
             self.img_rgb_obs_s[id] = img
         
         # 3. 获取深度图像
+        self.renderer.enable_depth_rendering()
         self.img_depth_obs_s = {}
         for id in self.config.obs_depth_cam_id:
             img = self.getDepthImg(id)
             self.img_depth_obs_s[id] = img
+        self.renderer._depth_rendering = depth_rendering
         
         # 4. 准备渲染图像
         if not self.renderer._depth_rendering:

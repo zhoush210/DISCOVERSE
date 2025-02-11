@@ -54,7 +54,7 @@ cfg.gs_model_dict["cabinet_drawer"] = "s2r2025/cabinet_drawer.ply"
 
 cfg.obs_rgb_cam_id = [0,1,2]
 cfg.obs_depth_cam_id = [0]
-cfg.use_gaussian_renderer = False
+cfg.use_gaussian_renderer = True
 
 class S2RNode(MMK2ROS2):
     gadgets_names = [
@@ -348,7 +348,6 @@ if __name__ == "__main__":
     parser.add_argument('--round_id', type=int, choices=[1, 2, 3], help='tasks round index', required=True)
     parser.add_argument('--random_seed', type=int, help='random seed', default=0, required=False)
     args = parser.parse_args()
-    print(f"args.random_seed = {args.random_seed} type={type(args.random_seed)}")
 
     cfg.round_id = args.round_id
     np.random.seed(args.random_seed)
@@ -364,14 +363,14 @@ if __name__ == "__main__":
     pubtopic_thread.start()
 
     try:
-        while sim_node.running:
+        while rclpy.ok() and sim_node.running:
             sim_node.step(sim_node.target_control)
 
     except KeyboardInterrupt:
         pass
 
     finally:
+        pubtopic_thread.join()
         sim_node.destroy_node()
         rclpy.shutdown()
-        pubtopic_thread.join()
         spin_thread.join()
