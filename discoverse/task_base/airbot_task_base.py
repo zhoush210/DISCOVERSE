@@ -1,5 +1,6 @@
 import os
 import json
+import glfw
 import shutil
 import mujoco
 import mediapy
@@ -74,10 +75,11 @@ class AirbotPlayTaskBase(AirbotPlayBase):
     def check_success(self):
         raise NotImplementedError
     
-    def cv2WindowKeyPressCallback(self, key):
-        ret = super().cv2WindowKeyPressCallback(key)
-        if key == ord("-"):
-            self.mj_model.vis.global_.fovy = np.clip(self.mj_model.vis.global_.fovy*0.95, 5, 175)
-        elif key == ord("="):
-            self.mj_model.vis.global_.fovy = np.clip(self.mj_model.vis.global_.fovy*1.05, 5, 175)
+    def on_key(self, window, key, scancode, action, mods):
+        ret = super().on_key(window, key, scancode, action, mods)
+        if action == glfw.PRESS:
+            if key == glfw.KEY_MINUS:
+                self.mj_model.vis.global_.fovy = np.clip(self.mj_model.vis.global_.fovy*0.95, 5, 175)
+            elif key == glfw.KEY_EQUAL:
+                self.mj_model.vis.global_.fovy = np.clip(self.mj_model.vis.global_.fovy*1.05, 5, 175)
         return ret

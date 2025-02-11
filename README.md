@@ -24,7 +24,7 @@ Please refer to [docker deployment](doc/docker.md), or directly download [v1.6.1
 git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
 cd DISCOVERSE
 pip install -r requirements.txt
-pip install -e.
+pip install -e .
 ```
 
 ### Download Resource Files
