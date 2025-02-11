@@ -33,7 +33,16 @@ def spin_thread(node):
 if __name__ == "__main__":
     rclpy.init()
 
-    cfg.eef_type = "none"
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Run arm with specified parameters. \ne.g. python3 airbot_play_short.py --arm_type play_short --eef_type none')
+    parser.add_argument('--arm_type', type=str, choices=["play_long", "play_short", "lite", "pro", "replay"], help='Name of the arm', default="play_short")
+    parser.add_argument('--eef_type', type=str, choices=["G2", "E2B", "PE2", "none"], help='Name of the eef', default="none")
+    parser.add_argument('--discoverse_viewer', action='store_true', help='Use discoverse viewer')
+    args = parser.parse_args()
+
+    cfg.arm_type = args.arm_type
+    cfg.eef_type = args.eef_type
     exec_node = AirbotPlayShortROS2(cfg)
 
     spin_thread = threading.Thread(target=spin_thread, args=(exec_node,))

@@ -34,7 +34,7 @@ class AirbotPlayJoyCtl(AirbotPlayBase, Node):
         self.joint_state.effort = self.sensor_joint_force.tolist()
 
         self.teleop = JoyTeleopRos2()
-        self.sub = self.create_subscription(Joy, '/joy_throttle', self.teleop.joy_callback, 10)
+        self.sub = self.create_subscription(Joy, '/joy', self.teleop.joy_callback, 10)
 
     def resetState(self):
         super().resetState()

@@ -131,16 +131,16 @@ if __name__ == "__main__":
 
     exec_node = AirbotPlayJoyCtl(cfg)
 
-    from discoverse.examples.robots.airbot_replay import AirbotReplay
-    replay = AirbotReplay("can0", with_eef=True, auto_control=True, control_period=0.03)
+    # from discoverse.examples.robots.airbot_replay import AirbotReplay
+    # replay = AirbotReplay("can0", with_eef=True, auto_control=True, control_period=0.03)
 
     move_speed = 5.
     while not rospy.is_shutdown() and exec_node.running:
-        # exec_node.teleopProcess()
-        jt = np.array([encoder.pos for encoder in replay.encoders])
+        exec_node.teleopProcess()
+        # jt = np.array([encoder.pos for encoder in replay.encoders])
 
-        for i in range(exec_node.nj-1):
-            exec_node.tar_jq[i] = step_func(exec_node.tar_jq[i], jt[i], move_speed * exec_node.delta_t)
-        exec_node.tar_jq[exec_node.nj-1] = jt[exec_node.nj-1]
+        # for i in range(exec_node.nj-1):
+        #     exec_node.tar_jq[i] = step_func(exec_node.tar_jq[i], jt[i], move_speed * exec_node.delta_t)
+        # exec_node.tar_jq[exec_node.nj-1] = jt[exec_node.nj-1]
 
         exec_node.step()
