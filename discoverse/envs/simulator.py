@@ -10,6 +10,7 @@ import glfw
 import OpenGL.GL as gl
 import ctypes
 import cv2
+import sys
 
 from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import BaseConfig
@@ -247,6 +248,10 @@ class SimulatorBase:
                 
                 # 设置正确的光栅化位置
                 gl.glRasterPos2i(-1, -1)
+                
+                # 在 macOS 上进行像素缩放
+                if sys.platform == "darwin":  # 检查是否为 macOS 系统
+                    gl.glPixelZoom(2.0, 2.0)
                 
                 if img_vis is not None:
                     # 将图像转换为opengl坐标
@@ -493,39 +498,24 @@ class SimulatorBase:
     def __del__(self):
         """清理资源"""
         try:
-            # 1. 首先清理OpenGL资源
-            if glfw.get_current_context() is not None:  # 确保OpenGL上下文仍然有效
-                if hasattr(self, 'shader_program'):
-                    gl.glDeleteProgram(self.shader_program)
-                if hasattr(self, 'vao'):
-                    gl.glDeleteVertexArrays([self.vao])
-                if hasattr(self, 'vbo'):
-                    gl.glDeleteBuffers([self.vbo])
-                if hasattr(self, 'pbo_ids'):
-                    gl.glDeleteBuffers(self.pbo_ids)
-                if hasattr(self, 'texture_id'):
-                    gl.glDeleteTextures([self.texture_id])
-            
-            # 2. 清理GLFW资源
+            # 清理GLFW资源
             if hasattr(self, 'window') and self.window is not None:
-                # 确保在主线程中执行
                 if glfw.get_current_context() is not None:
                     glfw.destroy_window(self.window)
                     self.window = None
             
-            # 3. 最后终止GLFW
+            # 终止GLFW
             if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
                 try:
                     if glfw.get_current_context() is not None:
                         glfw.terminate()
                 except Exception:
-                    pass  # 忽略GLFW终止时的错误
+                    pass
             
         except Exception as e:
             print(f"清理资源时出错: {str(e)}")
         
         finally:
-            # 确保基类的__del__被调用
             try:
                 super().__del__()
             except Exception:
@@ -597,36 +587,3 @@ class SimulatorBase:
         # 4. 如果需要渲染，渲染图像
         if self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
-
-    def create_shader_program(self, vertex_source, fragment_source):
-        """创建和编译着色器程序"""
-        # 编译顶点着色器
-        vertex_shader = gl.glCreateShader(gl.GL_VERTEX_SHADER)
-        gl.glShaderSource(vertex_shader, vertex_source)
-        gl.glCompileShader(vertex_shader)
-        if not gl.glGetShaderiv(vertex_shader, gl.GL_COMPILE_STATUS):
-            error = gl.glGetShaderInfoLog(vertex_shader)
-            raise RuntimeError(f"Vertex shader compilation failed: {error}")
-
-        # 编译片段着色器
-        fragment_shader = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
-        gl.glShaderSource(fragment_shader, fragment_source)
-        gl.glCompileShader(fragment_shader)
-        if not gl.glGetShaderiv(fragment_shader, gl.GL_COMPILE_STATUS):
-            error = gl.glGetShaderInfoLog(fragment_shader)
-            raise RuntimeError(f"Fragment shader compilation failed: {error}")
-
-        # 链接着色器程序
-        program = gl.glCreateProgram()
-        gl.glAttachShader(program, vertex_shader)
-        gl.glAttachShader(program, fragment_shader)
-        gl.glLinkProgram(program)
-        if not gl.glGetProgramiv(program, gl.GL_LINK_STATUS):
-            error = gl.glGetProgramInfoLog(program)
-            raise RuntimeError(f"Shader program linking failed: {error}")
-
-        # 清理
-        gl.glDeleteShader(vertex_shader)
-        gl.glDeleteShader(fragment_shader)
-
-        return program
