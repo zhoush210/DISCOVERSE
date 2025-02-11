@@ -115,10 +115,8 @@ class SimulatorBase:
                 self.glfw_initialized = True
                 
                 # 设置OpenGL版本和窗口属性
-                glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)  # 改为OpenGL 3.3
-                glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
-                glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-                glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, True)  # Add this line
+                glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 2)
+                glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 1)
                 glfw.window_hint(glfw.VISIBLE, True)
                 
                 # 创建窗口
@@ -135,87 +133,14 @@ class SimulatorBase:
                 
                 glfw.make_context_current(self.window)
                 
-                # 初始化纹理
-                self.texture_id = gl.glGenTextures(1)
-                gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_id)
-                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
-                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
-                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE)
-                gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE)
+                # 初始化OpenGL设置
+                gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+                gl.glShadeModel(gl.GL_SMOOTH)
+                gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1)
                 
-                # 创建和配置VAO、VBO
-                self.vao = gl.glGenVertexArrays(1)
-                self.vbo = gl.glGenBuffers(1)
-                
-                # 定义顶点数据（包含位置和纹理坐标）
-                vertices = np.array([
-                    # positions        # texture coords
-                    -1.0, -1.0, 0.0,  0.0, 1.0,  # 左下
-                     1.0, -1.0, 0.0,  1.0, 1.0,  # 右下
-                     1.0,  1.0, 0.0,  1.0, 0.0,  # 右上
-                    -1.0,  1.0, 0.0,  0.0, 0.0   # 左上
-                ], dtype=np.float32)
-                
-                gl.glBindVertexArray(self.vao)
-                gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
-                gl.glBufferData(gl.GL_ARRAY_BUFFER, vertices.nbytes, vertices, gl.GL_STATIC_DRAW)
-                
-                # 设置顶点属性
-                # 位置属性
-                gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 5 * vertices.itemsize, None)
-                gl.glEnableVertexAttribArray(0)
-                # 纹理坐标属性
-                gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, gl.GL_FALSE, 5 * vertices.itemsize, 
-                                       ctypes.c_void_p(3 * vertices.itemsize))
-                gl.glEnableVertexAttribArray(1)
-                
-                # 初始化PBO
-                self.pbo_ids = gl.glGenBuffers(2)  # 创建两个PBO
-                self.current_pbo_index = 0
-                
-                # 初始化PBO缓冲区
-                buffer_size = self.config.render_set["width"] * self.config.render_set["height"] * 3
-                for i in range(2):
-                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[i])
-                    gl.glBufferData(gl.GL_PIXEL_UNPACK_BUFFER, buffer_size, None, gl.GL_STREAM_DRAW)
-                
-                # 解绑PBO
-                gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
-                
-                # 简化的顶点着色器保持不变
-                vertex_shader = """
-                #version 330 core
-                layout (location = 0) in vec3 position;
-                layout (location = 1) in vec2 texCoord;
-                out vec2 TexCoord;
-                
-                void main() {
-                    gl_Position = vec4(position, 1.0);
-                    TexCoord = texCoord;
-                }
-                """
-                
-                # 简化的片段着色器，直接输出纹理颜色
-                fragment_shader = """
-                #version 330 core
-                in vec2 TexCoord;
-                out vec4 FragColor;
-                uniform sampler2D screenTexture;
-                
-                void main() {
-                    FragColor = texture(screenTexture, TexCoord);
-                }
-                """
-                
-                # 编译着色器
-                self.shader_program = self.create_shader_program(vertex_shader, fragment_shader)
-            
                 # 设置回调
-                # 设置键盘回调
                 glfw.set_key_callback(self.window, self.on_key)
-                # 设置鼠标移动回调
                 glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
-                # 设置鼠标按键回调
                 glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
                 
             except Exception as e:
@@ -302,7 +227,6 @@ class SimulatorBase:
                 img_depth = self.getDepthImg(self.cam_id)
             
             if img_depth is not None:
-                #测试下来，还是cv2更快
                 img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
             else:
                 img_vis = None
@@ -317,39 +241,26 @@ class SimulatorBase:
                 glfw.make_context_current(self.window)
                 gl.glClear(gl.GL_COLOR_BUFFER_BIT)
                 
+                # 设置正确的视口
+                gl.glViewport(0, 0, self.config.render_set["width"], 
+                             self.config.render_set["height"])
+                
+                # 设置正确的光栅化位置
+                gl.glRasterPos2i(-1, -1)
+                
                 if img_vis is not None:
-                    # 确保图像数据连续
+                    # 将图像转换为opengl坐标
+                    img_vis = img_vis[::-1]
+                    # 确保数据连续性
                     img_vis = np.ascontiguousarray(img_vis)
-                    
-                    # 使用PBO更新纹理
-                    next_pbo_index = (self.current_pbo_index + 1) % 2
-                    
-                    # 绑定下一个PBO用于更新数据
-                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[next_pbo_index])
-                    gl.glBufferSubData(gl.GL_PIXEL_UNPACK_BUFFER, 0, img_vis.nbytes, img_vis)
-                    
-                    # 使用当前PBO更新纹理
-                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, self.pbo_ids[self.current_pbo_index])
-                    gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture_id)
-                    gl.glTexImage2D(
-                        gl.GL_TEXTURE_2D, 0, gl.GL_RGB,
-                        img_vis.shape[1], img_vis.shape[0],
-                        0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE,
-                        None  # 使用当前绑定的PBO
+                    # 直接绘制像素
+                    gl.glDrawPixels(
+                        img_vis.shape[1],
+                        img_vis.shape[0],
+                        gl.GL_RGB,
+                        gl.GL_UNSIGNED_BYTE,
+                        img_vis.tobytes()
                     )
-                    
-                    # 切换PBO索引
-                    self.current_pbo_index = next_pbo_index
-                    
-                    # 使用着色器程序
-                    gl.glUseProgram(self.shader_program)
-                    
-                    # 绘制四边形
-                    gl.glBindVertexArray(self.vao)
-                    gl.glDrawArrays(gl.GL_TRIANGLE_FAN, 0, 4)
-                    
-                    # 解绑PBO
-                    gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
                 
                 # 交换缓冲区并处理事件
                 glfw.swap_buffers(self.window)
@@ -379,7 +290,6 @@ class SimulatorBase:
             self.last_cam_id = cam_id
             trans, quat_wxyz = self.getCameraPose(cam_id)
             self.gs_renderer.set_camera_pose(trans, quat_wxyz[[1,2,3,0]])
-            # torch.Tensor: RGB图像 (H,W,3) 或深度图 (H,W,1)，保持在GPU上
             return self.gs_renderer.render()
         else:
             if cam_id == -1:
@@ -390,7 +300,6 @@ class SimulatorBase:
                 return None
             # 2. 使用mujoco渲染器
             rgb_img = self.renderer.render()
-            # 返回numpy array uint 8 图像
             return rgb_img
 
     # 基于mujoco与高斯渲染器获取深度图像，按D切换
