@@ -1,4 +1,5 @@
 import os
+import threading
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -80,26 +81,29 @@ class AirbotPlayJoyCtl(AirbotPlayBase):
             self.tar_jq[6] += 1. * (self.teleop.joy_cmd.axes[2] - self.teleop.joy_cmd.axes[5]) * self.delta_t
             self.tar_jq[6] = np.clip(self.tar_jq[6], 0, 1.)
 
-    def post_physics_step(self):
-        self.joint_state.header.stamp = rospy.Time.now()
-        self.joint_state.position = self.sensor_joint_qpos.tolist()
-        self.joint_state.velocity = self.sensor_joint_qvel.tolist()
-        self.joint_state.effort = self.sensor_joint_force.tolist()
+    def thread_pubros2topic(self, freq=30):
+        rate = rospy.Rate(freq)
+        while not rospy.is_shutdown() and self.running:
+            self.joint_state.header.stamp = rospy.Time.now()
+            self.joint_state.position = self.sensor_joint_qpos.tolist()
+            self.joint_state.velocity = self.sensor_joint_qvel.tolist()
+            self.joint_state.effort = self.sensor_joint_force.tolist()
 
-        self.imu.header.stamp = rospy.Time.now()
-        self.imu.orientation.w = self.sensor_endpoint_quat_local[0]
-        self.imu.orientation.x = self.sensor_endpoint_quat_local[1]
-        self.imu.orientation.y = self.sensor_endpoint_quat_local[2]
-        self.imu.orientation.z = self.sensor_endpoint_quat_local[3]
-        self.imu.angular_velocity.x = self.sensor_endpoint_gyro[0]
-        self.imu.angular_velocity.y = self.sensor_endpoint_gyro[1]
-        self.imu.angular_velocity.z = self.sensor_endpoint_gyro[2]
-        self.imu.linear_acceleration.x = self.sensor_endpoint_acc[0]
-        self.imu.linear_acceleration.y = self.sensor_endpoint_acc[1]
-        self.imu.linear_acceleration.z = self.sensor_endpoint_acc[2]
+            self.imu.header.stamp = rospy.Time.now()
+            self.imu.orientation.w = self.sensor_endpoint_quat_local[0]
+            self.imu.orientation.x = self.sensor_endpoint_quat_local[1]
+            self.imu.orientation.y = self.sensor_endpoint_quat_local[2]
+            self.imu.orientation.z = self.sensor_endpoint_quat_local[3]
+            self.imu.angular_velocity.x = self.sensor_endpoint_gyro[0]
+            self.imu.angular_velocity.y = self.sensor_endpoint_gyro[1]
+            self.imu.angular_velocity.z = self.sensor_endpoint_gyro[2]
+            self.imu.linear_acceleration.x = self.sensor_endpoint_acc[0]
+            self.imu.linear_acceleration.y = self.sensor_endpoint_acc[1]
+            self.imu.linear_acceleration.z = self.sensor_endpoint_acc[2]
 
-        self.joint_state_puber.publish(self.joint_state)
-        self.imu_puber.publish(self.imu)
+            self.joint_state_puber.publish(self.joint_state)
+            self.imu_puber.publish(self.imu)
+            rate.sleep()
 
     def printMessage(self):
         print("-" * 100)
@@ -131,16 +135,21 @@ if __name__ == "__main__":
 
     exec_node = AirbotPlayJoyCtl(cfg)
 
-    from discoverse.examples.robots.airbot_replay import AirbotReplay
-    replay = AirbotReplay("can0", with_eef=True, auto_control=True, control_period=0.03)
+    # from discoverse.examples.robots.airbot_replay import AirbotReplay
+    # replay = AirbotReplay("can0", with_eef=True, auto_control=True, control_period=0.03)
+
+    pubtopic_thread = threading.Thread(target=exec_node.thread_pubros2topic, args=(30,))
+    pubtopic_thread.start()
 
     move_speed = 5.
     while not rospy.is_shutdown() and exec_node.running:
-        # exec_node.teleopProcess()
-        jt = np.array([encoder.pos for encoder in replay.encoders])
+        exec_node.teleopProcess()
+        # jt = np.array([encoder.pos for encoder in replay.encoders])
 
-        for i in range(exec_node.nj-1):
-            exec_node.tar_jq[i] = step_func(exec_node.tar_jq[i], jt[i], move_speed * exec_node.delta_t)
-        exec_node.tar_jq[exec_node.nj-1] = jt[exec_node.nj-1]
+        # for i in range(exec_node.nj-1):
+        #     exec_node.tar_jq[i] = step_func(exec_node.tar_jq[i], jt[i], move_speed * exec_node.delta_t)
+        # exec_node.tar_jq[exec_node.nj-1] = jt[exec_node.nj-1]
 
         exec_node.step()
+
+    pubtopic_thread.join()

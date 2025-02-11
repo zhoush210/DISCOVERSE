@@ -20,24 +20,36 @@ class AirbotPlayShortROS2(AirbotArm, Node):
         self.joint_state.velocity = self.sensor_joint_qvel.tolist()
         self.joint_state.effort = self.sensor_joint_force.tolist()
 
-    def post_physics_step(self):
-        self.joint_state.header.stamp = self.get_clock().now().to_msg()
-        self.joint_state.position = self.sensor_joint_qpos.tolist()
-        self.joint_state.velocity = self.sensor_joint_qvel.tolist()
-        self.joint_state.effort = self.sensor_joint_force.tolist()
-        self.joint_state_puber.publish(self.joint_state)
-
-def spin_thread(node):
-    rclpy.spin(node)
+    def thread_pubros2topic(self, freq=30):
+        rate = self.create_rate(freq)
+        while rclpy.ok() and self.running:
+            self.joint_state.header.stamp = self.get_clock().now().to_msg()
+            self.joint_state.position = self.sensor_joint_qpos.tolist()
+            self.joint_state.velocity = self.sensor_joint_qvel.tolist()
+            self.joint_state.effort = self.sensor_joint_force.tolist()
+            self.joint_state_puber.publish(self.joint_state)
+            rate.sleep()
 
 if __name__ == "__main__":
     rclpy.init()
 
-    cfg.eef_type = "none"
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Run arm with specified parameters. \ne.g. python3 airbot_play_short.py --arm_type play_short --eef_type none')
+    parser.add_argument('--arm_type', type=str, choices=["play_long", "play_short", "lite", "pro", "replay"], help='Name of the arm', default="play_short")
+    parser.add_argument('--eef_type', type=str, choices=["G2", "E2B", "PE2", "none"], help='Name of the eef', default="none")
+    parser.add_argument('--discoverse_viewer', action='store_true', help='Use discoverse viewer')
+    args = parser.parse_args()
+
+    cfg.arm_type = args.arm_type
+    cfg.eef_type = args.eef_type
     exec_node = AirbotPlayShortROS2(cfg)
 
-    spin_thread = threading.Thread(target=spin_thread, args=(exec_node,))
+    spin_thread = threading.Thread(target=lambda:rclpy.spin(exec_node))
     spin_thread.start()
+
+    pubtopic_thread = threading.Thread(target=exec_node.thread_pubros2topic, args=(30,))
+    pubtopic_thread.start()
 
     action = np.zeros(exec_node.nj*3)
     obs = exec_node.reset()
@@ -48,4 +60,5 @@ if __name__ == "__main__":
 
     exec_node.destroy_node()
     rclpy.shutdown()
+    pubtopic_thread.join()
     spin_thread.join()

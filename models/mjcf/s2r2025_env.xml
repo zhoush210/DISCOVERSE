@@ -176,7 +176,7 @@
       <geom size="1.0 0.44 0.015" pos="0 -0.95 1.0" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
     </body>
 
-    <body name="back_wall" pos="-1.4 0.2 0">
+    <!-- <body name="back_wall" pos="-1.4 0.2 0">
       <geom size="1.0 0.44 0.015" pos="0  0.0 1.0" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
       <geom size="1.0 0.44 0.015" pos="0  0.9 1.0" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
       <geom size="1.0 0.49 0.015" pos="0 -0.955 1.0" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
@@ -186,7 +186,7 @@
       <geom size="1.0 0.49 0.015" pos="0  1. 1" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
       <geom size="1.0 0.49 0.015" pos="0  0. 1" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
       <geom size="1.0 0.49 0.015" pos="0 -1. 1" euler="0 1.5708 0" type="box" rgba="1 1 1 1"/>
-    </body>
+    </body> -->
 
     <body name="cabinet_1" pos="0.4 1.37 0" euler="0 0 1.5708">
 

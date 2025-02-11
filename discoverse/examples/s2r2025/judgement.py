@@ -2,9 +2,6 @@ import numpy as np
 
 s2r2025_position_info = {
 
-    # <body name="cabinet_1" pos="0.4 1.37 0" euler="0 0 1.5708">
-    # <body name="cabinet_2" pos="1.37 0.4 0">
-
     "left_cabinet_range" : {
         "xmin" :  0,
         "xmax" :  0.8,

@@ -178,7 +178,8 @@ class MMK2Base(SimulatorBase):
             # "jf"   : self.sensor_force.tolist(),
             "base_position"    : self.sensor_base_position.tolist(),
             "base_orientation" : self.sensor_base_orientation.tolist(),
-            "img"  : self.img_rgb_obs_s
+            "img"  : self.img_rgb_obs_s,
+            "depth" : self.img_depth_obs_s
         }
         return self.obs
 
