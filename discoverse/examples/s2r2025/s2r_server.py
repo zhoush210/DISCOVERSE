@@ -1,20 +1,26 @@
 import mujoco
+import argparse
+import threading
 import numpy as np
 from scipy.spatial.transform import Rotation
-from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
+from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.examples.ros2.mmk2_ros2 import MMK2ROS2
 from judgement import TaskInfo, s2r2025_position_info, box_within_cabinet, prop_in_gripper, prop_within_table
+
+import rclpy
 
 cfg = MMK2Cfg()
 cfg.mjcf_file_path = "mjcf/s2r2025_env.xml"
 cfg.timestep       = 0.002
 cfg.decimation     = 5
+
 cfg.init_key = "pick"
 cfg.sync     = True
 cfg.headless = False
 cfg.render_set = {
     "fps"    : 30,
-    "width"  : 1920,
-    "height" : 1080 
+    "width"  : 640,
+    "height" : 480
 }
 cfg.obj_list = [
     "box_carton" , "box_disk"    , "box_sheet"     ,
@@ -45,14 +51,11 @@ cfg.gs_model_dict["toy_cabinet"]    = "s2r2025/toy_cabinet.ply"
 cfg.gs_model_dict["cabinet_door"]   = "s2r2025/cabinet_door.ply"
 cfg.gs_model_dict["cabinet_drawer"] = "s2r2025/cabinet_drawer.ply"
 
-cfg.obs_rgb_cam_id   = None
-cfg.obs_depth_cam_id = None
-cfg.use_gaussian_renderer = True
+cfg.obs_rgb_cam_id = [0,1,2]
+cfg.obs_depth_cam_id = [0]
+cfg.use_gaussian_renderer = False
 
-# import rospy
-# from discoverse.examples.ros1.mmk2_joy_ros1 import MMK2JOY
-# class S2RNode(MMK2JOY):
-class S2RNode(MMK2Base):
+class S2RNode(MMK2ROS2):
     gadgets_names = [
         "apple"     , "book" , "cup"  , "kettle"      , "scissors",
         "timeclock" , "wood" , "xbox" , "yellow_bowl" , "toy_cabinet"
@@ -62,7 +65,6 @@ class S2RNode(MMK2Base):
 
     def __init__(self, config):
         super().__init__(config)
-
         # self.options.frame = mujoco.mjtFrame.mjFRAME_SITE.value
         # self.options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
         # self.options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
@@ -168,7 +170,7 @@ class S2RNode(MMK2Base):
         for p, d in zip(props_toy, draw_door_toy):
             self.mj_data.qpos[self.props_info[p+"_02"]:self.props_info[p+"_02"]+3] = self.mj_data.body(d).xpos[:]
 
-        sel_R1_prop_id = np.random.randint(0, len(self.props_names))
+        sel_R1_prop_id = np.random.randint(0, len(self.boxes_info))
         self.boxes_choice_ids = np.random.choice(np.arange(0, len(s2r2025_position_info["cabinet"]["position"])), size=len(self.box_names), replace=False)
         for i, (n, qid) in enumerate(self.boxes_info.items()):
             self.mj_data.qpos[qid:qid+3] = s2r2025_position_info["cabinet"]["position"][self.boxes_choice_ids[i]][0]
@@ -339,18 +341,37 @@ class S2RNode(MMK2Base):
             raise ValueError(f"Invalid round_id : {self.round_id}")
 
 if __name__ == "__main__":
+    rclpy.init()
     np.set_printoptions(precision=3, suppress=True, linewidth=200)
-    np.random.seed(0)
+ 
+    parser = argparse.ArgumentParser(description='Run server with specified parameters. \ne.g. python3 s2r_server.py --round_id 1 --random_seed 0')
+    parser.add_argument('--round_id', type=int, choices=[1, 2, 3], help='tasks round index', required=True)
+    parser.add_argument('--random_seed', type=int, help='random seed', default=0, required=False)
+    args = parser.parse_args()
+    print(f"args.random_seed = {args.random_seed} type={type(args.random_seed)}")
 
-    # rospy.init_node('mmk2_mujoco_node', anonymous=True)
+    cfg.round_id = args.round_id
+    np.random.seed(args.random_seed)
 
     cfg.init_key = "pick"
-    cfg.round_id = 3
     sim_node = S2RNode(cfg)
     obs = sim_node.reset()
-    action = sim_node.init_joint_ctrl.copy()
 
-    while sim_node.running:
-        # sim_node.teleopProcess()
-        # obs, _, _, _, _ = sim_node.step(sim_node.target_control)
-        obs, _, _, _, _ = sim_node.step(action)
+    spin_thread = threading.Thread(target=lambda:rclpy.spin(sim_node))
+    spin_thread.start()
+
+    pubtopic_thread = threading.Thread(target=sim_node.thread_pubros2topic, args=(30,))
+    pubtopic_thread.start()
+
+    try:
+        while sim_node.running:
+            sim_node.step(sim_node.target_control)
+
+    except KeyboardInterrupt:
+        pass
+
+    finally:
+        sim_node.destroy_node()
+        rclpy.shutdown()
+        pubtopic_thread.join()
+        spin_thread.join()

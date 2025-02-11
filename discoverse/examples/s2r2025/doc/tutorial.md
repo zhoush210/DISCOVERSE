@@ -2,7 +2,7 @@
 
 ```bash
 cd DISCOVERSE/discoverse/examples/s2r2025/docker
-docker build -f Dockerfile.server -t discoverse:s2r_server <PATH-TO-DISCOVERSE> .
+docker build -f Dockerfile.server -t discoverse:s2r_server <PATH-TO-DISCOVERSE>
 
 cd DISCOVERSE
 docker run -dit --rm \

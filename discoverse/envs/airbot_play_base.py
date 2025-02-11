@@ -88,7 +88,8 @@ class AirbotPlayBase(SimulatorBase):
             "jf"   : self.sensor_joint_force.tolist(),
             "ep"   : self.sensor_endpoint_posi_local.tolist(),
             "eq"   : self.sensor_endpoint_quat_local.tolist(),
-            "img"  : self.img_rgb_obs_s
+            "img"  : self.img_rgb_obs_s,
+            "depth" : self.img_depth_obs_s
         }
         return self.obs
 

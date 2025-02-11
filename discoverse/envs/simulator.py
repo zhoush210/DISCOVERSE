@@ -364,15 +364,19 @@ class SimulatorBase:
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
             self.update_gs_scene()
 
+        depth_rendering = self.renderer._depth_rendering        
+        self.renderer.disable_depth_rendering()
         self.img_rgb_obs_s = {}
         for id in self.config.obs_rgb_cam_id:
             img = self.getRgbImg(id)
             self.img_rgb_obs_s[id] = img
 
+        self.renderer.enable_depth_rendering()
         self.img_depth_obs_s = {}
         for id in self.config.obs_depth_cam_id:
             img = self.getDepthImg(id)
             self.img_depth_obs_s[id] = img
+        self.renderer._depth_rendering = depth_rendering
 
         if not self.renderer._depth_rendering:
             if self.cam_id in self.config.obs_rgb_cam_id:
