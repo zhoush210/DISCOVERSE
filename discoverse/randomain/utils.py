@@ -51,6 +51,7 @@ class SampleforDR():
                 mask = np.zeros_like(geom_ids_ori, dtype=np.uint8)
                 start = simnode.mj_model.body(self.robot_parts[0]).geomadr
                 end = start + simnode.mj_model.body(self.robot_parts[0]).geomnum - 1
+                roboplace = (start<=geom_ids_ori) & (geom_ids_ori<=end)
                 for part in self.robot_parts[1:]:
                     geomadr = simnode.mj_model.body(part).geomadr
                     geomnum = simnode.mj_model.body(part).geomnum
@@ -59,11 +60,12 @@ class SampleforDR():
                     if geomadr == end + 1:
                         end = geomend
                     else:
-                        mask[np.where((start<=geom_ids_ori) & (geom_ids_ori<=end))] = 255
+                        roboplace = ((start<=geom_ids_ori) & (geom_ids_ori<=end)) | roboplace
                         start = geomadr
                         end = geomend
-                    
-                mask[np.where((start<=geom_ids_ori) & (geom_ids_ori<=end))] = 255
+
+                roboplace = ((start<=geom_ids_ori) & (geom_ids_ori<=end)) | roboplace
+                mask[roboplace] = 255
                 frames['robot'] = mask
 
             frames['background'] = background_mask([frame for frame in frames.values()])
