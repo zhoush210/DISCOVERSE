@@ -16,3 +16,6 @@ submodules*
 *_pb2*.py
 .vscode
 *.json
+*.safetensors
+*.pth
+discoverse/randomain/models

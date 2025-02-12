@@ -1,9 +1,7 @@
-from PIL import Image as PImage
-import argparse
-import random
 import cv2
-import numpy as np
-import torch
+import shutil
+import random
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 from params_proto.hyper import Sweep
 
@@ -38,7 +36,7 @@ def parse_args():
     parser.add_argument('--fore_strength', type=float, default=2.0, help="Foreground strength")
     
     # flow compute
-    parser.add_argument('--flow_interval', type=int, default=3, help="Frame interval for flow computation")
+    parser.add_argument('--flow_interval', type=int, default=3, help="Frame interval for flow computation, set 1 for no flow interval")
     parser.add_argument('--flow_method', type=str, default="raft", help="Method for flow computation (rgb or raft)")
     parser.add_argument('--raft_model_path', type=str, default="./models/flow/raft-small.pth", help="Path to RAFT model checkpoint")
     parser.add_argument('--raft_small', default=True, help="Use small RAFT model")
@@ -65,9 +63,10 @@ def main(args):
     )
     
     input_keys = ['cam', 'depth', 'background'] + args.fore_objs
-    work_dir = os.path.join(DISCOVERSE_ROOT_DIR, f"data/randomain/{args.task_name}/{args.work_dir}/{args.cam_id}")
+    work_dir = os.path.join(DISCOVERSE_ROOT_DIR, f"data/{args.task_name}/segment/{args.work_dir}/{args.cam_id}")
     input_paths = {k: f'{work_dir}/{k}.mp4' for k in input_keys}
     output_path = f'{work_dir}/output/{args.num_steps}.mp4'
+
     prompt_path = os.path.join(DISCOVERSE_ROOT_DIR, f'discoverse/randomain/prompts/{args.task_name}/prompts.jsonl')
     prompts = Sweep.read(prompt_path)
     
@@ -77,13 +76,16 @@ def main(args):
         caps[key] = cv2.VideoCapture(path)
         if not caps[key].isOpened():
             raise ValueError(f"cannot open video: {path}")
-        
+
     fps = caps['cam'].get(cv2.CAP_PROP_FPS)
     frame_width = int(caps['cam'].get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(caps['cam'].get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # output
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    if os.path.exists(os.path.dirname(output_path)):
+        shutil.rmtree(os.path.dirname(output_path))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
     
     # 读取视频

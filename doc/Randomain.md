@@ -18,14 +18,27 @@ pip install -r requirements.txt
 ```
 
 * **模型部署**
+- `checkpoints`:[sd_xl_turbo_1.0_fp16](https://huggingface.co/stabilityai/sdxl-turbo/blob/main/sd_xl_turbo_1.0_fp16.safetensors)
+  
+- `controlnet`:[controlnet_depth_sdxl_1.0](https://huggingface.co/diffusers/controlnet-depth-sdxl-1.0/blob/main/diffusion_pytorch_model.safetensors)
+  
+- `vae`:[sdxl_vae](https://huggingface.co/stabilityai/sdxl-vae/blob/main/diffusion_pytorch_model.safetensors)
 
-  - `checkpoints`:[sd_xl_turbo_1.0_fp16](https://huggingface.co/stabilityai/sdxl-turbo/blob/main/sd_xl_turbo_1.0_fp16.safetensors)
+分别部署于本目录下`models`下的同名文件夹中，并在`models/extra_model_paths.yaml`中添加模型所在目录路径，修改后如下：
 
-  - `controlnet`:[controlnet_depth_sdxl_1.0](https://huggingface.co/diffusers/controlnet-depth-sdxl-1.0/blob/main/diffusion_pytorch_model.safetensors)
+```bash
+randoma
+├── models
+│   ├── checkpoints
+│   │   └── sd_xl_turbo_1.0_fp16.safetensors
+│   ├── controlnet
+│   │   └── controlnet_depth_sdxl_1.0.safetensors
+│   ├── extra_model_paths.yaml
+│   └── vae
+│       └── sdxl_vae.safetensors
+```
 
-  - `vae`:[sdxl_vae](https://huggingface.co/stabilityai/sdxl-vae/blob/main/diffusion_pytorch_model.safetensors)
 
-分别部署于本目录下`models`下的同名文件夹中，并在`models/extra_model_paths.yaml`中添加模型所在目录路径
 
 * **路径链接**
 
