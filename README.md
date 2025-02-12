@@ -141,7 +141,7 @@ We currently provide the entire process of data collection, model training, and 
 
 ### Diverse images
 
-https://github.com/user-attachments/assets/389543f6-0ba5-4a7e-9b1d-3ba915049ec5
+https://github.com/user-attachments/assets/848db380-557c-469d-b274-2c9addf0b6bb
 
 Thanks to the open-sourcing of the [lucidsim](https://github.com/lucidsim/lucidsim), we have incorporated the image randomization feature into the emulator. Please follow the content in [document](doc/Randomain.md) to implement this feature.
 
