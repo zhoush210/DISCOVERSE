@@ -57,9 +57,12 @@ export COMFYUI_CONFIG_PATH=/path/to/extra_model_paths.yaml
 
 ```python
 from discoverse.randomain.utils import SampleforDR
-samples = SampleforDR(objs=objs, robot_parts=robot_parts, cam_ids=cfg.obs_rgb_cam_id, 												save_dir=save_dir, fps=cfg.render_set['fps'])
+samples = SampleforDR(objs=objs, robot_parts=robot_parts, 
+                      cam_ids=cfg.obs_rgb_cam_id, save_dir=save_dir,
+                      fps=cfg.render_set['fps'], max_vis_dis=max_vis_dis)
 # objs 操作对象 e.g.['block_green', 'bowl_pink']
 # robot_parts 机器人部件名称 e.g. cfg.rb_link_list
+# max_vis_dis 采样depth时的最大可视距离(m)，默认值为1，影响depth保存时的归一化
 ```
 
 2. 在线采样
