@@ -21,13 +21,14 @@ def background_mask(foreground_list):
     return results_np
 
 class SampleforDR():
-    def __init__(self, objs, robot_parts, cam_ids, save_dir, fps):
+    def __init__(self, objs, robot_parts, cam_ids, save_dir, fps, max_vis_dis=1.0):
         self.objs = objs
         self.cam_ids = cam_ids
         self.results = [[] for cam_id in self.cam_ids]
         self.save_dir = save_dir
         self.fps = fps
         self.robot_parts = robot_parts
+        self.max_vis_dis = max_vis_dis
 
     def reset(self):
         self.results = [[] for cam_id in self.cam_ids]
@@ -65,7 +66,11 @@ class SampleforDR():
             frames['background'] = background_mask([frame for frame in frames.values()])
             frames['cam'] = simnode.obs["img"][cam_id]
             depth = simnode.obs["depth"][cam_id].squeeze()
-            frames['depth'] = np.clip(depth * 1e3, 0, 65535).astype(np.uint16)
+            if self.max_vis_dis >= 1.0:
+                depth = np.clip(depth/self.max_vis_dis, 0, 1) 
+            else:
+                 depth = np.clip(depth, 0, self.max_vis_dis) # 此时不需要缩放
+            frames['depth'] = (depth * 255).astype(np.uint8)
 
             self.results[cam_id].append(frames)
 
