@@ -55,8 +55,8 @@ cfg.sync         = True
 cfg.headless     = False
 cfg.render_set   = {
     "fps"    : 20,
-    "width"  : 448,
-    "height" : 448
+    "width"  : 640,
+    "height" : 480
 }
 cfg.obs_rgb_cam_id = [0, 1]
 cfg.save_mjb_and_task_config = True
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument("--save_segment", action="store_true", help="save segment videos")
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
@@ -78,6 +79,11 @@ if __name__ == "__main__":
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/block_place")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+
+    if args.save_segment:
+        cfg.obs_depth_cam_id = list(set(cfg.obs_rgb_cam_id + ([] if cfg.obs_depth_cam_id is None else cfg.obs_depth_cam_id)))
+        from discoverse.randomain.utils import SampleforDR
+        samples = SampleforDR(objs=cfg.obj_list[2:], robot_parts=cfg.rb_link_list, cam_ids=cfg.obs_rgb_cam_id, save_dir=os.path.join(save_dir, "segment"), fps=cfg.render_set["fps"])
 
     sim_node = SimNode(cfg)
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
@@ -104,6 +110,8 @@ if __name__ == "__main__":
             stm.reset()
             action[:] = sim_node.target_control[:]
             act_lst, obs_lst = [], []
+            if args.save_segment:
+                samples.reset()
 
         try:
             if stm.trigger():
@@ -164,6 +172,8 @@ if __name__ == "__main__":
         if len(obs_lst) < sim_node.mj_data.time * cfg.render_set["fps"]:
             act_lst.append(action.tolist().copy())
             obs_lst.append(obs)
+            if args.save_segment:
+                samples.sampling(sim_node)
 
         if stm.state_idx >= stm.max_state_cnt:
             if sim_node.check_success():
@@ -171,6 +181,10 @@ if __name__ == "__main__":
                 process = mp.Process(target=recoder_airbot_play, args=(save_path, act_lst, obs_lst, cfg))
                 process.start()
                 process_list.append(process)
+                if args.save_segment:
+                    seg_process = mp.Process(target=samples.save)
+                    seg_process.start()
+                    process_list.append(seg_process)
 
                 data_idx += 1
                 print("\r{:4}/{:4} ".format(data_idx, data_set_size), end="")

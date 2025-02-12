@@ -18,7 +18,6 @@ def background_mask(foreground_list):
     results_np = np.ones_like(np.array(foreground_list[0]))*255
     foreground = np.any(np.array(foreground_list)>127, axis=0)
     results_np[foreground] = 0
-
     return results_np
 
 class SampleforDR():
@@ -35,6 +34,17 @@ class SampleforDR():
 
     # sample videos for randomization
     def sampling(self, simnode:SimulatorBase):
+        if not hasattr(self, "robot_geom_start") and self.robot_parts:
+            self.robot_geom_start = 1e6
+            self.robot_geom_end = 0
+            for part in self.robot_parts:
+                start = simnode.mj_model.body(part).geomadr
+                end = simnode.mj_model.body(part).geomadr + simnode.mj_model.body(part).geomnum
+                self.robot_geom_start = min(self.robot_geom_start, start)
+                self.robot_geom_end = max(self.robot_geom_end, end)
+
+        renderer_seg = simnode.renderer._segmentation_rendering
+        renderer_depth = simnode.renderer._depth_rendering
         for cam_id in self.cam_ids:
             simnode.renderer.enable_segmentation_rendering()
             simnode.renderer.update_scene(simnode.mj_data, simnode.camera_names[cam_id], simnode.options)
@@ -44,36 +54,23 @@ class SampleforDR():
             frames = {}
             for obj in self.objs:
                 mask = np.zeros_like(geom_ids_ori, dtype=np.uint8)
-                mask[np.where((simnode.mj_model.body(obj).geomadr <= geom_ids_ori) & (geom_ids_ori < simnode.mj_model.body(obj).geomadr + simnode.mj_model.body(obj).geomnum))] = 255
+                mask[(simnode.mj_model.body(obj).geomadr <= geom_ids_ori) & (geom_ids_ori < simnode.mj_model.body(obj).geomadr + simnode.mj_model.body(obj).geomnum)] = 255
                 frames[obj] = mask
             
             if self.robot_parts:
                 mask = np.zeros_like(geom_ids_ori, dtype=np.uint8)
-                start = simnode.mj_model.body(self.robot_parts[0]).geomadr
-                end = start + simnode.mj_model.body(self.robot_parts[0]).geomnum - 1
-                roboplace = (start<=geom_ids_ori) & (geom_ids_ori<=end)
-                for part in self.robot_parts[1:]:
-                    geomadr = simnode.mj_model.body(part).geomadr
-                    geomnum = simnode.mj_model.body(part).geomnum
-                    geomend = geomadr + geomnum - 1
-                    
-                    if geomadr == end + 1:
-                        end = geomend
-                    else:
-                        roboplace = ((start<=geom_ids_ori) & (geom_ids_ori<=end)) | roboplace
-                        start = geomadr
-                        end = geomend
-
-                roboplace = ((start<=geom_ids_ori) & (geom_ids_ori<=end)) | roboplace
-                mask[roboplace] = 255
+                mask[(self.robot_geom_start <= geom_ids_ori) & (geom_ids_ori < self.robot_geom_end)] = 255
                 frames['robot'] = mask
 
             frames['background'] = background_mask([frame for frame in frames.values()])
-            frames['cam'] = simnode.getRgbImg(cam_id)
-            depth = simnode.getDepthImg(cam_id).squeeze()
-            frames['depth'] = (depth * 255).astype(np.uint8)
+            frames['cam'] = simnode.obs["img"][cam_id]
+            depth = simnode.obs["depth"][cam_id].squeeze()
+            frames['depth'] = np.clip(depth * 1e3, 0, 65535).astype(np.uint16)
 
             self.results[cam_id].append(frames)
+
+        simnode.renderer._segmentation_rendering = renderer_seg
+        simnode.renderer._depth_rendering = renderer_depth
     
     def save(self):
         if not os.path.exists(self.save_dir):
