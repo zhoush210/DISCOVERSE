@@ -1,6 +1,9 @@
 [submodule "submodules/diff-gaussian-rasterization"]
 	path = submodules/diff-gaussian-rasterization
 	url = https://github.com/ashawkey/diff-gaussian-rasterization.git
+[submodule "submodules/ComfyUI"]
+	path = submodules/ComfyUI
+	url = https://github.com/comfyanonymous/ComfyUI.git
 [submodule "policies/act"]
 	path = policies/act
 	url = https://github.com/OpenGHz/Imitate-All.git
