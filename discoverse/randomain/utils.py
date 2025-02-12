@@ -16,10 +16,8 @@ def read_frame(key, cap):
 # 背景掩码生成
 def background_mask(foreground_list):
     results_np = np.ones_like(np.array(foreground_list[0]))*255
-    for fore in foreground_list:
-        fore_np = np.array(fore)
-        fore_np = fore_np > 127
-        results_np[fore_np>0] = 0
+    foreground = np.any(np.array(foreground_list)>127, axis=0)
+    results_np[foreground] = 0
 
     return results_np
 
@@ -31,6 +29,9 @@ class SampleforDR():
         self.save_dir = save_dir
         self.fps = fps
         self.robot_parts = robot_parts
+
+    def reset(self):
+        self.results = [[] for cam_id in self.cam_ids]
 
     # sample videos for randomization
     def sampling(self, simnode:SimulatorBase):
@@ -48,8 +49,21 @@ class SampleforDR():
             
             if self.robot_parts:
                 mask = np.zeros_like(geom_ids_ori, dtype=np.uint8)
-                for part in self.robot_parts:
-                    mask[np.where((simnode.mj_model.body(part).geomadr <= geom_ids_ori) & (geom_ids_ori < simnode.mj_model.body(part).geomadr + simnode.mj_model.body(part).geomnum))] = 255
+                start = simnode.mj_model.body(self.robot_parts[0]).geomadr
+                end = start + simnode.mj_model.body(self.robot_parts[0]).geomnum - 1
+                for part in self.robot_parts[1:]:
+                    geomadr = simnode.mj_model.body(part).geomadr
+                    geomnum = simnode.mj_model.body(part).geomnum
+                    geomend = geomadr + geomnum - 1
+                    
+                    if geomadr == end + 1:
+                        end = geomend
+                    else:
+                        mask[np.where((start<=geom_ids_ori) & (geom_ids_ori<=end))] = 255
+                        start = geomadr
+                        end = geomend
+                    
+                mask[np.where((start<=geom_ids_ori) & (geom_ids_ori<=end))] = 255
                 frames['robot'] = mask
 
             frames['background'] = background_mask([frame for frame in frames.values()])
