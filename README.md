@@ -139,6 +139,12 @@ python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 
 We currently provide the entire process of data collection, model training, and inference of the act algorithm in the simulator. You can refer to [Data Collection and Format Conversion](./doc/data.md), [Training](./doc/training.md), [Inference](./doc/inference.md), and refer to the corresponding tutorials.
 
+### Diverse images
+
+https://github.com/user-attachments/assets/389543f6-0ba5-4a7e-9b1d-3ba915049ec5
+
+Thanks to the open-sourcing of the [lucidsim](https://github.com/lucidsim/lucidsim), we have incorporated the image randomization feature into the emulator. Please follow the content in [document](doc/Randomain.md) to implement this feature.
+
 ### Keyboard Operations
 
 - Press 'h' to print help

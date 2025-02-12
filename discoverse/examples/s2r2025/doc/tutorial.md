@@ -5,7 +5,7 @@ cd DISCOVERSE/discoverse/examples/s2r2025/docker
 docker build -f Dockerfile.server -t discoverse:s2r_server <PATH-TO-DISCOVERSE>
 
 cd DISCOVERSE
-docker run -dit --rm \
+docker run -dit \
     --name s2r_server \
     --gpus all \
     --privileged=true \
@@ -29,7 +29,7 @@ docker run -dit --rm \
 cd DISCOVERSE/discoverse/examples/s2r2025/docker
 docker build -f Dockerfile.client -t <YOUR-TEAM-NAME>:<TAG> .
 
-docker run -dit --rm \
+docker run -dit \
     --network=host \
     --ipc=host \
     --pid=host \
