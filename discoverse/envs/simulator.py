@@ -126,7 +126,8 @@ class SimulatorBase:
                     raise RuntimeError("无法创建GLFW窗口")
                 
                 glfw.make_context_current(self.window)
-                
+                glfw.swap_interval(1)
+
                 # 初始化OpenGL设置
                 gl.glClearColor(0.0, 0.0, 0.0, 1.0)
                 gl.glShadeModel(gl.GL_SMOOTH)
@@ -185,11 +186,11 @@ class SimulatorBase:
         self.config.render_set["window_title"] = "DISCOVERSE Simulator"  # 添加默认标题
 
     def render(self):
-        # 1. 更新高斯场景
+        self.render_cnt += 1
+
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
             self.update_gs_scene()
         
-        # 2. 获取RGB图像
         depth_rendering = self.renderer._depth_rendering
         self.renderer.disable_depth_rendering()
         self.img_rgb_obs_s = {}
@@ -197,7 +198,6 @@ class SimulatorBase:
             img = self.getRgbImg(id)
             self.img_rgb_obs_s[id] = img
         
-        # 3. 获取深度图像
         self.renderer.enable_depth_rendering()
         self.img_depth_obs_s = {}
         for id in self.config.obs_depth_cam_id:
@@ -205,7 +205,6 @@ class SimulatorBase:
             self.img_depth_obs_s[id] = img
         self.renderer._depth_rendering = depth_rendering
         
-        # 4. 准备渲染图像
         if not self.renderer._depth_rendering:
             if self.cam_id in self.config.obs_rgb_cam_id:
                 img_vis = self.img_rgb_obs_s[self.cam_id]
@@ -223,7 +222,6 @@ class SimulatorBase:
             else:
                 img_vis = None
 
-        # 5. GLFW渲染
         if not self.config.headless and self.window is not None:
             try:
                 if glfw.window_should_close(self.window):
@@ -233,30 +231,21 @@ class SimulatorBase:
                 glfw.make_context_current(self.window)
                 gl.glClear(gl.GL_COLOR_BUFFER_BIT)
                 
-                # 设置正确的视口
-                gl.glViewport(0, 0, self.config.render_set["width"], 
-                             self.config.render_set["height"])
+                gl.glViewport(0, 0, self.config.render_set["width"], self.config.render_set["height"])
                 
-                # 设置正确的光栅化位置
                 gl.glRasterPos2i(-1, -1)
-                
-                # 在 macOS 上进行像素缩放
-                if sys.platform == "darwin":  # 检查是否为 macOS 系统
+
+                if sys.platform == "darwin":
                     gl.glPixelZoom(2.0, 2.0)
                 
                 if img_vis is not None:
-                    # 将图像转换为opengl坐标
                     img_vis = img_vis[::-1]
-                    # 确保数据连续性
                     img_vis = np.ascontiguousarray(img_vis)
-                    # 直接绘制像素
                     gl.glDrawPixels(img_vis.shape[1], img_vis.shape[0], gl.GL_RGB, gl.GL_UNSIGNED_BYTE, img_vis.tobytes())
                 
-                # 交换缓冲区并处理事件
                 glfw.swap_buffers(self.window)
                 glfw.poll_events()
                 
-                # 帧率控制
                 if self.config.sync:
                     current_time = time.time()
                     wait_time = max(1.0/self.render_fps - (current_time - self.last_render_time), 0)
