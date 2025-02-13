@@ -36,13 +36,10 @@ def setRenderOptions(options):
     options.frame = mujoco.mjtFrame.mjFRAME_BODY.value
     pass
 
-#主进程
 class SimulatorBase:
-    # 核心属性
     running = True
     obs = None
 
-    # 相机相关
     cam_id = -1  # -1表示自由视角
     last_cam_id = -1
     render_cnt = 0
@@ -54,7 +51,6 @@ class SimulatorBase:
         [ 0,  1,  0],
     ])
 
-    # 鼠标状态
     mouse_pressed = {
         'left': False,
         'right': False,
@@ -65,10 +61,8 @@ class SimulatorBase:
         'y': 0
     }
 
-    # Mujoco选项
     options = mujoco.MjvOption()
 
-    # 初始化
     def __init__(self, config:BaseConfig):
         self.config = config
 
@@ -102,14 +96,13 @@ class SimulatorBase:
                 else:
                     self.gs_renderer.set_camera_fovy(self.mj_model.cam_fovy[self.cam_id] * np.pi / 180.0)
 
-        self.window = None  # 明确初始化window为None
-        self.glfw_initialized = False  # 添加GLFW初始化标志
+        self.window = None
+        self.glfw_initialized = False
         
-        # 确保render_set中包含所需的所有配置
         if not hasattr(self.config.render_set, "window_title"):
             self.config.render_set["window_title"] = "DISCOVERSE Simulator"
         
-        if not self.config.headless:
+        if self.config.enable_render and not self.config.headless:
             try:
                 if not glfw.init():
                     raise RuntimeError("无法初始化GLFW")
@@ -151,14 +144,10 @@ class SimulatorBase:
                 self.config.headless = True
                 self.window = None
 
-        # 1. 记录最后一次渲染的时间，用于控制帧率
         self.last_render_time = time.time()
-        # 2. 重置物理引擎的数据到初始状态
         mujoco.mj_resetData(self.mj_model, self.mj_data)
-        # 3. 计算物理状态（位置、速度、加速度等）
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
-    # 加载MJCF模型文件
     def load_mjcf(self):
         if self.mjcf_file.endswith(".xml"):
             self.mj_model = mujoco.MjModel.from_xml_path(self.mjcf_file)
@@ -192,11 +181,9 @@ class SimulatorBase:
 
         self.post_load_mjcf()
 
-    # 加载MJCF模型文件后，设置窗口标题
     def post_load_mjcf(self):
         self.config.render_set["window_title"] = "DISCOVERSE Simulator"  # 添加默认标题
 
-    # 3. ★在类中，只要调用render，就会把图像渲染到GLFW窗口
     def render(self):
         # 1. 更新高斯场景
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
@@ -263,13 +250,7 @@ class SimulatorBase:
                     # 确保数据连续性
                     img_vis = np.ascontiguousarray(img_vis)
                     # 直接绘制像素
-                    gl.glDrawPixels(
-                        img_vis.shape[1],
-                        img_vis.shape[0],
-                        gl.GL_RGB,
-                        gl.GL_UNSIGNED_BYTE,
-                        img_vis.tobytes()
-                    )
+                    gl.glDrawPixels(img_vis.shape[1], img_vis.shape[0], gl.GL_RGB, gl.GL_UNSIGNED_BYTE, img_vis.tobytes())
                 
                 # 交换缓冲区并处理事件
                 glfw.swap_buffers(self.window)
@@ -286,11 +267,8 @@ class SimulatorBase:
             except Exception as e:
                 print(f"渲染错误: {e}")
 
-    # 基于mujoco与高斯渲染器获取RGB图像，按G切换
     def getRgbImg(self, cam_id):
-        # 获取RGB图像, 3D场景渲染成2D图像
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
-            # 1.使用高斯渲染器
             if cam_id == -1:
                 self.renderer.update_scene(self.mj_data, self.free_camera, self.options)
                 self.gs_renderer.set_camera_fovy(self.mj_model.vis.global_.fovy * np.pi / 180.0)
@@ -307,11 +285,9 @@ class SimulatorBase:
                 self.renderer.update_scene(self.mj_data, self.camera_names[cam_id], self.options)
             else:
                 return None
-            # 2. 使用mujoco渲染器
             rgb_img = self.renderer.render()
             return rgb_img
 
-    # 基于mujoco与高斯渲染器获取深度图像，按D切换
     def getDepthImg(self, cam_id):
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
             if cam_id == -1:
@@ -338,43 +314,29 @@ class SimulatorBase:
             return depth_img
         
     def on_mouse_move(self, window, xpos, ypos):
-        """鼠标移动事件处理"""
-        if self.cam_id == -1:  # 只在自由视角模式下处理
+        if self.cam_id == -1:
             dx = xpos - self.mouse_pos['x']
             dy = ypos - self.mouse_pos['y']
             height = self.config.render_set["height"]
             
             action = None
-            # 左键拖动：旋转相机
             if self.mouse_pressed['left']:
                 action = mujoco.mjtMouse.mjMOUSE_ROTATE_V
-            # 右键拖动：移动相机
             elif self.mouse_pressed['right']:
                 action = mujoco.mjtMouse.mjMOUSE_MOVE_V
-            # 中键拖动：缩放相机
             elif self.mouse_pressed['middle']:
                 action = mujoco.mjtMouse.mjMOUSE_ZOOM
 
-            # 更新相机位置
             if action is not None:
                 self.camera_pose_changed = True
-                mujoco.mjv_moveCamera(
-                    self.mj_model, 
-                    action, 
-                    dx/height, 
-                    dy/height,
-                    self.renderer.scene,
-                    self.free_camera
-                )
+                mujoco.mjv_moveCamera(self.mj_model,  action,  dx/height,  dy/height, self.renderer.scene, self.free_camera)
 
         self.mouse_pos['x'] = xpos
         self.mouse_pos['y'] = ypos
 
     def on_mouse_button(self, window, button, action, mods):
-        """鼠标按键事件处理"""
         is_pressed = action == glfw.PRESS
         
-        # 更新按键状态
         if button == glfw.MOUSE_BUTTON_LEFT:
             self.mouse_pressed['left'] = is_pressed
         elif button == glfw.MOUSE_BUTTON_RIGHT:
@@ -383,19 +345,14 @@ class SimulatorBase:
             self.mouse_pressed['middle'] = is_pressed
 
     def on_key(self, window, key, scancode, action, mods):
-        """GLFW键盘回调函数"""
-
-        if action == glfw.PRESS:  # 只在按下时触发，避免持续触发
-            # 检查是否按下Ctrl键
+        if action == glfw.PRESS:
             is_ctrl_pressed = (mods & glfw.MOD_CONTROL)
             
-            # 处理组合键
             if is_ctrl_pressed:
                 if key == glfw.KEY_G:  # Ctrl + G
                     if self.config.use_gaussian_renderer:
                         self.show_gaussian_img = not self.show_gaussian_img
                         self.gs_renderer.renderer.need_rerender = True
-                        
                 elif key == glfw.KEY_D:  # Ctrl + D
                     if self.config.use_gaussian_renderer:
                         self.gs_renderer.renderer.need_rerender = True
@@ -403,27 +360,20 @@ class SimulatorBase:
                         self.renderer.disable_depth_rendering()
                     else:
                         self.renderer.enable_depth_rendering()
-
-            # 处理单个按键
             else:
                 if key == glfw.KEY_H:  # 'h': 显示帮助
                     self.printHelp()
-
                 elif key == glfw.KEY_P:  # 'p': 打印信息
                     self.printMessage()
-
                 elif key == glfw.KEY_R:  # 'r': 重置状态
                     self.reset()
-
                 elif key == glfw.KEY_ESCAPE:  # ESC: 切换到自由视角
                     self.cam_id = -1
                     self.camera_pose_changed = True
-                    
                 elif key == glfw.KEY_RIGHT_BRACKET:  # ']': 下一个相机
                     if self.mj_model.ncam:
                         self.cam_id += 1
                         self.cam_id = self.cam_id % self.mj_model.ncam
-                        
                 elif key == glfw.KEY_LEFT_BRACKET:  # '[': 上一个相机
                     if self.mj_model.ncam:
                         self.cam_id += self.mj_model.ncam - 1
@@ -464,7 +414,6 @@ class SimulatorBase:
         self.camera_pose_changed = True
 
     def update_gs_scene(self):
-        # 更新场景状态
         for name in self.config.obj_list + self.config.rb_link_list:
             trans, quat_wxyz = self.getObjPose(name)
             self.gs_renderer.set_obj_pose(name, trans, quat_wxyz)
@@ -500,15 +449,12 @@ class SimulatorBase:
         return camera_position, Rotation.from_matrix(rotation_matrix).as_quat()[[3,0,1,2]]
 
     def __del__(self):
-        """清理资源"""
         try:
-            # 清理GLFW资源
             if hasattr(self, 'window') and self.window is not None:
                 if glfw.get_current_context() is not None:
                     glfw.destroy_window(self.window)
                     self.window = None
             
-            # 终止GLFW
             if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
                 try:
                     if glfw.get_current_context() is not None:
@@ -529,7 +475,8 @@ class SimulatorBase:
     # ---------------------------------- Override ----------------------------------
     def reset(self):
         self.resetState()
-        self.render()
+        if self.config.enable_render:
+            self.render()
         self.render_cnt = 0
         return self.getObservation()
 
@@ -565,29 +512,22 @@ class SimulatorBase:
     # ------------------------------------------------------------------------------
 
     def step(self, action=None): # 主要的仿真步进函数
-        # 1. 执行多步物理仿真
-        for _ in range(self.decimation): # decimation是每次step执行的物理仿真次数
-            self.updateControl(action) # 更新控制输入,如机器人关节力矩
-            mujoco.mj_step(self.mj_model, self.mj_data) #★①物理引擎计算出场景状态
+        for _ in range(self.decimation):
+            self.updateControl(action)
+            mujoco.mj_step(self.mj_model, self.mj_data)
 
-        # 2. 检查是否终止
-        if self.checkTerminated(): # 检查是否终止
+        if self.checkTerminated():
             self.resetState()
         
         self.post_physics_step()
         if self.config.enable_render and self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
 
-        # 4. 返回观测、私有观测、奖励、终止状态、其他信息
         return self.getObservation(), self.getPrivilegedObservation(), self.getReward(), self.checkTerminated(), {}
 
     def view(self):
-        # 1. 更新时间
         self.mj_data.time += self.delta_t
-        # 2. 设置速度为0
         self.mj_data.qvel[:] = 0
-        # 3. 执行物理仿真
         mujoco.mj_forward(self.mj_model, self.mj_data)
-        # 4. 如果需要渲染，渲染图像
         if self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()

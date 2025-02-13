@@ -3,9 +3,9 @@ import mujoco
 import numpy as np
 
 from discoverse.envs import SimulatorBase
-from discoverse.utils import BaseConfig, PIDarray
+from discoverse.utils import BaseConfig, PIDController, PIDarray
 
-class ArmControlMode(enum.Enum):
+class ControlMode(enum.Enum):
     POSITION = 0
     MIT = 1
 
@@ -21,7 +21,7 @@ class AirbotArm(SimulatorBase):
 
         if config.eef_type == "none":
             self.nj = 6
-            self.pids = PIDarray(
+            self.arm_pids = PIDarray(
                 kps=np.array([225.0, 275.0, 350.0, 1.5, 2.50, 1.00]),
                 kis=np.array([  5.0,  25.0,  35.0, 2.5, 2.50, 2.50]),
                 kds=np.array([  3.0,   5.0,   7.0, 0.1, 0.25, 0.01]),
@@ -29,22 +29,28 @@ class AirbotArm(SimulatorBase):
             )
         elif config.eef_type == "G2":
             self.nj = 7
-            self.pids = PIDarray(
-                kps=np.array([225.0, 275.0, 350.0, 25.00, 25.00, 5.00,  1.0]),
-                kis=np.array([  5.0,  25.0,  35.0,  2.50,  2.50, 2.50,  0.5]),
-                kds=np.array([  3.0,   5.0,   7.0,  0.01,  0.01, 0.01,  0.1]),
-                integrator_maxs=np.array([0.1, 0.1, 0.1, 0.05, 0.05, 0.05,  0.1]),
+            self.arm_pids = PIDarray(
+                kps=np.array([225.0, 275.0, 350.0, 25.00, 25.00, 5.00]),
+                kis=np.array([  5.0,  25.0,  35.0,  2.50,  2.50, 2.50]),
+                kds=np.array([  3.0,   5.0,   7.0,  0.01,  0.01, 0.01]),
+                integrator_maxs=np.array([0.1, 0.1, 0.1, 0.05, 0.05, 0.05]),
             )
+            self.gripper_pid = PIDController(1.0, 0.5, 0.1, integrator_max=0.1)
+            self.gripper_control_mode = ControlMode.MIT
         elif config.eef_type == "E2B" or config.eef_type == "PE2":
             self.nj = 7
-            self.pids = PIDarray(
-                kps=np.array([225.0, 275.0, 350.0, 25.00, 25.00, 5.00,  0]),
-                kis=np.array([  5.0,  25.0,  35.0,  2.50,  2.50, 2.50,  0]),
-                kds=np.array([  3.0,   5.0,   7.0,  0.01,  0.01, 0.01,  0]),
-                integrator_maxs=np.array([0.1, 0.1, 0.1, 0.05, 0.05, 0.05,  0]),
+            self.arm_pids = PIDarray(
+                kps=np.array([225.0, 275.0, 350.0, 25.00, 25.00, 5.00]),
+                kis=np.array([  5.0,  25.0,  35.0,  2.50,  2.50, 2.50]),
+                kds=np.array([  3.0,   5.0,   7.0,  0.01,  0.01, 0.01]),
+                integrator_maxs=np.array([0.1, 0.1, 0.1, 0.05, 0.05, 0.05]),
             )
+            self.gripper_pid = PIDController(0.0, 0.0, 0.0, integrator_max=0)
+            self.gripper_control_mode = ControlMode.MIT
 
-        self.control_mode = ArmControlMode.POSITION
+        self.arm_control_mode = ControlMode.POSITION
+        self.narm = 6
+
         self.action = np.zeros(self.nj*3)
         # self.action[:self.nj] = target_position
         # self.action[self.nj:2*self.nj] = target_velocity
@@ -62,7 +68,7 @@ class AirbotArm(SimulatorBase):
         self.mit_kps = self.mj_model.actuator_gainprm[:self.nj, 0].copy()
         self.mit_kds = self.mj_model.actuator_gainprm[self.nj:self.nj*2, 0].copy()
 
-        self.swith_control_mode(self.control_mode)
+        self.switch_arm_control_mode(self.arm_control_mode)
 
     def printMessage(self):
         print("-" * 100)
@@ -76,41 +82,71 @@ class AirbotArm(SimulatorBase):
         # print("    actuator_gainprm =\n{}".format(self.mj_model.actuator_gainprm))
         # print("    actuator_biasprm =\n{}".format(self.mj_model.actuator_biasprm))
 
-    def setMITKPKD(self, kps, kds):
-        self.mj_model.actuator_gainprm[:self.nj, 0] =  kps # kps
-        self.mj_model.actuator_biasprm[:self.nj, 1] = -kps #-kps
-        self.mj_model.actuator_gainprm[self.nj:self.nj*2, 0] =  kds # kds
-        self.mj_model.actuator_biasprm[self.nj:self.nj*2, 2] = -kds #-kds
+    def setArmMITKPKD(self, kps, kds):
+        assert (type(kps) is float and type(kds) is float) or (len(kps) == self.narm and len(kds) == self.narm)
+        self.mj_model.actuator_gainprm[:self.narm, 0] =  kps
+        self.mj_model.actuator_biasprm[:self.narm, 1] = -kps
+        self.mj_model.actuator_gainprm[self.nj:self.nj+self.narm, 0] =  kds
+        self.mj_model.actuator_biasprm[self.nj:self.nj+self.narm, 2] = -kds
 
-    def swith_control_mode(self, target_control_mode):
-        if target_control_mode == ArmControlMode.POSITION:
-            self.action[:self.nj] = self.sensor_joint_qpos[:]
-            self.pids.reset()
-            self.setMITKPKD(0.0, 0.0)
-        elif target_control_mode == ArmControlMode.MIT:
-            self.setMITKPKD(self.mit_kps, self.mit_kds)
+    def setGripperMITKPKD(self, kp, kd):
+        if hasattr(self, "gripper_control_mode"):
+            self.mj_model.actuator_gainprm[self.narm, 0] =  kp
+            self.mj_model.actuator_biasprm[self.narm, 1] = -kp
+            self.mj_model.actuator_gainprm[self.nj+self.narm, 0] =  kd
+            self.mj_model.actuator_biasprm[self.nj+self.narm, 2] = -kd
+
+    def switch_arm_control_mode(self, target_control_mode):
+        if target_control_mode == ControlMode.POSITION:
+            self.action[:self.narm] = self.sensor_joint_qpos[:self.narm]
+            self.arm_pids.reset()
+            self.setArmMITKPKD(0.0, 0.0)
+        elif target_control_mode == ControlMode.MIT:
+            self.setArmMITKPKD(self.mit_kps[:self.narm], self.mit_kds[:self.narm])
         else:
             raise NotImplementedError("Invalid control mode {}".format(target_control_mode))
-        self.control_mode = target_control_mode
-        print("Control mode: {}".format(self.control_mode))
+        self.arm_control_mode = target_control_mode
+        print("Arm control mode: {}".format(self.arm_control_mode))
+    
+    def switch_gripper_control_mode(self, target_control_mode):
+        if hasattr(self, "gripper_control_mode"):
+            if target_control_mode == ControlMode.POSITION:
+                self.action[self.narm] = self.sensor_joint_qpos[self.narm]
+                self.gripper_pid.reset()
+                self.setGripperMITKPKD(0.0, 0.0)
+            elif target_control_mode == ControlMode.MIT:
+                self.setGripperMITKPKD(self.mit_kps[self.narm], self.mit_kds[self.narm])
+            else:
+                raise NotImplementedError("Invalid control mode {}".format(target_control_mode))
+            self.gripper_control_mode = target_control_mode
+            print("Gripper control mode: {}".format(self.gripper_control_mode))
 
     def windowKeyPressCallback(self, key):
         if key == ord('M') or key == ord("m"):
-            self.swith_control_mode(ArmControlMode((self.control_mode.value + 1) % len(ArmControlMode)))
+            self.switch_arm_control_mode(ControlMode((self.arm_control_mode.value + 1) % len(ControlMode)))
+        elif key == ord('N') or key == ord("n"):
+            self.switch_gripper_control_mode(ControlMode((self.gripper_control_mode.value + 1) % len(ControlMode)))
 
     def resetState(self):
         mujoco.mj_resetData(self.mj_model, self.mj_data)
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
     def updateControl(self, _):
-        if self.control_mode == ArmControlMode.POSITION:
-            self.ctr_torque[:] = self.pids.output(self.action[:self.nj] - self.sensor_joint_qpos, self.mj_model.opt.timestep)
-        elif self.control_mode == ArmControlMode.MIT:
-            self.ctr_position[:] = self.action[:self.nj]
-            self.ctr_velcity[:] = self.action[self.nj:2*self.nj]
-            self.ctr_torque[:] = self.action[2*self.nj:3*self.nj]
+        if self.arm_control_mode == ControlMode.POSITION:
+            self.ctr_torque[:self.narm] = self.arm_pids.output(self.action[:self.narm] - self.sensor_joint_qpos[:self.narm], self.mj_model.opt.timestep)
+        elif self.arm_control_mode == ControlMode.MIT:
+            self.ctr_position[:self.narm] = self.action[:self.narm]
+            self.ctr_velcity[:self.narm] = self.action[self.nj:self.nj+self.narm]
+            self.ctr_torque[:self.narm] = self.action[2*self.nj:2*self.nj+self.narm]
         else:
-            raise NotImplementedError("Invalid control mode {}".format(self.control_mode))
+            raise NotImplementedError("Invalid control mode {}".format(self.arm_control_mode))
+        if hasattr(self, "gripper_control_mode"):
+            if self.gripper_control_mode == ControlMode.POSITION:
+                self.ctr_torque[self.narm] = self.gripper_pid.output(self.action[self.narm] - self.sensor_joint_qpos[self.narm], self.mj_model.opt.timestep)
+            elif self.gripper_control_mode == ControlMode.MIT:
+                self.ctr_position[self.narm] = self.action[self.narm]
+                self.ctr_velcity[self.narm] = self.action[self.nj+self.narm]
+                self.ctr_torque[self.narm] = self.action[2*self.nj+self.narm]
 
     def checkTerminated(self):
         return False

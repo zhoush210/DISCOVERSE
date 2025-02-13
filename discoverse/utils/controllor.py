@@ -24,6 +24,10 @@ class PIDController:
         out = self.kp * error + self.ki * self.error_sum + self.kd * d_error
         return np.clip(out, -self.output_max, self.output_max)
 
+    def reset(self):
+        self.error_sum = 0
+        self.last_error = 0
+
 class PIDarray:
     def __init__(self, kps, kis, kds, integrator_maxs=None):
         assert len(kps) == len(kis) == len(kds), "kps, kis, kds must have the same length"
