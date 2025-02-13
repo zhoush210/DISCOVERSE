@@ -516,14 +516,15 @@ class SimulatorBase:
             self.updateControl(action)
             mujoco.mj_step(self.mj_model, self.mj_data)
 
-        if self.checkTerminated():
+        terminated = self.checkTerminated()
+        if terminated:
             self.resetState()
         
         self.post_physics_step()
         if self.config.enable_render and self.render_cnt-1 < self.mj_data.time * self.render_fps:
             self.render()
 
-        return self.getObservation(), self.getPrivilegedObservation(), self.getReward(), self.checkTerminated(), {}
+        return self.getObservation(), self.getPrivilegedObservation(), self.getReward(), terminated, {}
 
     def view(self):
         self.mj_data.time += self.delta_t
