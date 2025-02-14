@@ -1,0 +1,44 @@
+
+<mujocoinclude>
+  <mesh name="right_middle_1_part_0" file="../meshes/right_middle_1_convex_dec/part_0.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_1" file="../meshes/right_middle_1_convex_dec/part_1.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_2" file="../meshes/right_middle_1_convex_dec/part_2.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_3" file="../meshes/right_middle_1_convex_dec/part_3.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_4" file="../meshes/right_middle_1_convex_dec/part_4.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_5" file="../meshes/right_middle_1_convex_dec/part_5.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_6" file="../meshes/right_middle_1_convex_dec/part_6.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_7" file="../meshes/right_middle_1_convex_dec/part_7.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_8" file="../meshes/right_middle_1_convex_dec/part_8.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_9" file="../meshes/right_middle_1_convex_dec/part_9.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_10" file="../meshes/right_middle_1_convex_dec/part_10.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_11" file="../meshes/right_middle_1_convex_dec/part_11.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_12" file="../meshes/right_middle_1_convex_dec/part_12.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_13" file="../meshes/right_middle_1_convex_dec/part_13.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_14" file="../meshes/right_middle_1_convex_dec/part_14.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_15" file="../meshes/right_middle_1_convex_dec/part_15.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_16" file="../meshes/right_middle_1_convex_dec/part_16.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_17" file="../meshes/right_middle_1_convex_dec/part_17.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_18" file="../meshes/right_middle_1_convex_dec/part_18.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_19" file="../meshes/right_middle_1_convex_dec/part_19.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_20" file="../meshes/right_middle_1_convex_dec/part_20.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_21" file="../meshes/right_middle_1_convex_dec/part_21.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_22" file="../meshes/right_middle_1_convex_dec/part_22.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_23" file="../meshes/right_middle_1_convex_dec/part_23.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_24" file="../meshes/right_middle_1_convex_dec/part_24.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_25" file="../meshes/right_middle_1_convex_dec/part_25.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_26" file="../meshes/right_middle_1_convex_dec/part_26.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_27" file="../meshes/right_middle_1_convex_dec/part_27.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_28" file="../meshes/right_middle_1_convex_dec/part_28.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_29" file="../meshes/right_middle_1_convex_dec/part_29.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_30" file="../meshes/right_middle_1_convex_dec/part_30.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_31" file="../meshes/right_middle_1_convex_dec/part_31.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_32" file="../meshes/right_middle_1_convex_dec/part_32.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_33" file="../meshes/right_middle_1_convex_dec/part_33.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_34" file="../meshes/right_middle_1_convex_dec/part_34.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_35" file="../meshes/right_middle_1_convex_dec/part_35.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_36" file="../meshes/right_middle_1_convex_dec/part_36.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_37" file="../meshes/right_middle_1_convex_dec/part_37.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_38" file="../meshes/right_middle_1_convex_dec/part_38.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_39" file="../meshes/right_middle_1_convex_dec/part_39.obj" scale="1 1 1"/>
+  <mesh name="right_middle_1_part_40" file="../meshes/right_middle_1_convex_dec/part_40.obj" scale="1 1 1"/>
+</mujocoinclude>

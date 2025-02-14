@@ -1,0 +1,188 @@
+<mujoco model="urdf_right_2025_1_17">
+  <compiler angle="radian"/>
+  
+  <option solver="Newton" tolerance="1e-6" timestep=".001" integrator="RK4"/>
+  
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global offwidth="1920" offheight="1080" azimuth="-35" elevation="-50" fovy="8"/>
+  </visual>
+  
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <include file="convex_dec_include/base_link_asset_include.xml"/>
+    <include file="convex_dec_include/palm_Link_asset_include.xml"/>
+    <include file="convex_dec_include/palm_Link_1_asset_include.xml"/>
+
+    <include file="convex_dec_include/right_thumb_1_asset_include.xml"/>
+    <include file="convex_dec_include/right_thumb_2_asset_include.xml"/>
+    <include file="convex_dec_include/right_thumb_3_asset_include.xml"/>
+    <include file="convex_dec_include/right_thumb_4_asset_include.xml"/>
+
+    <include file="convex_dec_include/right_index_1_asset_include.xml"/>
+    <include file="convex_dec_include/right_index_2_asset_include.xml"/>
+
+    <include file="convex_dec_include/right_middle_1_asset_include.xml"/>
+    <include file="convex_dec_include/right_middle_2_asset_include.xml"/>
+
+    <include file="convex_dec_include/right_ring_1_asset_include.xml"/>
+    <include file="convex_dec_include/right_ring_2_asset_include.xml"/>
+
+    <include file="convex_dec_include/right_little_1_asset_include.xml"/>
+    <include file="convex_dec_include/right_little_2_asset_include.xml"/>
+  </asset>
+
+  <worldbody>
+    <light name="1" pos="0.5 0.5 0.5" dir="-1 -1 -1" diffuse="1 1 1" specular="0.5 0.5 0.5" castshadow="false"/>
+    <light name="2" pos="-0.5 -0.5 -0.5" dir="1 1 1" diffuse="1 1 1" specular="0.5 0.5 0.5" castshadow="false"/>
+
+    <body name="base_link" quat="0.707388 0 0 0.706825">
+      <include file="convex_dec_include/base_link_geom_include.xml"/>
+    </body>
+    
+    <body name="palm_link" pos="0 0 0.041" quat="0.707388 0 0 0.706825">
+      <include file="convex_dec_include/palm_Link_geom_include.xml"/>
+      <include file="sensor_include/palm_site_include.xml"/>
+    </body>
+
+    <body name="palm_link_1" pos="0 0 0.041" quat="0.707388 0 0 0.706825">
+      <include file="convex_dec_include/palm_Link_1_geom_include.xml"/>
+    </body>
+
+    <!-- Thumb -->
+    <body name="right_thumb_1" pos="0.0210314 0.0268833 0.069" quat="-0.706828 0 0 0.707386">
+      <inertial pos="-0.00178423 0.000649411 0.00488589" quat="0.609481 0.695344 0.128437 -0.358515" mass="0.00115519" diaginertia="6.58579e-08 5.87769e-08 3.77927e-08"/>
+      <joint name="right_thumb_1_joint" pos="0 0 0" axis="0 0 -1" range="0 1.15" actuatorfrcrange="-10 10" damping="0.01" frictionloss='0.01'/>
+      <include file="convex_dec_include/right_thumb_1_geom_include.xml"/>
+
+      <body name="right_thumb_2" pos="-0.0063016 0.011924 0.003" quat="0.122797 0.122797 0.696364 0.696361">
+        <inertial pos="0.0141071 0.013272 -0.0090503" quat="0.653094 0.270971 -0.653141 0.271017" mass="0.0064504" diaginertia="1.39688e-06 1.14175e-06 9.89349e-07"/>
+        <joint name="right_thumb_2_joint" pos="0 0 0" axis="0 0 1" range="0 0.55" actuatorfrcrange="-10 10" damping="0.01" frictionloss='0.01'/>
+        <include file="convex_dec_include/right_thumb_2_geom_include.xml"/>
+
+        <body name="right_thumb_3" pos="0.034968 0.021325 -0.0015">
+          <inertial pos="0.00937844 0.00404408 -0.00753947" quat="0.686654 0.690582 -0.161401 -0.159853" mass="0.00397613" diaginertia="4.9004e-07 4.24794e-07 3.76617e-07"/>
+          <joint name="right_thumb_3_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-10 10" damping="0.01" frictionloss='0.01'/>
+          <include file="convex_dec_include/right_thumb_3_geom_include.xml"/>
+
+          <body name="right_thumb_4" pos="0.018887 0.011501 -0.0002">
+            <inertial pos="0.0159974 0.00631063 -0.00734352" quat="0.306916 0.308192 0.637344 0.636092" mass="0.00913038" diaginertia="9.67919e-07 9.25691e-07 4.39361e-07"/>
+            <joint name="right_thumb_4_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-10 10" damping="0.01" frictionloss='0.01'/>
+            <include file="convex_dec_include/right_thumb_4_geom_include.xml"/>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <!-- Index -->
+    <body name="right_index_1" pos="0.000595471 0.0386785 0.1564" quat="0.000275312 0.000285093 0.719339 0.694659">
+      <inertial pos="-0.00228224 0.0122806 -0.00664924" quat="0.475493 0.523357 -0.475453 0.523401" mass="0.0072" diaginertia="1.32924e-06 1.28622e-06 5.76964e-07"/>
+      <joint name="right_index_1_joint" pos="0 0 0" axis="0 0 1" range="0 1.6" actuatorfrcrange="-10 10"/>
+      <include file="convex_dec_include/right_index_1_geom_include.xml"/>
+
+      <body name="right_index_2" pos="-0.002817 0.032654 -0.00055">
+        <inertial pos="0.000405081 0.0257028 -0.00609276" quat="0.703612 0.702971 0.0715956 0.0750715" mass="0.00968594" diaginertia="2.34184e-06 2.30201e-06 3.04584e-07"/>
+        <joint name="right_index_2_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-10 10"/>
+        <include file="convex_dec_include/right_index_2_geom_include.xml"/>
+      </body>
+    </body>
+
+    <!-- Middle -->
+    <body name="right_middle" pos="0.000578287 0.0170995 0.157" quat="0.000280245 0.000280246 0.707108 0.707105">
+      <inertial pos="-0.00229221 0.0122787 -0.00664924" quat="0.47528 0.52355 -0.47524 0.523594" mass="0.00719999" diaginertia="1.32924e-06 1.28622e-06 5.76964e-07"/>
+      <joint name="right_middle_1_joint" pos="0 0 0" axis="0 0 1" range="0 1.6" actuatorfrcrange="-1 1"/>
+      <include file="convex_dec_include/right_middle_1_geom_include.xml"/>
+
+      <body name="right_middle_2" pos="-0.0028436 0.032651 -0.00055">
+        <inertial pos="7.55635e-05 0.0274472 -0.00610051" quat="0.703921 0.703917 0.0669721 0.067155" mass="0.0104603" diaginertia="2.8477e-06 2.80695e-06 3.32744e-07"/>
+        <joint name="right_middle_2_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-1 1"/>
+        <include file="convex_dec_include/right_middle_2_geom_include.xml"/>
+      </body>
+    </body>
+
+    <!-- Ring -->
+    <body name="right_ring_1" pos="0.000561062 -0.00453065 0.15683" quat="0.00028749 0.000272808 0.688341 0.725387">
+      <inertial pos="-0.00240481 0.0122572 -0.00664924" quat="0.472873 0.525725 -0.472833 0.52577" mass="0.00719999" diaginertia="1.32924e-06 1.28622e-06 5.76964e-07"/>
+      <joint name="right_ring_1_joint" pos="0 0 0" axis="0 0 1" range="0 1.6" actuatorfrcrange="-10 10"/>
+      <include file="convex_dec_include/right_ring_1_geom_include.xml"/>
+      
+      <body name="right_ring_2" pos="-0.0031431 0.032624 -0.00055">
+        <inertial pos="0.000666831 0.0256973 -0.00609277" quat="0.703985 0.703327 0.0680113 0.0714909" mass="0.00968594" diaginertia="2.34184e-06 2.30201e-06 3.04584e-07"/>
+        <joint name="right_ring_2_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-10 10"/>
+        <include file="convex_dec_include/right_ring_2_geom_include.xml"/>
+      </body>
+    </body>
+
+    <!-- Little -->
+    <body name="right_little_1" pos="0.000544032 -0.0259164 0.15365" quat="0.000294525 0.000265198 0.669139 0.743137">
+      <inertial pos="-0.00232893 0.0122718 -0.00664923" quat="0.474497 0.52426 -0.474457 0.524304" mass="0.00719999" diaginertia="1.32924e-06 1.28622e-06 5.76964e-07"/>
+      <joint name="right_little_1_joint" pos="0 0 0" axis="0 0 1" range="0 1.6" actuatorfrcrange="-1 1"/>
+      <include file="convex_dec_include/right_little_1_geom_include.xml"/>
+
+      <body name="right_little_2" pos="-0.0029412 0.032643 -0.00055">
+        <inertial pos="0.00160931 0.0209121 -0.00610004" quat="0.702906 0.702909 0.0768667 0.0770299" mass="0.00759283" diaginertia="1.28167e-06 1.2391e-06 2.26513e-07"/>
+        <joint name="right_little_2_joint" pos="0 0 0" axis="0 0 1" range="0 3.14" actuatorfrcrange="-1 1"/>
+        <include file="convex_dec_include/right_little_2_geom_include.xml"/>
+      </body>
+    </body>
+
+    <light pos="0 0.5 1" dir="0 -1 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+  </worldbody>
+
+  <sensor>
+    <include file="sensor_include/palm_touch_include.xml"/>
+  </sensor>
+  
+  <keyframe>
+    <key name="0" qpos='0 0 0 0 0 0 0 0 0 0 0 0'/>
+    <key name="1" qpos='0.322 0.452629 0.584079 0.390745 0.0807463 0.0882835 0.0808664 0.0895169 1.49839 1.50633 1.50595 1.51428'/>
+    <key name="2" qpos='0 0 0 0 0 0 0 0 0 0 0 0'/>
+    <key name="3" qpos='0.322 0.452629 0.584079 0.390745 0.0807463 0.0882835 0.0808664 0.0895169 1.49839 1.50633 1.50595 1.51428'/>
+    <key name="4" qpos='0 0 0 0 0 0 0 0 0 0 0 0'/>
+    <key name="5" qpos='0.322 0.452629 0.584079 0.390745 0.0807463 0.0882835 0.0808664 0.0895169 1.49839 1.50633 1.50595 1.51428'/>
+    <key name="6" qpos='0 0 0 0 0 0 0 0 0 0 0 0'/>
+
+  </keyframe>
+
+  <actuator>
+    <!-- Thumb -->
+    <position name="right_thumb_1_joint" joint="right_thumb_1_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+    <position name="right_thumb_2_joint" joint="right_thumb_2_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+
+    <!-- Index -->
+    <position name="right_index_1_joint" joint="right_index_1_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+
+    <!-- Middle -->
+    <position name="right_middle_1_joint" joint="right_middle_1_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+
+    <!-- Ring -->
+    <position name="right_ring_1_joint" joint="right_ring_1_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+
+    <!-- Little -->
+    <position name="right_little_1_joint" joint="right_little_1_joint" kp="2" dampratio="0.1" inheritrange="1"/>
+  </actuator>
+
+  <equality>
+    <!-- Thumb -->
+    <joint name="right_thumb_3_joint" joint1="right_thumb_2_joint" joint2="right_thumb_3_joint" polycoef="0 0.8 0 0"/>
+    <joint name="right_thumb_4_joint" joint1="right_thumb_2_joint" joint2="right_thumb_4_joint" polycoef="0 1.2 0 0"/>
+
+    <!-- Index -->
+    <joint name="right_index_2_joint" joint1="right_index_1_joint" joint2="right_index_2_joint" polycoef="0 1 0 0"/>
+
+    <!-- Middle -->
+    <joint name="right_middle_2_joint" joint1="right_middle_1_joint" joint2="right_middle_2_joint" polycoef="0 1 0 0"/>
+
+    <!-- Ring -->
+    <joint name="right_ring_2_joint" joint1="right_ring_1_joint" joint2="right_ring_2_joint" polycoef="0 1 0 0"/>
+
+    <!-- Little -->
+    <joint name="right_little_2_joint" joint1="right_little_1_joint" joint2="right_little_2_joint" polycoef="0 1 0 0"/>
+  </equality>
+</mujoco>
