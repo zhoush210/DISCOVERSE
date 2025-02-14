@@ -4,6 +4,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import Image, JointState
@@ -49,12 +50,18 @@ class MMK2ROS2(MMK2Base, Node):
         self.joint_state.velocity = self.sensor_qvel[2:].tolist()
         self.joint_state.effort = self.sensor_force[2:].tolist()
 
+        # geometry
+        self.odom_puber = self.create_publisher(Odometry, '/mmk2/odom', 5)
+        self.odom_msg = Odometry()
+        self.odom_msg.header.frame_id = "odom"
+        self.odom_msg.child_frame_id = "mmk2_footprint"
+
         # image
         self.bridge = CvBridge()
-        self.head_color_puber  = self.create_publisher(Image, '/mmk2/camera/head_camera/color/image_raw', 2)
-        self.head_depth_puber  = self.create_publisher(Image, '/mmk2/camera/head_camera/aligned_depth_to_color/image_raw', 2)
-        self.left_color_puber  = self.create_publisher(Image, '/mmk2/camera/left_camera/color/image_raw', 2)
-        self.right_color_puber = self.create_publisher(Image, '/mmk2/camera/right_camera/color/image_raw', 2)
+        self.head_color_puber  = self.create_publisher(Image, '/mmk2/head_camera/color/image_raw', 2)
+        self.head_depth_puber  = self.create_publisher(Image, '/mmk2/head_camera/aligned_depth_to_color/image_raw', 2)
+        self.left_color_puber  = self.create_publisher(Image, '/mmk2/left_camera/color/image_raw', 2)
+        self.right_color_puber = self.create_publisher(Image, '/mmk2/right_camera/color/image_raw', 2)
 
         # command subscriber
         self.cmd_vel_suber = self.create_subscription(Twist, '/mmk2/cmd_vel', self.cmd_vel_callback, 5)
@@ -106,6 +113,15 @@ class MMK2ROS2(MMK2Base, Node):
             self.joint_state.velocity = self.sensor_qvel[2:].tolist()
             self.joint_state.effort = self.sensor_force[2:].tolist()
             self.joint_state_puber.publish(self.joint_state)
+
+            self.odom_msg.pose.pose.position.x = self.sensor_base_position[0]
+            self.odom_msg.pose.pose.position.y = self.sensor_base_position[1]
+            self.odom_msg.pose.pose.position.z = self.sensor_base_position[2]
+            self.odom_msg.pose.pose.orientation.w = self.sensor_base_orientation[0]
+            self.odom_msg.pose.pose.orientation.x = self.sensor_base_orientation[1]
+            self.odom_msg.pose.pose.orientation.y = self.sensor_base_orientation[2]
+            self.odom_msg.pose.pose.orientation.z = self.sensor_base_orientation[3]
+            self.odom_puber.publish(self.odom_msg)
 
             head_color_img_msg = self.bridge.cv2_to_imgmsg(self.obs["img"][0], encoding="rgb8")
             head_color_img_msg.header.stamp = time_stamp
