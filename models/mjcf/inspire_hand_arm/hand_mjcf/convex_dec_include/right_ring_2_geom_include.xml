@@ -1,0 +1,17 @@
+
+<mujocoinclude>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_0"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_2"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_3"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_4"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_5"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_6"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_7"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_8"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_9"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_10"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_11"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_12"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_ring_2_part_13"/>
+</mujocoinclude>

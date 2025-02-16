@@ -1,0 +1,29 @@
+
+<mujocoinclude>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_0" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_1" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_2" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_3" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_4" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_5" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_6" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_7" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_8" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_9" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_10" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_11" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_12" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_13" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_14" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_15" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_16" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_17" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_18" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_19" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_20" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_21" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_22" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_23" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_24" friction="5.0 0.5 0.1"/>
+  <geom type="mesh" rgba="0.203922 0.203922 0.203922 1" mesh="right_thumb_4_part_25" friction="5.0 0.5 0.1"/>
+</mujocoinclude>
