@@ -5,7 +5,7 @@ python3 policies/train.py <policy> [args]
 ```
 
 解释：
-- `policy`: 位置参数，指定策略的类型，目前支持的选项：act
+- `policy`: 位置参数，指定策略的类型，目前支持的选项：act、dp
 - `[args]`: 不同的策略有不同的命令行参数，请参考下面对应策略的说明
 
 ## act
@@ -48,3 +48,48 @@ python3 policies/train.py act -tn <task_name>
 ### 训练结果
 
 训练结果保存在`policies/act/my_ckpt`目录下。
+
+## dp
+
+### 依赖安装
+
+```bash
+pip install -r policies/dp/requirements.txt 
+cd policies/dp
+pip install -e .
+```
+
+### 训练配置
+参考的训练配置文件位于`policies/dp/configs/block_place.yaml`中，其中主要参数解释如下：
+- `task_path`: 推理时，程序会加载其中的`SimNode`类和实例`cfg`来创建仿真环境
+- `max_episode_steps`: 推理时动作执行总步数
+- `obs_keys`: 模型输入的obs名称，若有多个视角的图像，则在`image`后加上对应`cam_id`
+- `shape_meta`: 输入obs的形状及类型
+- `action_dim`: 动作维度
+- `obs_steps`: 输入`obs`时间步长
+- `action_steps`: 输出`action`时间步长
+
+训练特定任务时，可以复制一份配置文件并重命名为任务名，作为该任务特定的配置文件。
+
+
+### 数据集位置
+仿真采集的数据默认位于discoverse仓库根目录的data文件夹中，而训练时默认从policies/dp/data/zarr中寻找数据。因此，建议使用软连接的方式将前者链接到后者，命令如下（注意修改命令中的路径，并且需要绝对路径）：
+
+```bash
+ln -sf /absolute/path/to/discoverse/data /absolute/path/to/discoverse/policies/dp/data
+```
+
+### 训练命令
+
+```bash
+python3 policies/train.py dp +config-path=configs +config-name=block_place mode=train
+```
+
+其中:
+- `+config-path`: 配置文件所在路径
+- `+config-name`: 配置文件名
+- `mode`: 指定训练或是推理
+
+### 训练结果
+
+训练结果保存在`policies/dp/logs`目录下。

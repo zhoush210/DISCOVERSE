@@ -1,0 +1,67 @@
+# env
+task_path: discoverse/examples/tasks_airbot_play/block_place.py
+task_name: block_place
+abs_action: false
+dataset_path: data/zarr/block_place.zarr
+mode: train
+max_episode_steps: 150
+obs_keys: [ 'jq', 'image0', 'image1']
+shape_meta:
+  obs:
+    jq:
+      shape:
+      - 7
+      type: low_dim
+    image0:
+      shape:
+      - 3
+      - 240
+      - 320
+      type: rgb
+    image1:
+      shape:
+      - 3
+      - 240
+      - 320
+      type: rgb
+action_dim: 7
+obs_steps: 2
+action_steps: 8
+# obs_encoder
+rgb_model: resnet18
+resize_shape: null
+crop_shape: null
+random_crop: false
+use_group_norm: true
+use_seq: true
+# train
+device: cuda:0
+seed: 0
+gradient_steps: 200000
+batch_size: 16
+horizon: 10
+nn: dit
+diffusion: ddpm
+sample_steps: 5
+# optimizer
+lr: 0.0001
+# eval
+model_path: path/to/model
+eval_episodes: 5
+eval_freq: 10000
+save_video: true
+# log
+exp_name: abs_${abs_action}_${nn}_${diffusion}_sample_${sample_steps}_horizon_${horizon}
+save_path: logs
+project: Diffuser
+group: dp_pusht
+wandb_mode: offline
+log_freq: 10000
+save_freq: 10000
+work_dir: ${save_path}/${task_name}/${mode}/${exp_name}_${now:%Y%m%d_%H%M%S}
+# hydra
+hydra:
+  run:
+    dir: ${work_dir}
+  job:
+    chdir: false

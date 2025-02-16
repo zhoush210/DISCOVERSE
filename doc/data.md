@@ -25,3 +25,16 @@ python3 policies/act/data_process/raw_to_hdf5.py -md mujoco -dir data -tn <task_
 - `-vn`: 视频名，指定需要转换的视频文件名（无后缀），多个名称用空格隔开
 
 转换后的数据存放于`discoverse/data/hdf5`文件夹中。
+
+## dp
+
+将仿真采集的原始数据格式转换为DP算法中用到的zarr格式，命令如下：
+
+```bash
+python3 policies/dp.py  -dir data -tn <task_name> 
+```
+
+- `-dir`: 数据存放的根目录，默认为data
+- `-tn`: 任务名，程序将根据任务名从data目录中寻找相同名称的数据集文件夹
+
+转换后的数据存放于`discoverse/data/zarr`文件夹中。

@@ -31,3 +31,20 @@ python3 policies/infer.py act -tn <task_name> -mts 100 -ts 20241125-110709 -rn d
 - `-mts` 动作执行总步数，该命令行参数会覆盖配置文件中的`max_timesteps`
 - `-ts` 时间戳，对应训练得到的模型文件所在的以时间戳命名的文件夹，程序会根据任务名和时间戳在policies/act/my_ckpt目录下寻找对应的模型文件
 - `-rn` 数据采集时使用的脚本文件路径，例如`discoverse/examples/tasks_airbot_play/drawer_open.py`，程序会加载其中的`SimNode`类和`AirbotPlayCfg`的实例`cfg`来创建仿真环境
+
+## dp
+
+### 推理配置
+推理配置文件与训练配置文件相同
+
+### 推理命令
+
+```bash
+python3 policies/infer.py dp +config-path=configs +config-name=block_place mode=eval model_path=path/to/model
+```
+
+其中:
+- `+config-path`: 配置文件所在路径
+- `+config-name`: 配置文件名
+- `mode`: 指定训练或是推理
+- `model_path`: 模型权重路径

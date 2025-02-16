@@ -30,7 +30,9 @@ if __name__ == "__main__":
 
     args = sys.argv[2:]
     if policy == "act":
-        command = f"cd policies/act && python3 policy_evaluate.py -res mujoco "
+        command = f"cd policies/act && python policy_evaluate.py -res mujoco "
+    elif policy == "dp":
+        command = f"cd policies/dp && python train_eval.py "
     else:
         raise NotImplementedError(f"Policy {policy} is not implemented.")
 
