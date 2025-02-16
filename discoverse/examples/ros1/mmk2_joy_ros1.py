@@ -1,15 +1,37 @@
 import os
 import numpy as np
 from scipy.spatial.transform import Rotation
-
 import rospy
+import json
+import glfw
+import xml.etree.ElementTree as ET
 
 from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
 from discoverse.airbot_play import AirbotPlayFIK
 from discoverse.mmk2 import MMK2FIK
 from discoverse.utils.joy_stick_ros1 import JoyTeleopRos1
+from discoverse.utils import get_site_tmat, get_body_tmat
 
 from discoverse import DISCOVERSE_ASSERT_DIR
+
+def read_object_positions(xml_path):
+    # 解析XML文件
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # 用于存储物体信息（name, pos）
+    objects = []
+
+    # 遍历所有的<worldbody>下的<body>标签
+    for idx, body in enumerate(root.findall(".//worldbody/body")):
+        name = body.get("name")  # 获取物品名称
+        pos = body.get("pos")  # 获取位置属性
+        if name and pos:
+            # 打印物品名称及其位置，并存储物品信息
+            objects.append((idx + 1, name, pos))  # 物品编号从1开始
+            print(f"{idx + 1}. Object: {name}, Position: {pos}")
+
+    return objects
 
 class MMK2JOY(MMK2Base):
     arm_action_init_position = {
@@ -24,6 +46,7 @@ class MMK2JOY(MMK2Base):
     }
 
     target_control = np.zeros(19)
+    
     def __init__(self, config: MMK2Cfg):
         self.arm_action = config.init_key
         self.tctr_base = self.target_control[:2]
@@ -44,6 +67,8 @@ class MMK2JOY(MMK2Base):
         self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
 
         self.teleop = JoyTeleopRos1()
+
+        self.objects = []  # 用于存储物体信息
 
     def resetState(self):
         super().resetState()
@@ -119,6 +144,79 @@ class MMK2JOY(MMK2Base):
     def base_move(self, linear_vel, angular_vel):
         self.tctr_base[0] = linear_vel
         self.tctr_base[1] = angular_vel
+
+    def on_key(self, window, key, scancode, action, mods):
+        """重载GLFW键盘回调函数，保留父类处理逻辑"""
+        if action == glfw.PRESS:  # 只在按下时触发，避免持续触发
+            if key == glfw.KEY_O:  # 按下 'O' 键时保存状态到 JSON
+                print("left_end position:", get_site_tmat(self.mj_data, "lft_endpoint")[:3, 3])
+                print("right_end position:", get_site_tmat(self.mj_data, "rgt_endpoint")[:3, 3])
+                self.save_state_to_json()
+
+            # 调用父类的 on_key 函数，保留父类的按键处理逻辑
+            super().on_key(window, key, scancode, action, mods)
+
+    def save_state_to_json(self):
+        """保存机器人的当前状态到 JSON 文件"""
+        # 读取物体信息
+        xml_path = '/home/andy/DISCOVERSE/models/mjcf/tasks_mmk2/plate_coffeecup.xml'
+        self.objects = read_object_positions(xml_path)
+
+        # 提示用户选择物体编号
+        if self.objects:
+            print("\n请选择一个物体的编号:")
+            selected_idx = int(input(f"请输入编号（1 到 {len(self.objects)}）：")) - 1
+            if 0 <= selected_idx < len(self.objects):
+                selected_object = self.objects[selected_idx]
+                selected_name = selected_object[1]
+                selected_pos = get_body_tmat(self.mj_data, selected_name)[:3, 3]  # 物体的位置信息
+                print(f"选择了物体: {selected_name}, 位置: {selected_pos}")
+            else:
+                print("无效编号，保存失败。")
+                return
+        else:
+            print("未找到任何物体。")
+            return
+
+        # 获取机器人的当前状态，并调整为相对于物体的坐标
+        state_data = {
+            "object_name": selected_name,  # 使用选择的物体名称
+            "left_arm": {
+                "position_object_local": [round(coord - selected_pos[idx], 3) for idx, coord in enumerate(get_site_tmat(self.mj_data, "lft_endpoint")[:3, 3])],
+                "rotation_robot_local": [round(val, 3) for val in self.lft_end_euler],
+                "gripper": round(self.tctr_lft_gripper[0], 3),
+                "movement": "move"
+            },
+            "right_arm": {
+                "position_object_local": [round(coord - selected_pos[idx], 3) for idx, coord in enumerate(get_site_tmat(self.mj_data, "rgt_endpoint")[:3, 3])],
+                "rotation_robot_local": [round(val, 3) for val in self.rgt_end_euler],
+                "gripper": round(self.tctr_rgt_gripper[0], 3),
+                "movement": "stop"
+            },
+            "slide": [round(self.tctr_slide[0], 3)],
+            "head": [round(self.tctr_head[0], 3), round(self.tctr_head[1], 3)],
+            "delay_s": 0.0  # 如果需要其他数据也可以加
+        }
+
+        # 定义 JSON 文件保存路径
+        json_file_path = "discoverse/examples/ros1/robot_state.json"
+        
+        # 如果文件已存在，则加载已有数据并追加新状态，否则创建一个新文件
+        if os.path.exists(json_file_path):
+            with open(json_file_path, "r") as f:
+                data = json.load(f)
+        else:
+            data = []
+
+        # 添加当前状态到列表中
+        data.append(state_data)
+
+        # 将更新后的数据写入 JSON 文件
+        with open(json_file_path, "w") as f:
+            json.dump(data, f, indent=4)
+
+        print("当前状态已保存到 JSON 文件。")
+
 
     def printMessage(self):
         super().printMessage()
