@@ -1,0 +1,5 @@
+wandb
+numba
+zarr
+hydra-core
+omegaconf
