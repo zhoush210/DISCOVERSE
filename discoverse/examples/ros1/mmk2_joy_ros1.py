@@ -146,26 +146,25 @@ class MMK2JOY(MMK2Base):
         self.tctr_base[1] = angular_vel
 
     def on_key(self, window, key, scancode, action, mods):
-        """重载GLFW键盘回调函数，保留父类处理逻辑"""
-        if action == glfw.PRESS:  # 只在按下时触发，避免持续触发
-            if key == glfw.KEY_O:  # 按下 'O' 键时保存状态到 JSON
+        super().on_key(window, key, scancode, action, mods)
+        if action == glfw.PRESS:
+            if key == glfw.KEY_O:
                 print("left_end position:", get_site_tmat(self.mj_data, "lft_endpoint")[:3, 3])
                 print("right_end position:", get_site_tmat(self.mj_data, "rgt_endpoint")[:3, 3])
                 self.save_state_to_json()
 
-            # 调用父类的 on_key 函数，保留父类的按键处理逻辑
-            super().on_key(window, key, scancode, action, mods)
-
     def save_state_to_json(self):
         """保存机器人的当前状态到 JSON 文件"""
-        # 读取物体信息
-        xml_path = '/home/andy/DISCOVERSE/models/mjcf/tasks_mmk2/plate_coffeecup.xml'
-        self.objects = read_object_positions(xml_path)
+        self.objects = read_object_positions(self.mjcf_file)
 
         # 提示用户选择物体编号
         if self.objects:
             print("\n请选择一个物体的编号:")
-            selected_idx = int(input(f"请输入编号（1 到 {len(self.objects)}）：")) - 1
+            try:
+                selected_idx = int(input(f"请输入编号（1 到 {len(self.objects)}）：")) - 1
+            except ValueError:
+                print("无效编号，保存失败。")
+                return
             if 0 <= selected_idx < len(self.objects):
                 selected_object = self.objects[selected_idx]
                 selected_name = selected_object[1]
@@ -178,6 +177,16 @@ class MMK2JOY(MMK2Base):
             print("未找到任何物体。")
             return
 
+        select_arm = input("请选择要移动的机械臂（a/l/r）：")
+        if not select_arm in {"a", "l", "r"}:
+            print(("无效输入，保存失败。"))
+            return
+
+        try:
+            delay_time_s = float(input("请输入延迟时间（秒）："))
+        except ValueError:
+            delay_time_s = 0.0
+
         # 获取机器人的当前状态，并调整为相对于物体的坐标
         state_data = {
             "object_name": selected_name,  # 使用选择的物体名称
@@ -185,21 +194,21 @@ class MMK2JOY(MMK2Base):
                 "position_object_local": [round(coord - selected_pos[idx], 3) for idx, coord in enumerate(get_site_tmat(self.mj_data, "lft_endpoint")[:3, 3])],
                 "rotation_robot_local": [round(val, 3) for val in self.lft_end_euler],
                 "gripper": round(self.tctr_lft_gripper[0], 3),
-                "movement": "move"
+                "movement": "stop" if select_arm == "r" else "move"
             },
             "right_arm": {
                 "position_object_local": [round(coord - selected_pos[idx], 3) for idx, coord in enumerate(get_site_tmat(self.mj_data, "rgt_endpoint")[:3, 3])],
                 "rotation_robot_local": [round(val, 3) for val in self.rgt_end_euler],
                 "gripper": round(self.tctr_rgt_gripper[0], 3),
-                "movement": "stop"
+                "movement": "stop" if select_arm == "l" else "move"
             },
             "slide": [round(self.tctr_slide[0], 3)],
             "head": [round(self.tctr_head[0], 3), round(self.tctr_head[1], 3)],
-            "delay_s": 0.0  # 如果需要其他数据也可以加
+            "delay_s": delay_time_s
         }
 
         # 定义 JSON 文件保存路径
-        json_file_path = "discoverse/examples/ros1/robot_state.json"
+        json_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"scheme_{os.path.basename(self.mjcf_file).split('.')[0]}.json")
         
         # 如果文件已存在，则加载已有数据并追加新状态，否则创建一个新文件
         if os.path.exists(json_file_path):

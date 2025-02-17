@@ -64,7 +64,7 @@ pip install -e .
 - `task_path`: 推理时，程序会加载其中的`SimNode`类和实例`cfg`来创建仿真环境
 - `max_episode_steps`: 推理时动作执行总步数
 - `obs_keys`: 模型输入的obs名称，若有多个视角的图像，则在`image`后加上对应`cam_id`
-- `shape_meta`: 输入obs的形状及类型
+- `shape_meta`: 输入obs的形状及类型，注意img的尺寸需要和生成的图像尺寸一致
 - `action_dim`: 动作维度
 - `obs_steps`: 输入`obs`时间步长
 - `action_steps`: 输出`action`时间步长
@@ -82,12 +82,12 @@ ln -sf /absolute/path/to/discoverse/data /absolute/path/to/discoverse/policies/d
 ### 训练命令
 
 ```bash
-python3 policies/train.py dp +config-path=configs +config-name=block_place mode=train
+python3 policies/train.py dp --config-path=configs --config-name=block_place mode=train
 ```
 
 其中:
-- `+config-path`: 配置文件所在路径
-- `+config-name`: 配置文件名
+- `--config-path`: 配置文件所在路径
+- `--config-name`: 配置文件名
 - `mode`: 指定训练或是推理
 
 ### 训练结果

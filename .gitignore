@@ -19,3 +19,4 @@ submodules*
 *.safetensors
 *.pth
 discoverse/randomain/models
+policies/dp/logs
