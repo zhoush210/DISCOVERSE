@@ -46,7 +46,8 @@ class Env():
     def step(self, action):
         success = 0
         for act in action: #依次执行每个动作
-            obs, _, _, _, _ = self.simnode.step(act)
+            for _ in range(int(round(1. / self.simnode.render_fps / (self.simnode.delta_t)))):
+                obs, _, _, _, _ = self.simnode.step(act)
             self.obs_que.append(obs) #添加单个obs
             self.video_list.append(obs['img'])
             if self.simnode.check_success():

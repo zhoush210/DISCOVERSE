@@ -11,7 +11,7 @@ from discoverse.airbot_play import AirbotPlayFIK
 from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
 from discoverse.envs.airbot_play_base import AirbotPlayCfg
 from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
-from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play
+from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
 class SimNode(AirbotPlayTaskBase):
     def __init__(self, config: AirbotPlayCfg):
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     sim_node = SimNode(cfg)
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
-        shutil.copyfile(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
+        copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
         
     arm_fik = AirbotPlayFIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
 

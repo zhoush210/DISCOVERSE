@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torchvision
 
+import clip
 from diffuser.utils.crop_randomizer import CropRandomizer
 from diffuser.nn_condition import BaseNNCondition
 
@@ -53,6 +54,13 @@ def get_resnet(name, weights=None, **kwargs):
     resnet.fc = torch.nn.Identity()
     return resnet
 
+def get_clip_model(model_name="ViT-B/32", **kwargs):
+    """
+    model_name: CLIP model name, e.g., "ViT-B/32", "RN50"
+    """
+    model, preprocess = clip.load(model_name, **kwargs)
+    model.visual.fc = torch.nn.Identity()
+    return model
 
 class MultiImageObsCondition(BaseNNCondition):
 
@@ -95,7 +103,10 @@ class MultiImageObsCondition(BaseNNCondition):
 
         # rgb_model
         if 'resnet' in rgb_model_name:
-            rgb_model = get_resnet(rgb_model_name)
+            rgb_model = get_resnet(rgb_model_name, "IMAGENET1K_V1")
+            # rgb_model = get_resnet(rgb_model_name)
+        elif 'clip' in rgb_model_name:
+            rgb_model = get_clip_model()
         else:
             raise ValueError("Fatal rgb_model")
 

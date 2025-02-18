@@ -8,7 +8,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from discoverse.envs.airbot_play_base import AirbotPlayBase
 
-
 def recoder_airbot_play(save_path, act_lst, obs_lst, cfg):
     if os.path.exists(save_path):
         shutil.rmtree(save_path)

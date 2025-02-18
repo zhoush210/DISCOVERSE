@@ -35,16 +35,17 @@ python3 policies/infer.py act -tn <task_name> -mts 100 -ts 20241125-110709 -rn d
 ## dp
 
 ### 推理配置
+
 推理配置文件与训练配置文件相同
 
 ### 推理命令
 
 ```bash
-python3 policies/infer.py dp +config-path=configs +config-name=block_place mode=eval model_path=path/to/model
+python3 policies/infer.py dp --config-path=configs --config-name=block_place mode=eval model_path=path/to/model
 ```
 
 其中:
-- `+config-path`: 配置文件所在路径
-- `+config-name`: 配置文件名
+- `--config-path`: 配置文件所在路径
+- `--config-name`: 配置文件名
 - `mode`: 指定训练或是推理
 - `model_path`: 模型权重路径

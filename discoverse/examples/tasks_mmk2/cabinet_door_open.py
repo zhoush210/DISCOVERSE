@@ -9,7 +9,7 @@ import multiprocessing as mp
 
 from discoverse import DISCOVERSE_ROOT_DIR
 from discoverse.envs.mmk2_base import MMK2Cfg
-from discoverse.task_base import MMK2TaskBase, recoder_mmk2
+from discoverse.task_base import MMK2TaskBase, recoder_mmk2, copypy2
 from discoverse.utils import get_site_tmat, get_body_tmat, step_func, SimpleStateMachine
 
 class SimNode(MMK2TaskBase):
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     sim_node.teleop = None
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
-        shutil.copyfile(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
+        copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
 
     stm = SimpleStateMachine()
     stm.max_state_cnt = 16
