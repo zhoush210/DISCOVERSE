@@ -160,6 +160,9 @@ Thanks to the open-sourcing of the [lucidsim](https://github.com/lucidsim/lucids
 
 +   2025.01.13: DISCOVERSE is open source
 +   2025.01.16: add docker file
++   2025.01.14: The [S2R2025](sim2real.net/track/track?nav=S2R2025) competition is officially launched. We welcome everyone to sign up and participate, the [repository](https://github.com/DISCOVER-Robotics/SIM2REAL-2025.git).
++   2025.02.17: add dp baseline, thanks to [CleanDiffuserTeam](https://github.com/CleanDiffuserTeam/CleanDiffuser)
++   2025.02.19: add point cloud sensor
 
 ## ❔ Frequently Asked Questions
 
