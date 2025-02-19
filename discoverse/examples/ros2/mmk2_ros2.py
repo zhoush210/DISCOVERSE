@@ -7,9 +7,10 @@ from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
-from sensor_msgs.msg import Image, JointState
+from sensor_msgs.msg import Image, CameraInfo, JointState
 
 from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
+from discoverse.utils import camera2k
 
 cfg = MMK2Cfg()
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
@@ -63,12 +64,50 @@ class MMK2ROS2(MMK2Base, Node):
         self.left_color_puber  = self.create_publisher(Image, '/mmk2/left_camera/color/image_raw', 2)
         self.right_color_puber = self.create_publisher(Image, '/mmk2/right_camera/color/image_raw', 2)
 
+        # camera info publishers
+        self.head_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/color/camera_info', 2)
+        self.head_depth_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/aligned_depth_to_color/camera_info', 2)
+        self.left_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/left_camera/color/camera_info', 2)
+        self.right_color_info_puber = self.create_publisher(CameraInfo, '/mmk2/right_camera/color/camera_info', 2)
+
+        # Initialize camera info messages
+        self.head_color_info = CameraInfo()
+        self.head_depth_info = CameraInfo()
+        self.left_color_info = CameraInfo()
+        self.right_color_info = CameraInfo()
+
+        # Set camera info parameters
+        self.head_color_info.width = self.config.render_set["width"]
+        self.head_color_info.height = self.config.render_set["height"]
+        self.head_color_info.k = camera2k(self.mj_model.cam_fovy[0] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
+
+        self.head_depth_info.width = self.config.render_set["width"]
+        self.head_depth_info.height = self.config.render_set["height"]
+        self.head_depth_info.k = camera2k(self.mj_model.cam_fovy[0] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
+
+        self.left_color_info.width = self.config.render_set["width"]
+        self.left_color_info.height = self.config.render_set["height"]
+        self.left_color_info.k = camera2k(self.mj_model.cam_fovy[1] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
+
+        self.right_color_info.width = self.config.render_set["width"]
+        self.right_color_info.height = self.config.render_set["height"]
+        self.right_color_info.k = camera2k(self.mj_model.cam_fovy[2] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
+
+        # Publish camera info periodically
+        self.create_timer(1.0, self.publish_camera_info)
+
         # command subscriber
         self.cmd_vel_suber = self.create_subscription(Twist, '/mmk2/cmd_vel', self.cmd_vel_callback, 5)
         self.spine_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/spine_forward_position_controller/commands', self.cmd_spine_callback, 5)
         self.head_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/head_forward_position_controller/commands', self.cmd_head_callback, 5)
         self.left_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/left_arm_forward_position_controller/commands', self.cmd_left_arm_callback, 5)
         self.right_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/right_arm_forward_position_controller/commands', self.cmd_right_arm_callback, 5)
+
+    def publish_camera_info(self):
+        self.head_color_info_puber.publish(self.head_color_info)
+        self.head_depth_info_puber.publish(self.head_depth_info)
+        self.left_color_info_puber.publish(self.left_color_info)
+        self.right_color_info_puber.publish(self.right_color_info)
 
     def cmd_vel_callback(self, msg: Twist):
         self.tctr_base[0] = msg.linear.x
