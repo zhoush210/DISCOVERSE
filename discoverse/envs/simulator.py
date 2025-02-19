@@ -301,7 +301,45 @@ class SimulatorBase:
                 return None
             depth_img = self.renderer.render()
             return depth_img
-        
+
+    def get_point_cloud(self, cam_id, N_gap=5):
+        """ please call after get_observation """
+
+        assert (cam_id in self.config.obs_rgb_cam_id) and (cam_id in self.config.obs_depth_cam_id), "Invalid cam_id"
+
+        # 相机内参预计算
+        fovy = (self.mj_model.vis.global_.fovy if cam_id == -1 else self.mj_model.cam_fovy[cam_id]) * np.pi / 180.0
+        height, width = self.config.render_set["height"], self.config.render_set["width"]
+        fx = width / (2 * np.tan(fovy * width / (2 * height)))  # 合并计算
+        fy = height / (2 * np.tan(fovy / 2))
+        cx, cy = width / 2, height / 2
+        inv_fx, inv_fy = 1.0 / fx, 1.0 / fy
+
+        rgb = self.obs["rgb"][cam_id][::N_gap, ::N_gap]
+        depth = self.obs["depth"][cam_id][::N_gap, ::N_gap]
+
+        rows, cols = depth.shape
+        u = (np.arange(cols) * N_gap).astype(np.float32)
+        v = (np.arange(rows) * N_gap).astype(np.float32)
+        u, v = np.meshgrid(u, v)
+        u_flat = u.ravel()
+        v_flat = v.ravel()
+        depth_flat = depth.ravel()
+
+        valid = depth_flat > 0
+        u_valid = u_flat[valid]
+        v_valid = v_flat[valid]
+        Z_valid = depth_flat[valid]
+
+        points = np.empty((len(Z_valid), 3), dtype=np.float32)
+        points[:, 0] = (u_valid - cx) * Z_valid * inv_fx
+        points[:, 1] = (v_valid - cy) * Z_valid * inv_fy
+        points[:, 2] = Z_valid
+
+        colors_rgb = rgb.reshape(-1, 3)[valid].astype(np.float32) / 255.0
+
+        return points, colors_rgb
+
     def on_mouse_move(self, window, xpos, ypos):
         if self.cam_id == -1:
             dx = xpos - self.mouse_pos['x']
