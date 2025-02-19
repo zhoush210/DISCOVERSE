@@ -302,7 +302,7 @@ class SimulatorBase:
             depth_img = self.renderer.render()
             return depth_img
 
-    def getPointcloud(self, cam_id, N_gap=5):
+    def getPointCloud(self, cam_id, N_gap=5):
         """ please call after get_observation """
 
         assert (cam_id in self.config.obs_rgb_cam_id) and (cam_id in self.config.obs_depth_cam_id), "Invalid cam_id"
