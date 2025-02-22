@@ -35,7 +35,7 @@
               <geom type="box" pos="0 0 -0.07" size="0.025 0.08 0.015" rgba="1 0 0 0.00"/>
               <geom rgba="0.1 0.1 0.1 1" mesh="link6" class="visual"/>
               <body pos="-0.105 0 -0.12" euler="3.1416 0 1.5708">
-                <camera name="rgt_handeye" euler="-0.5236 0 0" fovy="72.5376526571421"/>
+                <camera name="rgt_handeye" euler="-0.5236 0 0" fovy="42.58"/>
               </body>
               <site name="rgt_endpoint" pos='0 0 0' euler="0 -1.5708 0" size='0.001' type='sphere'/>
               <body name="rgt_finger_right_link" pos="0 0 0">
