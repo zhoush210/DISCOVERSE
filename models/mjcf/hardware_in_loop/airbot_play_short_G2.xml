@@ -95,6 +95,8 @@
     <light directional='false' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0.6 0.3 3'/>
     <geom name="ground" type="plane" pos="0 0 0" size="3 3 0.1" material="grid" solimp=".9 .95 .001" solref='-10000 -1000'/>
 
+    <camera name="eye_side" fovy="72.02" pos="-0.324 0.697 1.02" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
+
     <body name="arm_base" pos="0 0 0.78">
       <geom type="box" pos="-0.02 0 0.005" size="0.0806 0.1375 0.0025" rgba="0.2 0.2 0.2 1"/>
       <geom mesh="arm_base_0" pos="0 0 -0.0015" material="________________Emissive_White__1_2" class="visual"/>
@@ -126,6 +128,9 @@
                 <geom mesh="link5_0" material="Paint_Matte_Black" class="visual"/>
                 <geom mesh="link5_1" material="Paint_Metallic_Cool_Grey" class="visual"/>
                 <body name="link6" pos="0 0.0864 0" quat="0.707105 -0.707108 0 0">
+                  <body pos="-0.105 0 -0.12" euler="3.1416 0 1.5708">
+                    <camera name="eye" euler="-0.5236 0 0" fovy="72.5376526571421"/>
+                  </body>
                   <inertial pos="0 0 -0.022" quat="1 0 0 0" mass="0.118" diaginertia="1.29801e-05 1.29739e-05 2.3175e-05"/>
                   <joint name="joint6" class="joint6"/>
                   <body name="G2_base_link" quat="-0.5 0.5 0.5 0.5">
