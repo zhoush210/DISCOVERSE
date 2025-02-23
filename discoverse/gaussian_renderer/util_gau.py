@@ -191,7 +191,7 @@ def gamma_shs(shs, gamma):
     return new_shs
 
 def load_ply(path, gamma=1):
-    max_sh_degree = 3
+    max_sh_degree = 0
     plydata = PlyData.read(path)
     xyz = np.stack((np.asarray(plydata.elements[0]["x"]),
                     np.asarray(plydata.elements[0]["y"]),
@@ -205,12 +205,15 @@ def load_ply(path, gamma=1):
 
     extra_f_names = [p.name for p in plydata.elements[0].properties if p.name.startswith("f_rest_")]
     extra_f_names = sorted(extra_f_names, key = lambda x: int(x.split('_')[-1]))
-    assert len(extra_f_names)==3 * (max_sh_degree + 1) ** 2 - 3
+
+    # assert len(extra_f_names)==3 * (max_sh_degree + 1) ** 2 - 3
     features_extra = np.zeros((xyz.shape[0], len(extra_f_names)))
     for idx, attr_name in enumerate(extra_f_names):
         features_extra[:, idx] = np.asarray(plydata.elements[0][attr_name])
 
-    features_extra = features_extra.reshape((features_extra.shape[0], 3, (max_sh_degree + 1) ** 2 - 1))
+    # features_extra = features_extra.reshape((features_extra.shape[0], 3, (max_sh_degree + 1) ** 2 - 1))
+    features_extra = features_extra.reshape((features_extra.shape[0], 3, len(extra_f_names)//3))
+    features_extra = features_extra[:, :, :(max_sh_degree + 1) ** 2 - 1]
     features_extra = np.transpose(features_extra, [0, 2, 1])
 
     scale_names = [p.name for p in plydata.elements[0].properties if p.name.startswith("scale_")]
