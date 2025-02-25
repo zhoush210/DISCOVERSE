@@ -1,0 +1,25 @@
+<mujocoinclude>
+
+  <option integrator="RK4" solver="Newton" timestep="0.001"/>
+  <compiler angle="radian" inertiafromgeom="auto" inertiagrouprange="4 5" meshdir="../../meshes/hil"/>
+
+  <asset>
+    <mesh name="base_link" file="airbot_play_v3_1/collision/base_link.STL"/>
+    <mesh name="link1" file="airbot_play_v3_1/collision/link1.STL"/>
+    <mesh name="link2" file="airbot_play_v3_1/collision/link2.STL"/>
+    <mesh name="link3" file="airbot_play_v3_1/collision/link3.STL"/>
+    <mesh name="link4" file="airbot_play_v3_1/collision/link4.STL"/>
+    <mesh name="link5" file="airbot_play_v3_1/collision/link5.STL"/>
+    <mesh name="link6" file="airbot_play_v3_1/collision/link6.STL"/>
+
+    <mesh name="flange" file="flange/collision/flange.obj"/>
+    <mesh name="g2base" file="G2/collision/base_link.STL"/>
+    <mesh name="g2link1" file="G2/collision/link1.STL"/>
+    <mesh name="g2link2" file="G2/collision/link2.STL"/>
+    <mesh name="e2bbase" file="E2B/collision/base_link.STL"/>
+    <mesh name="e2blink1" file="E2B/collision/link1.STL"/>
+    <mesh name="e2blink2" file="E2B/collision/link2.STL"/>
+    <mesh name="e2blink3" file="E2B/collision/link3.STL"/>
+  </asset>
+
+</mujocoinclude>
