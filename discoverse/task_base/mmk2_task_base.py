@@ -69,6 +69,10 @@ class MMK2TaskBase(MMK2Base):
 
         self.lft_arm_target_pose = self.arm_action_init_position[0].copy()
         self.rgt_arm_target_pose = self.arm_action_init_position[1].copy()
+        if hasattr(self.config, "io_dim") and self.config.io_dim == 17:
+            self.io_dim = 17
+        else:
+            self.io_dim = 19
 
     def resetState(self):
         super().resetState()
@@ -99,6 +103,28 @@ class MMK2TaskBase(MMK2Base):
         elif arm == "r":
             self.tctr_right_arm[:] = rq
             self.set_right_arm_new_target = True
+
+    def updateControl(self, action):
+        # assert len(action) == self.io_dim
+        if self.io_dim == 19:
+            self.mj_data.ctrl[:self.njctrl] = np.clip(action[:self.njctrl], self.mj_model.actuator_ctrlrange[:self.njctrl,0], self.mj_model.actuator_ctrlrange[:self.njctrl,1])
+        elif self.io_dim == 17: 
+            self.mj_data.ctrl[2:self.njctrl] = np.clip(action[:self.io_dim], self.mj_model.actuator_ctrlrange[2:self.njctrl,0], self.mj_model.actuator_ctrlrange[2:self.njctrl,1])
+        else:
+            raise ValueError(f"Wrong action dim{self.io_dim}")
+
+    def getObservation(self):
+        self.obs = {
+            "time" : self.mj_data.time,
+            "jq"   : self.sensor_qpos[self.njctrl-self.io_dim:self.njctrl].tolist(),
+            # "jv"   : self.sensor_qvel.tolist(),
+            # "jf"   : self.sensor_force.tolist(),
+            "base_position"    : self.sensor_base_position.tolist(),
+            "base_orientation" : self.sensor_base_orientation.tolist(),
+            "img"  : self.img_rgb_obs_s,
+            "depth" : self.img_depth_obs_s
+        }
+        return self.obs
 
     def checkActionDone(self):
         slide_done = np.allclose(self.tctr_slide, self.sensor_slide_qpos, atol=3e-2) and np.abs(self.sensor_slide_qvel).sum() < 1e-2
