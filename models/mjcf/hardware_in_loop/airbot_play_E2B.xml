@@ -3,14 +3,18 @@
 
   <tendon>
     <fixed name='gripper_gear'>
-      <joint joint='teacher_joint2' coef='-25'/>
-      <joint joint='teacher_joint3' coef='25'/>
+      <joint joint='teacher_joint2' coef='25'/>
+      <joint joint='teacher_joint3' coef='-25'/>
     </fixed>
   </tendon>
 
   <equality>
     <joint joint1='teacher_joint2' joint2='teacher_joint3' polycoef='0 -1 0 0 0 '/>
   </equality>
+
+  <contact>
+    <exclude body1='gripper_link2' body2='gripper_link3'/>
+  </contact>
 
   <worldbody>
     <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1" mesh="base_link"/>
