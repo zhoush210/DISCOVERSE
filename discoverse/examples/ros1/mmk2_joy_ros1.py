@@ -252,7 +252,7 @@ if __name__ == "__main__":
         "width"  : 1920,
         "height" : 1080
     }
-    cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
+    cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_cup.xml"
 
     exec_node = MMK2JOY(cfg)
     exec_node.reset()

@@ -1,16 +1,44 @@
 <mujocoinclude>
-  <!-- <body name="cup_lid" pos="0 0.2 0.53">
-  <joint type="free" frictionloss="0.00005" />
-  <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
-  <geom material="cup_lid_texture" mesh="cup_lid" class="obj_visual"/>
-  <geom mesh="cup_lid" class="obj_collision"/> -->
-
-
-
   <joint type="free" frictionloss="0.00001" />
-  <inertial pos="0 0 0" mass="0.0005" diaginertia="0.00002 0.00002 0.00002" />
-  <!-- <geom material="box_texture" mesh="box" class="obj_visual"/> -->
-  <geom type="mesh" mesh="box" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001"/>
-
-<!-- </body> -->
+  <inertial pos="0 0 0" mass="0.005" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="box_texture" mesh="box" class="obj_visual"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_0"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_1"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_2"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_3"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_4"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_5"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_6"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_7"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_8"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_9"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_10"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_11"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_12"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_13"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_14"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_15"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_16"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_17"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_18"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_19"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_20"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_21"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_22"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_23"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_24"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_25"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_26"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_27"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_28"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_29"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_30"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_31"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_32"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_33"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_34"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_35"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_36"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_37"/>
+  <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_38"/>
 </mujocoinclude>
