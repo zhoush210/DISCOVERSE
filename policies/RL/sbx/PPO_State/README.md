@@ -1,4 +1,4 @@
-# PPO 强化学习训练框架
+# SBX PPO 强化学习训练框架
 
 本目录包含使用 PPO (Proximal Policy Optimization) 算法进行强化学习训练的框架代码。这个框架专为 DISCOVERSE 环境设计，特别是针对机械臂抓取任务。
 

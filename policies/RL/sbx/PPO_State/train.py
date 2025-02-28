@@ -7,8 +7,9 @@ from discoverse.task_base import MMK2TaskBase
 from env import Env
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, BaseCallback, BaseCallback
 from sbx import PPO
+from tqdm import tqdm
 
 
 def make_env(render=True):
