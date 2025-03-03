@@ -1,5 +1,8 @@
+tqdm
 wandb
 numba
 zarr
 hydra-core
 omegaconf
+einops
+clip
