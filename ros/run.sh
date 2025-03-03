@@ -1,6 +1,6 @@
 #!/bin/bash
-set -ex
-env | sort
+set -e
+
 if [ -n "${MODEL_PATH}" ]; then
     MOUNT_ARGS="-v ${MODEL_PATH}:/workspace/models"
 fi
