@@ -40,10 +40,11 @@ def recoder_airbot_play(save_path, obs_lst, cfg):
 
 
 class Airbot(AirbotArm, Node):
-    def __init__(self, config, sim="sim0", domain_id=100):
+    def __init__(self, config, sim, domain_id):
 
         super().__init__(config)
         context = rclpy.context.Context()
+        print("domain_id", domain_id)
         rclpy.init(args=None, context=context, domain_id=domain_id)
         Node.__init__(self, "Airbot_play_node", context=context)
 
@@ -157,7 +158,7 @@ def main():
         "-d",
         "--domain_id",
         type=int,
-        default=100,
+        default=os.environ.get("ROS_DOMAIN_ID", 100),
         help="ROS domain id",
     )
     parser.add_argument(

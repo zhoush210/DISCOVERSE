@@ -42,6 +42,11 @@ RUN pip3 install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple --br
 ADD scripts ./scripts
 ADD ros ./ros
 
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y -q --no-install-recommends \
+    ros-jazzy-rmw-cyclonedds-cpp
+
 ENTRYPOINT [ "/workspace/ros/ros_entrypoint.sh" ]
 
 CMD source /opt/ros/jazzy/setup.sh && source /opt/airbot_driver/setup.sh && python3 scripts/airbot_driver.py

@@ -7,6 +7,8 @@ fi
 
 docker run -it --rm \
     --network host \
+    -e ROS_DOMAIN_ID \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
     --privileged -v /usr/lib/$(uname -m)-linux-gnu/:/usr/lib/$(uname -m)-linux-gnu/ \
     ${MOUNT_ARGS} \
