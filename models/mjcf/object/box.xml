@@ -1,6 +1,6 @@
 <mujocoinclude>
   <joint type="free" frictionloss="0.00001" />
-  <inertial pos="0 0 0" mass="0.005" diaginertia="0.00002 0.00002 0.00002" />
+  <inertial pos="0 0 0" mass="0.1" diaginertia="0.00002 0.00002 0.00002" />
   <geom material="box_texture" mesh="box" class="obj_visual"/>
   <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_0"/>
   <geom type="mesh" rgba="0.5 0.5 0.5 0" mesh="box_part_1"/>

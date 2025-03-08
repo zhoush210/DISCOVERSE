@@ -18,15 +18,15 @@ class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
         # 随机box位置
-        box_x_bios = (np.random.random() - 0.5) * 0.2
-        box_y_bios = (np.random.random() - 0.5) * 0.2
+        box_x_bios = (np.random.random() - 0.5) * 0.1
+        box_y_bios = (np.random.random() - 0.5) * 0.1
         self.mj_data.qpos[self.njq+7*0+0] += box_x_bios
         self.mj_data.qpos[self.njq+7*0+1] += box_y_bios
 
 
         # 随机cup位置
-        cup_x_bios = (np.random.random() - 0.5) * 0.2
-        cup_y_bios = (np.random.random() - 0.5) * 0.2
+        cup_x_bios = (np.random.random() - 0.5) * 0.1
+        cup_y_bios = (np.random.random() - 0.5) * 0.1
         self.mj_data.qpos[self.njq+7*1+0] += cup_x_bios
         self.mj_data.qpos[self.njq+7*1+1] += cup_y_bios
 
@@ -53,7 +53,7 @@ cfg.use_gaussian_renderer = True
 cfg.init_key = "pick"
 cfg.gs_model_dict["box"]     = "object/box.ply"
 cfg.gs_model_dict["cup"]          = "object/cup_blue.ply"
-cfg.gs_model_dict["background"]      = "scene/lab3/environment.ply"
+cfg.gs_model_dict["background"]      = "scene/lab3/environment_aligned.ply"
 
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_cup.xml"
 cfg.obj_list    = ["box", "cup"]
