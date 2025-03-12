@@ -7,6 +7,7 @@ import pathlib
 import time
 import numpy as np
 import torch
+import tqdm
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from policies.dp.utils import set_seed, Logger, report_parameters
@@ -57,7 +58,7 @@ def eval(args, env, dataset, agent, gradient_step):
             start = args.obs_steps - 1
             end = start + args.action_steps
             action = np.squeeze(action_pred[:, start:end, :], axis=0) # 多一个env_num维度
-            obs, success = env.step(action)
+            obs, success = env.step(action,mode="eval")
             t += args.action_steps
 
             if success:
@@ -158,47 +159,54 @@ def main(args: DictConfig):
         n_gradient_step = 0
         diffusion_loss_list = []
         start_time = time.time()
-        for batch in loop_dataloader(dataloader):
-            # get condition
-            nobs = batch['obs']
-            condition = {}
-            for k in nobs.keys():
-                condition[k] = nobs[k][:, :args.obs_steps, :].to(args.device) # Batch size, Obs_steps, Self.shape
+        
+        with tqdm.tqdm(total=args.gradient_steps, desc="Training Progress", unit="step") as pbar:
+            for batch in loop_dataloader(dataloader):
+                # get condition
+                nobs = batch['obs']
+                condition = {}
+                for k in nobs.keys():
+                    condition[k] = nobs[k][:, :args.obs_steps, :].to(args.device) # Batch size, Obs_steps, Self.shape
 
-            naction = batch['action'].to(args.device) # Batch size, Sample sequence length, Action length
+                naction = batch['action'].to(args.device) # Batch size, Sample sequence length, Action length
 
-            # update diffusion
-            diffusion_loss = agent.update(naction, condition)['loss']
-            lr_scheduler.step()
-            diffusion_loss_list.append(diffusion_loss)
+                # update diffusion
+                diffusion_loss = agent.update(naction, condition)['loss']
+                lr_scheduler.step()
+                diffusion_loss_list.append(diffusion_loss)
 
-            if n_gradient_step % args.log_freq == 0:
-                metrics = {
-                    'step': n_gradient_step,
-                    'total_time': time.time() - start_time,
-                    'avg_diffusion_loss': np.mean(diffusion_loss_list)
-                }
-                logger.log(metrics, category='train')
-                diffusion_loss_list = []
-            
-            if n_gradient_step % args.save_freq == 0:
-                logger.save_agent(agent=agent, identifier=n_gradient_step)
+                if n_gradient_step % args.log_freq == 0:
+                    metrics = {
+                        'step': n_gradient_step,
+                        'total_time': time.time() - start_time,
+                        'avg_diffusion_loss': np.mean(diffusion_loss_list)
+                    }
+                    logger.log(metrics, category='train')
+                    diffusion_loss_list = []
                 
-            if n_gradient_step % args.eval_freq == 0:
-                print("Evaluate model...")
-                agent.model.eval()
-                agent.model_ema.eval()
-                metrics = {'step': n_gradient_step}
-                metrics.update(eval(args, env, dataset, agent, n_gradient_step))
-                logger.log(metrics, category='eval')
-                agent.model.train()
-                agent.model_ema.train()
-            
-            n_gradient_step += 1
-            if n_gradient_step > args.gradient_steps:
-                # finish
-                logger.finish(agent)
-                break
+                if n_gradient_step % args.save_freq == 0 and n_gradient_step != 0:
+                    logger.save_agent(agent=agent, identifier=n_gradient_step)
+
+                if n_gradient_step % args.eval_freq == 0 and n_gradient_step != 0:
+                    print("Evaluate model...")
+                    agent.model.eval()
+                    agent.model_ema.eval()
+                    metrics = {'step': n_gradient_step}
+                    metrics.update(eval(args, env, dataset, agent, n_gradient_step))
+                    logger.log(metrics, category='eval')
+                    agent.model.train()
+                    agent.model_ema.train()
+                
+                n_gradient_step += 1
+                
+                # 更新tqdm进度条，显示当前的平均损失
+                pbar.set_postfix(loss=np.mean(diffusion_loss_list))
+                pbar.update(1)
+                
+                if n_gradient_step > args.gradient_steps:
+                    # finish
+                    logger.finish(agent)
+                    break
     elif args.mode == "eval":
         # ----------------- eval ----------------------
         if args.model_path:

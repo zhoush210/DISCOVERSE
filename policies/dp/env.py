@@ -9,6 +9,10 @@ class Env():
         cfg = getattr(module, "cfg") # cfg
         self.cfg = cfg
         cfg.headless = True
+        if args.action_dim == 17:
+            cfg.io_dim = 17
+        else:
+            cfg.io_dim = 19
         self.simnode = SimNode(cfg)
         self.args = args
         self.obs_steps = args.obs_steps
@@ -17,6 +21,8 @@ class Env():
 
     def reset(self):
         obs, t = self.simnode.reset(), 0
+        if self.args.action_dim == 17:
+            obs["jq"]=obs["jq"][:17]
         self.video_list = list()
         from collections import  deque
         self.obs_que = deque([obs], maxlen=self.obs_steps+1) 
@@ -43,11 +49,15 @@ class Env():
             result[f'image{id}'] = self.stack_last_n_obs(imgs[id])
         return result
     
-    def step(self, action):
+    def step(self, action, mode="train"):
         success = 0
         for act in action: #依次执行每个动作
             for _ in range(int(round(1. / self.simnode.render_fps / (self.simnode.delta_t)))):
                 obs, _, _, _, _ = self.simnode.step(act)
+                if self.args.action_dim == 17 and mode=="train":
+                    sim_jq=[0]*19
+                    sim_jq[2:]=obs["jq"]
+                    obs["jq"]=sim_jq
             self.obs_que.append(obs) #添加单个obs
             self.video_list.append(obs['img'])
             if self.simnode.check_success():
