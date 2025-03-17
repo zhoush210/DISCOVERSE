@@ -1,0 +1,58 @@
+<mujocoinclude>
+
+  <joint type="free" frictionloss="0.000001" />
+  <inertial pos="0 0 0.05" mass="0.05" diaginertia="0.00002 0.00002 0.00002" />
+  <geom material="box" mesh="box" quat="0.707 0 0 -0.707" class="obj_visual"/> 
+  <geom material="white_airbot_logo" pos="-0.1 0 0.093" quat="0.707 0 0 -0.707" size="0.03 0.01 0.0001" type="box" contype="0" conaffinity="0"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_0" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_1" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_2" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_3" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_4" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_5" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_6" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_7" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_8" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_9" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_10" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_11" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_12" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_13" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_14" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_15" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_16" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_17" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_18" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_19" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_20" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_21" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_22" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_23" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_24" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_25" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_26" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_27" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_28" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_29" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_30" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_31" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_32" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_33" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_34" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_35" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_36" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_37" class="obj_collision"/>
+  <geom type="mesh" quat="0.707 0 0 -0.707" rgba="0.5 0.5 0.5 1" mesh="box_part_38" class="obj_collision"/>
+
+  <geom size="0.1   0.08 0.002" pos=" 0     0    0.068"   type="box" rgba="0 0 0 1"/>
+  <geom size="0.017 0.08 0.002" pos=" 0.095 0    0.09" type="box" rgba="0 0 0 1"/>
+  <geom size="0.001 0.08 0.010" pos=" 0.08  0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.022 0.08 0.010" pos=" 0.05  0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.022 0.08 0.010" pos=" 0.00  0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.022 0.08 0.010" pos="-0.05  0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.017 0.08 0.010" pos="-0.095 0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.001 0.08 0.010" pos="-0.08  0    0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.08  0.018 0.01" pos=" 0.0 -0.062 0.082" type="box" rgba="0 0 0 1"/>
+  <geom size="0.08  0.018 0.01" pos=" 0.0  0.062 0.082" type="box" rgba="0 0 0 1"/>
+
+</mujocoinclude>

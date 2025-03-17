@@ -31,8 +31,9 @@
               <geom mesh="link5_0" material="Paint_Matte_Black" class="visual"/>
               <geom mesh="link5_1" material="Paint_Metallic_Cool_Grey" class="visual"/>
               <body name="link6" pos="0 0.23645 0" quat="0.499998 -0.5 0.5 0.500002">
-                <body pos="-0.105 0 -0.12" euler="3.1416 0 1.5708">
-                  <camera name="eye" euler="-0.5236 0 0" fovy="72.5376526571421"/>
+                <body pos="-0.08 0 -0.065" euler="3.1416 0 1.5708">
+                  <camera name="lft_handeye" euler="-0.5236 0 0" fovy="42.58"/>
+                  <geom type="sphere" size="0.005" rgba="0 0 0 1"/>
                 </body>
                 <inertial pos="-0.0047053 7.3857e-05 -0.12293" mass="0.53855" diaginertia="5e-05 5e-05 3.85e-05"/>
                 <joint name="joint6" class="joint6"/>
