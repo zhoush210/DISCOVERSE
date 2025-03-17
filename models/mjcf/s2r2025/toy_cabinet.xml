@@ -1,0 +1,51 @@
+<mujocoinclude>
+
+  <body name="cabinet_door" pos="-0.172 0.1145 0.312">
+    <joint name="jcb_door" range='0 3.1416' axis='0 0 -1' frictionloss="0.5"/>
+    <geom size="0.015 0.127 0.145" pos="0 -0.1145 0.01" type="box" rgba=".6 .6 .6 1" class="obj_visual"/>
+    <geom size="0.01 0.12 0.14" pos="0 -0.1145 0.01" type="box" rgba="1 0 0 1"/>
+    <geom size="0.005 0.015" pos="-0.015 -0.195  0.055" euler="0 1.5708 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="1 0.005 0.0001" rgba=".1 .1 .1 1"/>
+    <geom size="0.005 0.015" pos="-0.015 -0.195 -0.055" euler="0 1.5708 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="1 0.005 0.0001" rgba=".1 .1 .1 1"/>
+    <geom size="0.005 0.055" pos="-0.03 -0.195 0" euler="0 0 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="10 10 10" rgba=".1 .1 .1 1"/>
+    <!-- <site name="cabinet_door_handle" pos='-0.03 -0.195 0' euler="0 0 3.1416" size='0.001' type='sphere'/> -->
+  </body>
+
+  <body name="cabinet_drawer" pos="-0.172 0 0.078">
+    <joint name="jcb_drawer" range='0 0.22' type='slide' axis='-1 0 0' frictionloss="0.5"/>
+    <body name="drawer_bottom_layer" pos="0.15 0 0">
+      <geom size="0.003 0.105 0.05" pos="0.15 0 0.01" type="box" rgba="1 1 1 1"/>
+      <geom size="0.15 0.003 0.05" pos="0 0.1 0.01" type="box" rgba="1 1 1 1"/>
+      <geom size="0.15 0.003 0.05" pos="0 -0.1 0.01" type="box" rgba="1 1 1 1"/>
+      <geom size="0.15 0.105 0.005" pos="0 0 -0.037" type="box" rgba="1 1 1 1"/>
+    </body>
+    <geom size="0.015 0.127 0.077" pos="0 0 0" type="box" rgba=".6 .6 .6 1"/>
+    <geom size="0.005 0.015" pos="-0.015 0.045 0" euler="0 1.5708 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="1 0.005 0.0001" rgba=".1 .1 .1 1"/>
+    <geom size="0.005 0.015" pos="-0.015 -0.045 0" euler="0 1.5708 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="1 0.005 0.0001" rgba=".1 .1 .1 1"/>
+    <geom size="0.005 0.045" pos="-0.03 0 0" euler="1.5708 0 0" type="cylinder" condim="4" solimp="2 1 0.01" solref="0.001 1" friction="10 10 10" rgba=".1 .1 .1 1"/>
+    <!-- <site name="cabinet_drawer_handle" pos='-0.03 0 0' euler="0 0 3.1416" size='0.001' type='sphere'/>       -->
+  </body>
+
+  <body pos="0 0 0">
+    <geom size="0.157 0.005 0.078" pos="0  0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.005 0.078" pos="0 -0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.005 0.127 0.078" pos="0.153 0 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.127 0.012" pos="0 0 0.012" type="box" rgba="1 1 1 1"/>
+  </body>
+  <body pos="0 0 0.156">
+    <geom size="0.157 0.005 0.078" pos="0  0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.005 0.078" pos="0 -0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.005 0.127 0.078" pos="0.153 0 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.127 0.012" pos="0 0 0.012" type="box" rgba="1 1 1 1"/>
+    <geom size="0.015 0.127 0.01" pos="-0.172 0 0.01" type="box" rgba="1 1 1 1"/>
+    <geom size="0.005 0.01 0.078" pos="-0.155 -0.117 0.078" type="box" rgba="1 1 1 1"/>
+  </body>
+  <body name="drawer_top_layer" pos="0 0 0.312">
+    <geom size="0.157 0.005 0.078" pos="0  0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.005 0.078" pos="0 -0.122 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.005 0.127 0.078" pos="0.153 0 0.078" type="box" rgba="1 1 1 1"/>
+    <geom size="0.157 0.127 0.012" pos="0 0 0.168" type="box" rgba="1 1 1 1"/>
+    <geom size="0.015 0.127 0.012" pos="-0.172 0 0.168" type="box" rgba="1 1 1 1"/>
+    <geom size="0.005 0.01 0.078" pos="-0.155 -0.117 0.078" type="box" rgba="1 1 1 1"/>
+  </body>
+
+</mujocoinclude>
