@@ -52,10 +52,8 @@ cfg.sync     = True  #加速
 cfg.headless = False
 cfg.render_set  = {
     "fps"    : 25,
-    # "width"  : 1920,
-    # "height" : 1080
-    # "width"  : 640,
-    # "height" : 480
+    "width"  : 640,
+    "height" : 480
 }
 cfg.obs_rgb_cam_id = [0,1,2]
 cfg.save_mjb_and_task_config = True
@@ -172,8 +170,8 @@ if __name__ == "__main__":
 
         for i in range(2, sim_node.njctrl):
             action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
-        # yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2] + np.pi / 2
-        # action[1] = -10 * yaw
+        yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2] + np.pi / 2
+        action[1] = -10 * yaw
 
         obs, _, _, _, _ = sim_node.step(action)
         
