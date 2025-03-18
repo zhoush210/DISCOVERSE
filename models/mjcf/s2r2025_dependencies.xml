@@ -1,0 +1,139 @@
+<mujocoinclude>
+
+  <default>
+    <default class="obj_visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
+    </default>
+  </default>
+
+  <asset>
+    <!-- airbot log -->
+    <texture name="white_airbot_logo" rgb1="0 0 0" gridsize="1 1" gridlayout="U" file="s2r2025/logo/white_airbot.png"/>
+    <material name="white_airbot_logo" texture="white_airbot_logo"/>
+
+    <!-- carton -->
+    <mesh file="s2r2025/carton/carton.obj"/>
+    <mesh file="s2r2025/carton/carton_0.obj"/>
+    <mesh file="s2r2025/carton/carton_1.obj"/>
+    <mesh file="s2r2025/carton/carton_2.obj"/>
+    <mesh file="s2r2025/carton/carton_3.obj"/>
+    <mesh file="s2r2025/carton/carton_4.obj"/>
+    <mesh file="s2r2025/carton/carton_5.obj"/>
+    <material name="carton_01_Material" specular="0.5" shininess="0.25" rgba="0.8 0.8 0.8 1"/>
+    <texture type="2d" name="carton_01" file="s2r2025/carton/carton_01.png"/>
+    <material name="carton_01_Material002" texture="carton_01" specular="0.5" shininess="0.25"/>
+    <texture type="2d" name="carton_04" file="s2r2025/carton/carton_04.png"/>
+    <material name="carton_01_Material003" texture="carton_04" specular="0.5" shininess="0.25"/>
+    <texture type="2d" name="carton_02" file="s2r2025/carton/carton_02.png"/>
+    <material name="carton_01_Material004" texture="carton_02" specular="0.5" shininess="0.25"/>
+    <texture type="2d" name="carton_03" file="s2r2025/carton/carton_03.png"/>
+    <material name="carton_01_Material005" texture="carton_03" specular="0.5" shininess="0.25"/>
+    <texture type="2d" name="carton_00" file="s2r2025/carton/carton_00.png"/>
+    <material name="carton_01_Material006" texture="carton_00" specular="0.5" shininess="0.25"/>
+
+    <!-- disk -->
+    <mesh file="s2r2025/disk/disk.obj"/>
+    <texture type="2d" name="disk_texture_01" file="s2r2025/disk/disk_01.png"/>
+    <material name="disk_texture_01" texture="disk_texture_01" specular="0.5" shininess="0.5"/>
+    
+    <!-- sheet -->
+    <mesh file="s2r2025/sheet/sheet.obj"/>
+    <texture type="2d" name="sheet_texture_01" file="s2r2025/sheet/sheet_01.png"/>
+    <material name="sheet_texture_01" texture="sheet_texture_01" specular="0.5" shininess="0.5"/>
+
+    <!-- box -->
+    <mesh file="s2r2025/box/box.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_0"  file="s2r2025/box/part_0.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_1"  file="s2r2025/box/part_1.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_2"  file="s2r2025/box/part_2.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_3"  file="s2r2025/box/part_3.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_4"  file="s2r2025/box/part_4.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_5"  file="s2r2025/box/part_5.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_6"  file="s2r2025/box/part_6.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_7"  file="s2r2025/box/part_7.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_8"  file="s2r2025/box/part_8.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_9"  file="s2r2025/box/part_9.obj"  scale="1 1 1.09"/>
+    <mesh name="box_part_10" file="s2r2025/box/part_10.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_11" file="s2r2025/box/part_11.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_12" file="s2r2025/box/part_12.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_13" file="s2r2025/box/part_13.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_14" file="s2r2025/box/part_14.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_15" file="s2r2025/box/part_15.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_16" file="s2r2025/box/part_16.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_17" file="s2r2025/box/part_17.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_18" file="s2r2025/box/part_18.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_19" file="s2r2025/box/part_19.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_20" file="s2r2025/box/part_20.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_21" file="s2r2025/box/part_21.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_22" file="s2r2025/box/part_22.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_23" file="s2r2025/box/part_23.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_24" file="s2r2025/box/part_24.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_25" file="s2r2025/box/part_25.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_26" file="s2r2025/box/part_26.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_27" file="s2r2025/box/part_27.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_28" file="s2r2025/box/part_28.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_29" file="s2r2025/box/part_29.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_30" file="s2r2025/box/part_30.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_31" file="s2r2025/box/part_31.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_32" file="s2r2025/box/part_32.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_33" file="s2r2025/box/part_33.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_34" file="s2r2025/box/part_34.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_35" file="s2r2025/box/part_35.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_36" file="s2r2025/box/part_36.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_37" file="s2r2025/box/part_37.obj" scale="1 1 1.09"/>
+    <mesh name="box_part_38" file="s2r2025/box/part_38.obj" scale="1 1 1.09"/>
+
+    <texture type="2d" name="box" file="s2r2025/box/box.png"/>
+    <material name="box" texture="box" specular="0.5" shininess="0.5"/>
+
+    <!-- apple -->
+    <mesh file="s2r2025/apple/apple.obj"/>
+    <texture type="2d" name="apple_texture" file="s2r2025/apple/apple.png"/>
+    <material name="apple_texture" texture="apple_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- book -->
+    <mesh file="s2r2025/book/book.obj"/>
+    <texture type="2d" name="book_texture" file="s2r2025/book/book.png"/>
+    <material name="book_texture" texture="book_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- cup -->
+    <mesh file="s2r2025/cup/cup.obj"/>
+    <texture type="2d" name="cup_texture" file="s2r2025/cup/cup.png"/>
+    <material name="cup_texture" texture="cup_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- kettle -->
+    <mesh file="s2r2025/kettle/kettle.obj"/>
+    <texture type="2d" name="kettle_texture" file="s2r2025/kettle/kettle.png"/>
+    <material name="kettle_texture" texture="kettle_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- scissors -->
+    <mesh file="s2r2025/scissors/scissors.obj"/>
+    <texture type="2d" name="scissors_texture" file="s2r2025/scissors/scissors.png"/>
+    <material name="scissors_texture" texture="scissors_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- timeclock -->
+    <mesh file="s2r2025/timeclock/timeclock.obj"/>
+    <texture type="2d" name="timeclock_texture" file="s2r2025/timeclock/timeclock.png"/>
+    <material name="timeclock_texture" texture="timeclock_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- wood -->
+    <mesh file="s2r2025/wood/wood.obj"/>
+    <texture type="2d" name="wood_texture" file="s2r2025/wood/wood.png"/>
+    <material name="wood_texture" texture="wood_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- XBOX -->
+    <mesh file="s2r2025/xbox/xbox.obj"/>
+    <texture type="2d" name="xbox_texture" file="s2r2025/xbox/xbox.png"/>
+    <material name="xbox_texture" texture="xbox_texture" specular="0.5" shininess="0.5"/>
+
+    <!-- yellow_bowl -->
+    <mesh file="s2r2025/yellow_bowl/yellow_bowl.obj"/>
+    <texture type="2d" name="yellow_bowl_texture" file="s2r2025/yellow_bowl/yellow_bowl.png"/>
+    <material name="yellow_bowl_texture" texture="yellow_bowl_texture" specular="0.5" shininess="0.5"/>
+
+  </asset>
+
+</mujocoinclude>
