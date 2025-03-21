@@ -3,6 +3,7 @@ import mujoco
 import numpy as np
 import taichi as ti
 from scipy.spatial.transform import Rotation
+import argparse
 
 from pynput import keyboard
 
@@ -405,6 +406,33 @@ class KeyboardListener:
         return self.lidar_position.copy(), self.lidar_orientation.copy()
 
 if __name__ == "__main__":
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='MuJoCo LiDAR可视化与ROS集成')
+    parser.add_argument('--h-res', type=int, default=720, help='水平分辨率 (默认: 720)')
+    parser.add_argument('--v-res', type=int, default=64, help='垂直分辨率 (默认: 64)')
+    parser.add_argument('--profiling', action='store_true', help='启用性能分析')
+    parser.add_argument('--verbose', action='store_true', help='显示详细输出信息')
+    parser.add_argument('--rate', type=int, default=10, help='循环频率 (Hz) (默认: 10)')
+    args = parser.parse_args()
+    
+    print("\n" + "=" * 60)
+    print("MuJoCo LiDAR可视化与ROS集成")
+    print("=" * 60)
+    print(f"配置：")
+    print(f"- 水平分辨率: {args.h_res}")
+    print(f"- 垂直分辨率: {args.v_res}")
+    print(f"- 总射线数量: {args.h_res * args.v_res}")
+    print(f"- 循环频率: {args.rate} Hz")
+    print(f"- 性能分析: {'启用' if args.profiling else '禁用'}")
+    print(f"- 详细输出: {'启用' if args.verbose else '禁用'}")
+    print("=" * 60)
+    print("控制说明:")
+    print("  WASD: 控制水平移动")
+    print("  Q/E: 控制高度上升/下降")
+    print("  方向键上/下: 控制俯仰角")
+    print("  方向键左/右: 控制偏航角")
+    print("  ESC: 退出程序")
+    print("=" * 60 + "\n")
 
     # 初始化ROS节点
     rospy.init_node('mujoco_lidar_test', anonymous=True)
@@ -434,11 +462,11 @@ if __name__ == "__main__":
     )
 
     # 创建激光雷达传感器
-    lidar = MjLidarSensor(scene)
+    lidar = MjLidarSensor(scene, enable_profiling=args.profiling, verbose=args.verbose)
 
-    # 创建激光雷达射线 - 使用更高的分辨率进行性能测试
-    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=3600, vertical_resolution=256)
-    print(f"射线数量: {len(rays_phi)}")
+    # 创建激光雷达射线 - 使用参数指定的分辨率
+    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
+    print(f"射线数量: {len(rays_phi)}, 水平分辨率: {args.h_res}, 垂直分辨率: {args.v_res}")
 
     # 设置激光雷达位置
     lidar_position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -448,7 +476,7 @@ if __name__ == "__main__":
     kb_listener = KeyboardListener(lidar_position, lidar_orientation)
 
     # 主循环
-    rate = rospy.Rate(30)  # 提高帧率以获得更流畅的控制体验
+    rate = rospy.Rate(args.rate)  # 使用参数指定的循环频率
     last_time = time.time()
 
     print("在RViz中设置以下显示：")
@@ -456,7 +484,7 @@ if __name__ == "__main__":
     print("2. 添加PointCloud2显示，话题为/lidar_points_taichi")
     print("3. 添加MarkerArray显示，话题为/mujoco_scene")
     print("4. 设置Fixed Frame为'world'")
-        
+       
     try:
         while not rospy.is_shutdown():
             # 计算时间增量
@@ -496,9 +524,15 @@ if __name__ == "__main__":
             end_time = time.time()
             
             # 打印性能信息和当前位置
-            print(f"位置: [{lidar_position[0]:.2f}, {lidar_position[1]:.2f}, {lidar_position[2]:.2f}], "
-                    f"欧拉角: [{kb_listener.euler_angles[0]:.2f}, {kb_listener.euler_angles[1]:.2f}, {kb_listener.euler_angles[2]:.2f}], "
-                    f"耗时: {(end_time - start_time)*1000:.2f} ms, 射线数量: {len(rays_phi)}")
+            if args.verbose:
+                # 格式化欧拉角为度数
+                euler_deg = np.degrees(kb_listener.euler_angles)
+                print(f"位置: [{lidar_position[0]:.2f}, {lidar_position[1]:.2f}, {lidar_position[2]:.2f}], "
+                      f"欧拉角: [{euler_deg[0]:.1f}°, {euler_deg[1]:.1f}°, {euler_deg[2]:.1f}°], "
+                      f"耗时: {(end_time - start_time)*1000:.2f} ms")
+                
+                if args.profiling:
+                    print(f"  准备时间: {lidar.prepare_time:.2f}ms, 内核时间: {lidar.kernel_time:.2f}ms")
             
             # 发布点云
             publish_point_cloud(pub_taichi, points, "lidar")

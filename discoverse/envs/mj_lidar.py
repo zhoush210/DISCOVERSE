@@ -2,6 +2,7 @@ import time
 import mujoco
 import numpy as np
 import taichi as ti
+import argparse
 
 ti.init(
     arch=ti.gpu, 
@@ -25,9 +26,21 @@ ti.init(
 @ti.data_oriented
 class MjLidarSensor:
 
-    def __init__(self, mj_scene):
+    def __init__(self, mj_scene, enable_profiling=False, verbose=False):
+        """
+        初始化LiDAR传感器
+        
+        参数:
+            mj_scene: MuJoCo场景对象
+            enable_profiling: 是否启用性能分析（默认False）
+            verbose: 是否打印详细信息（默认False）
+        """
         self.n_geoms = mj_scene.ngeom
-        print(f"n_geoms: {self.n_geoms}")
+        self.enable_profiling = enable_profiling
+        self.verbose = verbose
+        
+        if self.verbose:
+            print(f"n_geoms: {self.n_geoms}")
 
         # 预分配所有Taichi字段，避免重复创建
         self.geom_types = ti.field(dtype=ti.i32, shape=(self.n_geoms))
@@ -78,7 +91,7 @@ class MjLidarSensor:
 
     def update_geom_positions(self, mj_scene):
         """更新几何体位置和旋转数据"""
-        start_time = time.time()
+        start_time = time.time() if self.enable_profiling else 0
         
         # 预先分配NumPy数组以收集所有数据
         pos_data = np.zeros((self.n_geoms, 3), dtype=np.float32)
@@ -93,8 +106,8 @@ class MjLidarSensor:
         # 使用Taichi内核并行更新
         self.update_geom_positions_parallel(pos_data, rot_data)
         
-        end_time = time.time()
-        self.update_geom_time = (end_time - start_time) * 1000
+        end_time = time.time() if self.enable_profiling else 0
+        self.update_geom_time = (end_time - start_time) * 1000 if self.enable_profiling else 0
 
     @ti.kernel
     def update_geom_positions_parallel(self, 
@@ -579,16 +592,16 @@ class MjLidarSensor:
         start_total = time.time()
         
         # 确保sensor_pose是float32类型
-        convert_start = time.time()
+        convert_start = time.time() if self.enable_profiling else 0
         sensor_pose = sensor_pose.astype(np.float32)
         
         # 创建Taichi ndarray并从NumPy数组填充
         self.sensor_pose_ti.from_numpy(sensor_pose)
-        convert_end = time.time()
-        self.convert_sensor_pose_time = (convert_end - convert_start) * 1000
+        convert_end = time.time() if self.enable_profiling else 0
+        self.convert_sensor_pose_time = (convert_end - convert_start) * 1000 if self.enable_profiling else 0
         
         # 如果光线数量变化，重新分配内存
-        memory_start = time.time()
+        memory_start = time.time() if self.enable_profiling else 0
         if self.cached_n_rays != n_rays:
             self.rays_phi_ti = ti.ndarray(dtype=ti.f32, shape=n_rays)
             self.rays_theta_ti = ti.ndarray(dtype=ti.f32, shape=n_rays)
@@ -597,30 +610,30 @@ class MjLidarSensor:
             self.hit_points_world = ti.Vector.field(3, dtype=ti.f32, shape=n_rays)
             self.hit_mask = ti.field(dtype=ti.i32, shape=n_rays)
             self.cached_n_rays = n_rays
-        memory_end = time.time()
-        self.memory_allocation_time = (memory_end - memory_start) * 1000
+        memory_end = time.time() if self.enable_profiling else 0
+        self.memory_allocation_time = (memory_end - memory_start) * 1000 if self.enable_profiling else 0
             
         # 更新光线数据
-        rays_start = time.time()
+        rays_start = time.time() if self.enable_profiling else 0
         self.rays_phi_ti.from_numpy(rays_phi.astype(np.float32))
         self.rays_theta_ti.from_numpy(rays_theta.astype(np.float32))
-        rays_end = time.time()
-        self.update_rays_time = (rays_end - rays_start) * 1000
+        rays_end = time.time() if self.enable_profiling else 0
+        self.update_rays_time = (rays_end - rays_start) * 1000 if self.enable_profiling else 0
         
         # 更新几何体位置
         self.update_geom_positions(mj_scene)
         
         # 准备阶段结束，记录时间
-        prepare_end = time.time()
-        self.prepare_time = (prepare_end - start_total) * 1000
+        prepare_end = time.time() if self.enable_profiling else 0
+        self.prepare_time = (prepare_end - start_total) * 1000 if self.enable_profiling else 0
         
         # 开始Taichi内核计算
-        sync_start = time.time()
+        sync_start = time.time() if self.enable_profiling else 0
         ti.sync()  # 确保之前的操作完成
-        sync_end = time.time()
-        self.sync_time = (sync_end - sync_start) * 1000
+        sync_end = time.time() if self.enable_profiling else 0
+        self.sync_time = (sync_end - sync_start) * 1000 if self.enable_profiling else 0
         
-        kernel_start = time.time()
+        kernel_start = time.time() if self.enable_profiling else 0
         
         # 调用Taichi内核
         self.trace_rays(
@@ -633,24 +646,25 @@ class MjLidarSensor:
         
         # 等待内核完成
         ti.sync()
-        kernel_end = time.time()
-        self.kernel_time = (kernel_end - kernel_start) * 1000
+        kernel_end = time.time() if self.enable_profiling else 0
+        self.kernel_time = (kernel_end - kernel_start) * 1000 if self.enable_profiling else 0
         
         # 结果已经在内核中转换为局部坐标系
         result = self.hit_points.to_numpy()
         
         # 计算总时间
         end_total = time.time()
-        self.total_time = (end_total - start_total) * 1000
+        self.total_time = (end_total - start_total) * 1000 if self.enable_profiling else 0
         
         # 打印详细性能信息
-        print(f"准备阶段性能分析:")
-        print(f"  - 传感器位姿转换时间: {self.convert_sensor_pose_time:.2f}ms")
-        print(f"  - 内存分配时间: {self.memory_allocation_time:.2f}ms")
-        print(f"  - 光线数据更新时间: {self.update_rays_time:.2f}ms")
-        print(f"  - 几何体位置更新时间: {self.update_geom_time:.2f}ms")
-        print(f"  - 同步操作时间: {self.sync_time:.2f}ms")
-        print(f"总计: 准备时间: {self.prepare_time:.2f}ms, 内核时间: {self.kernel_time:.2f}ms, 总时间: {self.total_time:.2f}ms")
+        if self.enable_profiling and self.verbose:
+            print(f"准备阶段性能分析:")
+            print(f"  - 传感器位姿转换时间: {self.convert_sensor_pose_time:.2f}ms")
+            print(f"  - 内存分配时间: {self.memory_allocation_time:.2f}ms")
+            print(f"  - 光线数据更新时间: {self.update_rays_time:.2f}ms")
+            print(f"  - 几何体位置更新时间: {self.update_geom_time:.2f}ms")
+            print(f"  - 同步操作时间: {self.sync_time:.2f}ms")
+            print(f"总计: 准备时间: {self.prepare_time:.2f}ms, 内核时间: {self.kernel_time:.2f}ms, 总时间: {self.total_time:.2f}ms")
         
         return result
 
@@ -710,14 +724,22 @@ def create_demo_scene():
     """
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    mujoco.mj_saveLastXML("test.xml", model)
+    # mujoco.mj_saveLastXML("test.xml", model)
     return model, data
 
 if __name__ == "__main__":
     import time
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
-
+    
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='MuJoCo LiDAR传感器演示和性能测试')
+    parser.add_argument('--profiling', action='store_true', help='启用性能分析')
+    parser.add_argument('--verbose', action='store_true', help='显示详细输出')
+    parser.add_argument('--skip-test', action='store_true', help='跳过性能测试')
+    parser.add_argument('--rays', type=int, default=11520, help='默认射线数量(水平x垂直)')
+    args = parser.parse_args()
+    
     # 设置matplotlib支持中文显示
     plt.rcParams['font.sans-serif'] = 'simhei'  # 用来正常显示中文标签
     plt.rcParams['axes.unicode_minus'] = False    # 用来正常显示负号
@@ -738,11 +760,14 @@ if __name__ == "__main__":
     )
 
     # 创建激光雷达传感器
-    lidar = MjLidarSensor(scene)
+    lidar = MjLidarSensor(scene, enable_profiling=args.profiling, verbose=args.verbose)
     
-    # 创建激光雷达射线 - 使用更高的分辨率进行性能测试
-    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=360, vertical_resolution=32)
-    print(f"射线数量: {len(rays_phi)}")
+    # 创建激光雷达射线 - 使用命令行参数指定的分辨率
+    h_res = int(np.sqrt(args.rays) * 2)  # 近似水平分辨率
+    v_res = max(1, args.rays // h_res)   # 计算得到的垂直分辨率
+    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=h_res, vertical_resolution=v_res)
+    if args.verbose:
+        print(f"射线数量: {len(rays_phi)}, 水平分辨率: {h_res}, 垂直分辨率: {v_res}")
 
     # 设置激光雷达传感器位姿
     lidar_position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -761,266 +786,311 @@ if __name__ == "__main__":
         mujoco.mjtCatBit.mjCAT_ALL.value, scene
     )
     
-    print("=" * 50)
-    print("性能测试 - 不同射线数量")
-    print("=" * 50)
-    
-    # 测试不同射线数量的性能
-    ray_counts = [1000, 5000, 10000, 20000, 50000, 100000]
-    prepare_times = []
-    kernel_times = []
-    update_geom_times = []
-    
-    for count in ray_counts:
-        print(f"\n测试射线数量: {count}")
+    # 是否跳过性能测试
+    if not args.skip_test:
+        print("=" * 50)
+        print("性能测试 - 不同射线数量")
+        print("=" * 50)
         
-        # 创建测试用的射线
-        test_rays_phi, test_rays_theta = create_lidar_rays(
-            horizontal_resolution=int(np.sqrt(count) * 10), 
-            vertical_resolution=int(np.sqrt(count) / 10)
-        )
-        test_rays_phi = test_rays_phi[:count]
-        test_rays_theta = test_rays_theta[:count]
+        # 测试不同射线数量的性能
+        ray_counts = [1000, 5000, 10000, 20000, 50000, 100000]
+        prepare_times = []
+        kernel_times = []
+        update_geom_times = []
         
-        # 执行多次测试取平均值
-        n_tests = 5
-        prepare_time_sum = 0
-        kernel_time_sum = 0
-        update_geom_time_sum = 0
-        
-        for i in range(n_tests+1):
-            # 执行光线追踪
-            points = lidar.ray_cast_taichi(test_rays_phi, test_rays_theta, lidar_pose, scene)
-            ti.sync()
-            if i == 0:
-                continue
+        for count in ray_counts:
+            print(f"\n测试射线数量: {count}")
             
-            # 累加时间
-            prepare_time_sum += lidar.prepare_time
-            kernel_time_sum += lidar.kernel_time
-            update_geom_time_sum += lidar.update_geom_time
-        
-        # 计算平均时间
-        avg_prepare_time = prepare_time_sum / n_tests
-        avg_kernel_time = kernel_time_sum / n_tests
-        avg_update_geom_time = update_geom_time_sum / n_tests
-        
-        prepare_times.append(avg_prepare_time)
-        kernel_times.append(avg_kernel_time)
-        update_geom_times.append(avg_update_geom_time)
-        
-        print(f"平均准备时间: {avg_prepare_time:.2f}ms")
-        print(f"平均内核时间: {avg_kernel_time:.2f}ms")
-        print(f"平均几何体更新时间: {avg_update_geom_time:.2f}ms")
-    
-    print("=" * 50)
-    print("性能测试 - 不同几何体数量")
-    print("=" * 50)
-    
-    # 测试不同几何体数量的性能
-    # 创建包含更多几何体的场景
-    num_geoms = [10, 20, 50, 100, 200, 500]
-    geom_prepare_times = []
-    geom_kernel_times = []
-    geom_update_times = []
-    
-    # 使用固定数量的射线
-    test_rays_phi, test_rays_theta = create_lidar_rays(horizontal_resolution=1800, vertical_resolution=64)
-    
-    for num_geom in num_geoms:
-        print(f"\n测试几何体数量: {num_geom}")
-        
-        # 创建一个包含指定数量几何体的场景
-        xml_header = """
-        <mujoco>
-          <worldbody>
-            <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
-            <geom name="ground" type="plane" size="10 10 0.1" pos="0 0 0" rgba="0.9 0.9 0.9 1"/>
-        """
-        
-        xml_footer = """
-          </worldbody>
-        </mujoco>
-        """
-        
-        xml_content = xml_header
-        
-        # 添加指定数量的几何体
-        for i in range(num_geom):
-            geom_type = i % 5  # 0=box, 1=sphere, 2=capsule, 3=ellipsoid, 4=cylinder
-            x = (i % 10) - 5
-            y = (i // 10) - 5
-            z = 0.5
+            # 创建测试用的射线
+            test_rays_phi, test_rays_theta = create_lidar_rays(
+                horizontal_resolution=int(np.sqrt(count) * 10), 
+                vertical_resolution=int(np.sqrt(count) / 10)
+            )
+            test_rays_phi = test_rays_phi[:count]
+            test_rays_theta = test_rays_theta[:count]
             
-            if geom_type == 0:  # box
-                xml_content += f'<geom name="box{i}" type="box" size="0.3 0.3 0.3" pos="{x} {y} {z}" rgba="1 0 0 1"/>\n'
-            elif geom_type == 1:  # sphere
-                xml_content += f'<geom name="sphere{i}" type="sphere" size="0.3" pos="{x} {y} {z}" rgba="0 1 0 1"/>\n'
-            elif geom_type == 2:  # capsule
-                xml_content += f'<geom name="capsule{i}" type="capsule" size="0.2 0.4" pos="{x} {y} {z}" rgba="1 0 1 1"/>\n'
-            elif geom_type == 3:  # ellipsoid
-                xml_content += f'<geom name="ellipsoid{i}" type="ellipsoid" size="0.3 0.2 0.4" pos="{x} {y} {z}" rgba="1 1 0 1"/>\n'
-            elif geom_type == 4:  # cylinder
-                xml_content += f'<geom name="cylinder{i}" type="cylinder" size="0.2 0.3" pos="{x} {y} {z}" rgba="0 0 1 1"/>\n'
-        
-        xml_content += xml_footer
-        
-        # 创建MuJoCo模型和场景
-        test_model = mujoco.MjModel.from_xml_string(xml_content)
-        test_data = mujoco.MjData(test_model)
-        # mujoco.mj_saveLastXML(f"test_{num_geom}.xml", test_model)
-        mujoco.mj_forward(test_model, test_data)
-        
-        test_scene = mujoco.MjvScene(test_model, maxgeom=max(100, num_geom + 10))
-        mujoco.mjv_updateScene(
-            test_model, test_data, mujoco.MjvOption(), 
-            None, mujoco.MjvCamera(), 
-            mujoco.mjtCatBit.mjCAT_ALL.value, test_scene
-        )
-        
-        # 创建新的激光雷达传感器
-        test_lidar = MjLidarSensor(test_scene)
-        
-        # 执行多次测试取平均值
-        n_tests = 5
-        prepare_time_sum = 0
-        kernel_time_sum = 0
-        update_geom_time_sum = 0
-        
-        for i in range(n_tests+1):
-            # 执行光线追踪
-            points = test_lidar.ray_cast_taichi(test_rays_phi, test_rays_theta, lidar_pose, test_scene)
-            ti.sync()
-            if i == 0:
-                continue
+            # 执行多次测试取平均值
+            n_tests = 5
+            prepare_time_sum = 0
+            kernel_time_sum = 0
+            update_geom_time_sum = 0
             
-            # 累加时间
-            prepare_time_sum += test_lidar.prepare_time
-            kernel_time_sum += test_lidar.kernel_time
-            update_geom_time_sum += test_lidar.update_geom_time
-        
-        # 计算平均时间
-        avg_prepare_time = prepare_time_sum / n_tests
-        avg_kernel_time = kernel_time_sum / n_tests
-        avg_update_geom_time = update_geom_time_sum / n_tests
-        
-        geom_prepare_times.append(avg_prepare_time)
-        geom_kernel_times.append(avg_kernel_time)
-        geom_update_times.append(avg_update_geom_time)
-        
-        print(f"平均准备时间: {avg_prepare_time:.2f}ms")
-        print(f"平均内核时间: {avg_kernel_time:.2f}ms")
-        print(f"平均几何体更新时间: {avg_update_geom_time:.2f}ms")
-    
-    # 绘制性能结果图表
-    plt.figure(figsize=(12, 10))
-    
-    # 全局字体设置
-    title_font = {'fontsize': 14, 'fontweight': 'bold'}
-    label_font = {'fontsize': 12}
-    tick_font = {'fontsize': 10}
-    
-    # 射线数量对性能的影响
-    plt.subplot(2, 2, 1)
-    plt.plot(ray_counts, prepare_times, 'o-', label='准备时间')
-    plt.plot(ray_counts, kernel_times, 's-', label='内核时间')
-    plt.xlabel('射线数量', **label_font)
-    plt.ylabel('时间 (ms)', **label_font)
-    plt.title('射线数量对性能的影响', **title_font)
-    plt.legend(prop={'size': 10})
-    plt.grid(True)
-    plt.tick_params(labelsize=10)
-    
-    # 准备时间的细分
-    plt.subplot(2, 2, 2)
-    plt.plot(ray_counts, update_geom_times, 'o-', label='几何体更新时间')
-    plt.plot(ray_counts, prepare_times, 's-', label='总准备时间')
-    plt.xlabel('射线数量', **label_font)
-    plt.ylabel('时间 (ms)', **label_font)
-    plt.title('准备时间的细分', **title_font)
-    plt.legend(prop={'size': 10})
-    plt.grid(True)
-    plt.tick_params(labelsize=10)
-    
-    # 几何体数量对性能的影响
-    plt.subplot(2, 2, 3)
-    plt.plot(num_geoms, geom_prepare_times, 'o-', label='准备时间')
-    plt.plot(num_geoms, geom_kernel_times, 's-', label='内核时间')
-    plt.xlabel('几何体数量', **label_font)
-    plt.ylabel('时间 (ms)', **label_font)
-    plt.title('几何体数量对性能的影响 分辨率1800*64', **title_font)
-    plt.legend(prop={'size': 10})
-    plt.grid(True)
-    plt.tick_params(labelsize=10)
-    
-    # 几何体数量对update_geom_positions的影响
-    plt.subplot(2, 2, 4)
-    plt.plot(num_geoms, geom_update_times, 'o-', label='几何体更新时间')
-    plt.plot(num_geoms, geom_prepare_times, 's-', label='总准备时间')
-    plt.xlabel('几何体数量', **label_font)
-    plt.ylabel('时间 (ms)', **label_font)
-    plt.title('几何体数量对update_geom_positions的影响 分辨率1800*64', **title_font)
-    plt.legend(prop={'size': 10})
-    plt.grid(True)
-    plt.tick_params(labelsize=10)
-    
-    plt.tight_layout()
-    plt.savefig('lidar_performance_analysis.png', dpi=300)
-    plt.show()
+            for i in range(n_tests+1):
+                # 执行光线追踪
+                points = lidar.ray_cast_taichi(test_rays_phi, test_rays_theta, lidar_pose, scene)
+                ti.sync()
+                if i == 0:
+                    continue
                 
+                # 累加时间
+                prepare_time_sum += lidar.prepare_time
+                kernel_time_sum += lidar.kernel_time
+                update_geom_time_sum += lidar.update_geom_time
+            
+            # 计算平均时间
+            avg_prepare_time = prepare_time_sum / n_tests
+            avg_kernel_time = kernel_time_sum / n_tests
+            avg_update_geom_time = update_geom_time_sum / n_tests
+            
+            prepare_times.append(avg_prepare_time)
+            kernel_times.append(avg_kernel_time)
+            update_geom_times.append(avg_update_geom_time)
+            
+            print(f"平均准备时间: {avg_prepare_time:.2f}ms")
+            print(f"平均内核时间: {avg_kernel_time:.2f}ms")
+            print(f"平均几何体更新时间: {avg_update_geom_time:.2f}ms")
+        
+        print("=" * 50)
+        print("性能测试 - 不同几何体数量")
+        print("=" * 50)
+        
+        # 测试不同几何体数量的性能
+        # 创建包含更多几何体的场景
+        num_geoms = [10, 20, 50, 100, 200, 500]
+        geom_prepare_times = []
+        geom_kernel_times = []
+        geom_update_times = []
+        
+        # 使用固定数量的射线
+        test_rays_phi, test_rays_theta = create_lidar_rays(horizontal_resolution=1800, vertical_resolution=64)
+        
+        for num_geom in num_geoms:
+            print(f"\n测试几何体数量: {num_geom}")
+            
+            # 创建一个包含指定数量几何体的场景
+            xml_header = """
+            <mujoco>
+              <worldbody>
+                <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+                <geom name="ground" type="plane" size="10 10 0.1" pos="0 0 0" rgba="0.9 0.9 0.9 1"/>
+            """
+            
+            xml_footer = """
+              </worldbody>
+            </mujoco>
+            """
+            
+            xml_content = xml_header
+            
+            # 添加指定数量的几何体
+            for i in range(num_geom):
+                geom_type = i % 5  # 0=box, 1=sphere, 2=capsule, 3=ellipsoid, 4=cylinder
+                x = (i % 10) - 5
+                y = (i // 10) - 5
+                z = 0.5
+                
+                if geom_type == 0:  # box
+                    xml_content += f'<geom name="box{i}" type="box" size="0.3 0.3 0.3" pos="{x} {y} {z}" rgba="1 0 0 1"/>\n'
+                elif geom_type == 1:  # sphere
+                    xml_content += f'<geom name="sphere{i}" type="sphere" size="0.3" pos="{x} {y} {z}" rgba="0 1 0 1"/>\n'
+                elif geom_type == 2:  # capsule
+                    xml_content += f'<geom name="capsule{i}" type="capsule" size="0.2 0.4" pos="{x} {y} {z}" rgba="1 0 1 1"/>\n'
+                elif geom_type == 3:  # ellipsoid
+                    xml_content += f'<geom name="ellipsoid{i}" type="ellipsoid" size="0.3 0.2 0.4" pos="{x} {y} {z}" rgba="1 1 0 1"/>\n'
+                elif geom_type == 4:  # cylinder
+                    xml_content += f'<geom name="cylinder{i}" type="cylinder" size="0.2 0.3" pos="{x} {y} {z}" rgba="0 0 1 1"/>\n'
+            
+            xml_content += xml_footer
+            
+            # 创建MuJoCo模型和场景
+            test_model = mujoco.MjModel.from_xml_string(xml_content)
+            test_data = mujoco.MjData(test_model)
+            # mujoco.mj_saveLastXML(f"test_{num_geom}.xml", test_model)
+            mujoco.mj_forward(test_model, test_data)
+            
+            test_scene = mujoco.MjvScene(test_model, maxgeom=max(100, num_geom + 10))
+            mujoco.mjv_updateScene(
+                test_model, test_data, mujoco.MjvOption(), 
+                None, mujoco.MjvCamera(), 
+                mujoco.mjtCatBit.mjCAT_ALL.value, test_scene
+            )
+            
+            # 创建新的激光雷达传感器
+            test_lidar = MjLidarSensor(test_scene, enable_profiling=args.profiling, verbose=args.verbose)
+            
+            # 执行多次测试取平均值
+            n_tests = 5
+            prepare_time_sum = 0
+            kernel_time_sum = 0
+            update_geom_time_sum = 0
+            
+            for i in range(n_tests+1):
+                # 执行光线追踪
+                points = test_lidar.ray_cast_taichi(test_rays_phi, test_rays_theta, lidar_pose, test_scene)
+                ti.sync()
+                if i == 0:
+                    continue
+                
+                # 累加时间
+                prepare_time_sum += test_lidar.prepare_time
+                kernel_time_sum += test_lidar.kernel_time
+                update_geom_time_sum += test_lidar.update_geom_time
+            
+            # 计算平均时间
+            avg_prepare_time = prepare_time_sum / n_tests
+            avg_kernel_time = kernel_time_sum / n_tests
+            avg_update_geom_time = update_geom_time_sum / n_tests
+            
+            geom_prepare_times.append(avg_prepare_time)
+            geom_kernel_times.append(avg_kernel_time)
+            geom_update_times.append(avg_update_geom_time)
+            
+            print(f"平均准备时间: {avg_prepare_time:.2f}ms")
+            print(f"平均内核时间: {avg_kernel_time:.2f}ms")
+            print(f"平均几何体更新时间: {avg_update_geom_time:.2f}ms")
+        
+        # 绘制性能结果图表
+        plt.figure(figsize=(12, 10))
+        
+        # 全局字体设置
+        title_font = {'fontsize': 14, 'fontweight': 'bold'}
+        label_font = {'fontsize': 12}
+        tick_font = {'fontsize': 10}
+        
+        # 根据字体可用性选择标签语言
+        if 'use_english_labels' in locals() and use_english_labels:
+            # 使用英文标签
+            ray_count_title = 'Effect of Ray Count on Performance'
+            prep_time_title = 'Breakdown of Preparation Time'
+            geom_count_title = 'Effect of Geometry Count on Performance'
+            geom_update_title = 'Effect of Geometry Count on update_geom_positions'
+            
+            ray_label = 'Ray Count'
+            geom_label = 'Geometry Count'
+            time_label = 'Time (ms)'
+            
+            prep_legend = 'Preparation Time'
+            kernel_legend = 'Kernel Time'
+            update_legend = 'Geometry Update Time'
+            total_legend = 'Total Preparation Time'
+        else:
+            # 使用中文标签
+            ray_count_title = '射线数量对性能的影响'
+            prep_time_title = '准备时间的细分'
+            geom_count_title = '几何体数量对性能的影响'
+            geom_update_title = '几何体数量对update_geom_positions的影响'
+            
+            ray_label = '射线数量'
+            geom_label = '几何体数量'
+            time_label = '时间 (ms)'
+            
+            prep_legend = '准备时间'
+            kernel_legend = '内核时间'
+            update_legend = '几何体更新时间'
+            total_legend = '总准备时间'
+        
+        # 射线数量对性能的影响
+        plt.subplot(2, 2, 1)
+        plt.plot(ray_counts, prepare_times, 'o-', label=prep_legend)
+        plt.plot(ray_counts, kernel_times, 's-', label=kernel_legend)
+        plt.xlabel(ray_label, **label_font)
+        plt.ylabel(time_label, **label_font)
+        plt.title(ray_count_title, **title_font)
+        plt.legend(prop={'size': 10})
+        plt.grid(True)
+        plt.tick_params(labelsize=10)
+        
+        # 准备时间的细分
+        plt.subplot(2, 2, 2)
+        plt.plot(ray_counts, update_geom_times, 'o-', label=update_legend)
+        plt.plot(ray_counts, prepare_times, 's-', label=total_legend)
+        plt.xlabel(ray_label, **label_font)
+        plt.ylabel(time_label, **label_font)
+        plt.title(prep_time_title, **title_font)
+        plt.legend(prop={'size': 10})
+        plt.grid(True)
+        plt.tick_params(labelsize=10)
+        
+        # 几何体数量对性能的影响
+        plt.subplot(2, 2, 3)
+        plt.plot(num_geoms, geom_prepare_times, 'o-', label=prep_legend)
+        plt.plot(num_geoms, geom_kernel_times, 's-', label=kernel_legend)
+        plt.xlabel(geom_label, **label_font)
+        plt.ylabel(time_label, **label_font)
+        plt.title(geom_count_title, **title_font)
+        plt.legend(prop={'size': 10})
+        plt.grid(True)
+        plt.tick_params(labelsize=10)
+        
+        # 几何体数量对update_geom_positions的影响
+        plt.subplot(2, 2, 4)
+        plt.plot(num_geoms, geom_update_times, 'o-', label=update_legend)
+        plt.plot(num_geoms, geom_prepare_times, 's-', label=total_legend)
+        plt.xlabel(geom_label, **label_font)
+        plt.ylabel(time_label, **label_font)
+        plt.title(geom_update_title, **title_font)
+        plt.legend(prop={'size': 10})
+        plt.grid(True)
+        plt.tick_params(labelsize=10)
+        
+        plt.tight_layout()
+        plt.savefig('lidar_performance_analysis.png', dpi=300)
+        plt.show()
+        
+        # 将性能测试结果以表格形式打印
+        print("\n" + "=" * 80)
+        print("性能测试结果汇总")
+        print("=" * 80)
+        
+        # 表格1：射线数量对性能的影响
+        print("\n表格1: 射线数量对性能的影响")
+        print("-" * 70)
+        print(f"{'射线数量':^12} | {'准备时间 (ms)':^15} | {'内核时间 (ms)':^15} | {'总时间 (ms)':^15}")
+        print("-" * 70)
+        for i, count in enumerate(ray_counts):
+            total_time = prepare_times[i] + kernel_times[i]
+            print(f"{count:^12} | {prepare_times[i]:^15.2f} | {kernel_times[i]:^15.2f} | {total_time:^15.2f}")
+        print("-" * 70)
+        
+        # 表格2：准备时间的细分
+        print("\n表格2: 准备时间的细分")
+        print("-" * 70)
+        print(f"{'射线数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
+        print("-" * 70)
+        for i, count in enumerate(ray_counts):
+            print(f"{count:^12} | {update_geom_times[i]:^20.2f} | {prepare_times[i]:^15.2f}")
+        print("-" * 70)
+        
+        # 表格3：几何体数量对性能的影响
+        print("\n表格3: 几何体数量对性能的影响")
+        print("-" * 70)
+        print(f"{'几何体数量':^12} | {'准备时间 (ms)':^15} | {'内核时间 (ms)':^15} | {'总时间 (ms)':^15}")
+        print("-" * 70)
+        for i, count in enumerate(num_geoms):
+            total_time = geom_prepare_times[i] + geom_kernel_times[i]
+            print(f"{count:^12} | {geom_prepare_times[i]:^15.2f} | {geom_kernel_times[i]:^15.2f} | {total_time:^15.2f}")
+        print("-" * 70)
+        
+        # 表格4：几何体数量对update_geom_positions的影响
+        print("\n表格4: 几何体数量对update_geom_positions的影响")
+        print("-" * 70)
+        print(f"{'几何体数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
+        print("-" * 70)
+        for i, count in enumerate(num_geoms):
+            print(f"{count:^12} | {geom_update_times[i]:^20.2f} | {geom_prepare_times[i]:^15.2f}")
+        print("-" * 70)
+    
     # 执行标准光线追踪测试
     print("\n执行标准光线追踪测试:")
+    old_enable_profiling = lidar.enable_profiling
+    old_verbose = lidar.verbose
+    
+    # 临时开启性能分析和详细输出
+    lidar.enable_profiling = True
+    lidar.verbose = True
+    
     for _ in range(3):
         start_time = time.time()
         points = lidar.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, scene)
         ti.sync()
         end_time = time.time()
     
+    # 恢复原始设置
+    lidar.enable_profiling = old_enable_profiling
+    lidar.verbose = old_verbose
+    
     # 打印性能信息和当前位置
     print(f"耗时: {(end_time - start_time)*1000:.2f} ms, 射线数量: {len(rays_phi)}")
-    
-    # 将性能测试结果以表格形式打印
-    print("\n" + "=" * 80)
-    print("性能测试结果汇总")
-    print("=" * 80)
-    
-    # 表格1：射线数量对性能的影响
-    print("\n表格1: 射线数量对性能的影响")
-    print("-" * 70)
-    print(f"{'射线数量':^12} | {'准备时间 (ms)':^15} | {'内核时间 (ms)':^15} | {'总时间 (ms)':^15}")
-    print("-" * 70)
-    for i, count in enumerate(ray_counts):
-        total_time = prepare_times[i] + kernel_times[i]
-        print(f"{count:^12} | {prepare_times[i]:^15.2f} | {kernel_times[i]:^15.2f} | {total_time:^15.2f}")
-    print("-" * 70)
-    
-    # 表格2：准备时间的细分
-    print("\n表格2: 准备时间的细分")
-    print("-" * 70)
-    print(f"{'射线数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
-    print("-" * 70)
-    for i, count in enumerate(ray_counts):
-        print(f"{count:^12} | {update_geom_times[i]:^20.2f} | {prepare_times[i]:^15.2f}")
-    print("-" * 70)
-    
-    # 表格3：几何体数量对性能的影响
-    print("\n表格3: 几何体数量对性能的影响")
-    print("-" * 70)
-    print(f"{'几何体数量':^12} | {'准备时间 (ms)':^15} | {'内核时间 (ms)':^15} | {'总时间 (ms)':^15}")
-    print("-" * 70)
-    for i, count in enumerate(num_geoms):
-        total_time = geom_prepare_times[i] + geom_kernel_times[i]
-        print(f"{count:^12} | {geom_prepare_times[i]:^15.2f} | {geom_kernel_times[i]:^15.2f} | {total_time:^15.2f}")
-    print("-" * 70)
-    
-    # 表格4：几何体数量对update_geom_positions的影响
-    print("\n表格4: 几何体数量对update_geom_positions的影响")
-    print("-" * 70)
-    print(f"{'几何体数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
-    print("-" * 70)
-    for i, count in enumerate(num_geoms):
-        print(f"{count:^12} | {geom_update_times[i]:^20.2f} | {geom_prepare_times[i]:^15.2f}")
-    print("-" * 70)
     
     # 三维点云可视化
     fig = plt.figure(figsize=(10, 8))
