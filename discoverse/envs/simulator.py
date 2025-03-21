@@ -8,7 +8,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import glfw
 import OpenGL.GL as gl
-import ctypes
 import cv2
 import sys
 
@@ -100,7 +99,7 @@ class SimulatorBase:
         self.glfw_initialized = False
         
         if not hasattr(self.config.render_set, "window_title"):
-            self.config.render_set["window_title"] = "DISCOVERSE Simulator"
+            self.config.render_set["window_title"] = "DISCOVERSE"
         
         if self.config.enable_render and not self.config.headless:
             try:
@@ -117,7 +116,7 @@ class SimulatorBase:
                 self.window = glfw.create_window(
                     self.config.render_set["width"],
                     self.config.render_set["height"],
-                    self.config.render_set.get("window_title", "DISCOVERSE Simulator"),
+                    self.config.render_set.get("window_title", "DISCOVERSE"),
                     None, None
                 )
                 
@@ -137,7 +136,26 @@ class SimulatorBase:
                 glfw.set_key_callback(self.window, self.on_key)
                 glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
                 glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
-                
+
+                if sys.platform == "darwin":
+                    try:
+                        import AppKit
+                    except ImportError:
+                        print("pyobjc is required for retina display support on macOS. Run:")
+                        print(">>> pip install pyobjc")
+                        quit()
+
+                    def get_screen_scale(screen_id):
+                        screens = AppKit.NSScreen.screens()
+                        if len(screens) >= screen_id:
+                            return screens[screen_id].backingScaleFactor()
+                        else:
+                            return None
+                    self.screen_scale = get_screen_scale(0)
+                    gl.glPixelZoom(self.screen_scale, self.screen_scale)
+                else:
+                    self.screen_scale = 1
+
             except Exception as e:
                 print(f"GLFW初始化失败: {e}")
                 if self.glfw_initialized:
@@ -182,12 +200,16 @@ class SimulatorBase:
 
         self.post_load_mjcf()
 
-    def post_load_mjcf(self):
-        self.config.render_set["window_title"] = "DISCOVERSE Simulator"  # 添加默认标题
+    def update_renderer_window_size(self, width, height):
+        self.renderer._width = width
+        self.renderer._height = height
+        self.renderer._rect.width = width
+        self.renderer._rect.height = height
 
     def render(self):
         self.render_cnt += 1
 
+        self.update_renderer_window_size(self.config.render_set["width"], self.config.render_set["height"])
         if self.config.use_gaussian_renderer and self.show_gaussian_img:
             self.update_gs_scene()
         
@@ -205,24 +227,53 @@ class SimulatorBase:
             self.img_depth_obs_s[id] = img
         self.renderer._depth_rendering = depth_rendering
         
-        if not self.renderer._depth_rendering:
-            if self.cam_id in self.config.obs_rgb_cam_id:
-                img_vis = self.img_rgb_obs_s[self.cam_id]
-            else:
-                img_rgb = self.getRgbImg(self.cam_id)
-                img_vis = img_rgb
-        else:
-            if self.cam_id in self.config.obs_depth_cam_id:
-                img_depth = self.img_depth_obs_s[self.cam_id]
-            else:
-                img_depth = self.getDepthImg(self.cam_id)
-            
-            if img_depth is not None:
-                img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
-            else:
-                img_vis = None
-
         if not self.config.headless and self.window is not None:
+            if not (self.config.use_gaussian_renderer and self.show_gaussian_img):
+                current_width_s_, current_height_s_ = glfw.get_framebuffer_size(self.window)
+                current_width, current_height = int(current_width_s_/self.screen_scale), int(current_height_s_/self.screen_scale)
+                if current_height == self.config.render_set["height"] and current_width == self.config.render_set["width"]:
+                    if not self.renderer._depth_rendering:
+                        if self.cam_id in self.config.obs_rgb_cam_id:
+                            img_vis = self.img_rgb_obs_s[self.cam_id]
+                        else:
+                            img_rgb = self.getRgbImg(self.cam_id)
+                            img_vis = img_rgb
+                    else:
+                        if self.cam_id in self.config.obs_depth_cam_id:
+                            img_depth = self.img_depth_obs_s[self.cam_id]
+                        else:
+                            img_depth = self.getDepthImg(self.cam_id)
+                        
+                        if img_depth is not None:
+                            img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                        else:
+                            img_vis = None
+                else:
+                    self.update_renderer_window_size(current_width, current_height)
+                    if not self.renderer._depth_rendering:
+                        img_vis = self.getRgbImg(self.cam_id)
+                    else:
+                        img_depth = self.getDepthImg(self.cam_id)
+                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+            else:
+                current_width, current_height = self.config.render_set["width"], self.config.render_set["height"]
+                if not self.renderer._depth_rendering:
+                    if self.cam_id in self.config.obs_rgb_cam_id:
+                        img_vis = self.img_rgb_obs_s[self.cam_id]
+                    else:
+                        img_rgb = self.getRgbImg(self.cam_id)
+                        img_vis = img_rgb
+                else:
+                    if self.cam_id in self.config.obs_depth_cam_id:
+                        img_depth = self.img_depth_obs_s[self.cam_id]
+                    else:
+                        img_depth = self.getDepthImg(self.cam_id)
+                    
+                    if img_depth is not None:
+                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                    else:
+                        img_vis = None
+
             try:
                 if glfw.window_should_close(self.window):
                     self.running = False
@@ -231,13 +282,9 @@ class SimulatorBase:
                 glfw.make_context_current(self.window)
                 gl.glClear(gl.GL_COLOR_BUFFER_BIT)
                 
-                gl.glViewport(0, 0, self.config.render_set["width"], self.config.render_set["height"])
-                
-                gl.glRasterPos2i(-1, -1)
+                # gl.glViewport(0, 0, current_width, current_height)              
+                # gl.glRasterPos2i(-1, -1)
 
-                if sys.platform == "darwin":
-                    gl.glPixelZoom(2.0, 2.0)
-                
                 if img_vis is not None:
                     img_vis = img_vis[::-1]
                     img_vis = np.ascontiguousarray(img_vis)
