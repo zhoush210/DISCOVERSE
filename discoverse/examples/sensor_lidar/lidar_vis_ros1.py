@@ -437,7 +437,7 @@ if __name__ == "__main__":
     lidar = MjLidarSensor(scene)
 
     # 创建激光雷达射线 - 使用更高的分辨率进行性能测试
-    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=360, vertical_resolution=64)
+    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=3600, vertical_resolution=256)
     print(f"射线数量: {len(rays_phi)}")
 
     # 设置激光雷达位置
