@@ -1,4 +1,5 @@
 import tqdm
+import argparse
 import struct
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -120,18 +121,25 @@ def ply_bin_transpose(input_file, output_file, transformMatrix, scale_factor=1.)
             f.write(binary_data)
 
 if __name__ == "__main__":
-    import argparse
+
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
 
-    parser = argparse.ArgumentParser(description='Transpose binary PLY.')
-    parser.add_argument('input_file', type=str, help='Path to the input binary PLY file')
+    parser = argparse.ArgumentParser(description='example: python3 scripts/ply_transpose.py -i data/ply/000000.ply -o data/ply/000000_trans.ply -t [0, 0, 0] -r [0.707, 0., 0., 0.707] -s 1')
+    parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to the input binary PLY file')
     parser.add_argument('-o', '--output_file', type=str, help='Path to the output PLY file', default=None)
-
+    parser.add_argument('-t', '--transform', nargs=3, type=float, help='transformation', default=None)
+    parser.add_argument('-r', '--rotation', nargs=4, type=float, help='rotation quaternion xyzw', default=None)
+    parser.add_argument('-s', '--scale', type=float, help='Scale factor', default=1)
     args = parser.parse_args()
+
+    Tmat = np.eye(4)
+    if args.transform is not None:
+        Tmat[:3,3] = args.transform
+    
+    if args.rotation is not None:
+        Tmat[:3,:3] = Rotation.from_quat(args.rotation).as_matrix()
 
     if args.output_file is None:
         args.output_file = args.input_file.replace('.ply', '_trans.ply')
 
-    Tmat = np.eye(4)
-    Tmat[2,3] = -0.01
     ply_bin_transpose(args.input_file, args.output_file, Tmat, scale_factor=1)
