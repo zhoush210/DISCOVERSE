@@ -2,5 +2,6 @@ numpy
 # numpy==1.24.0
 scipy
 mediapy
+pyautogui
 opencv-python
 mujoco

@@ -1,15 +1,17 @@
 import os
+import sys
 import time
 import traceback
 from abc import abstractmethod
 
+import cv2
+import glfw
+import pyautogui
+import OpenGL.GL as gl
+
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
-import glfw
-import OpenGL.GL as gl
-import cv2
-import sys
 
 from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import BaseConfig
@@ -196,6 +198,9 @@ class SimulatorBase:
             elif self.config.obs_depth_cam_id is None:
                 self.config.obs_depth_cam_id = []
 
+            screen_width, screen_height = pyautogui.size()
+            self.mj_model.vis.global_.offwidth = max(self.mj_model.vis.global_.offwidth, screen_width)
+            self.mj_model.vis.global_.offheight = max(self.mj_model.vis.global_.offheight, screen_height)
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
 
         self.post_load_mjcf()
