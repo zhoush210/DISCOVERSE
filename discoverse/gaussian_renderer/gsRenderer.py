@@ -95,8 +95,12 @@ class GSRenderer:
 
     def set_camera_fovy(self, fovy):
         if not fovy == self.camera.fovy:
-            self.camera.fovy = fovy
-            self.camera.is_intrin_dirty = True
+            self.camera.update_fovy(fovy)
+    
+    def set_camera_resolution(self, height, width):
+        if not (height == self.camera.h and width == self.camera.w):
+            self.camera.update_resolution(height, width)
+            self.renderer.set_render_reso(width, height)
 
     def render(self, render_depth=False):
         self.update_camera_intrin_lazy()

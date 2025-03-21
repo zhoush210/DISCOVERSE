@@ -210,6 +210,8 @@ class SimulatorBase:
         self.renderer._height = height
         self.renderer._rect.width = width
         self.renderer._rect.height = height
+        if self.config.use_gaussian_renderer and self.show_gaussian_img:
+            self.gs_renderer.set_camera_resolution(height, width)
 
     def render(self):
         self.render_cnt += 1
@@ -233,35 +235,9 @@ class SimulatorBase:
         self.renderer._depth_rendering = depth_rendering
         
         if not self.config.headless and self.window is not None:
-            if not (self.config.use_gaussian_renderer and self.show_gaussian_img):
-                current_width_s_, current_height_s_ = glfw.get_framebuffer_size(self.window)
-                current_width, current_height = int(current_width_s_/self.screen_scale), int(current_height_s_/self.screen_scale)
-                if current_height == self.config.render_set["height"] and current_width == self.config.render_set["width"]:
-                    if not self.renderer._depth_rendering:
-                        if self.cam_id in self.config.obs_rgb_cam_id:
-                            img_vis = self.img_rgb_obs_s[self.cam_id]
-                        else:
-                            img_rgb = self.getRgbImg(self.cam_id)
-                            img_vis = img_rgb
-                    else:
-                        if self.cam_id in self.config.obs_depth_cam_id:
-                            img_depth = self.img_depth_obs_s[self.cam_id]
-                        else:
-                            img_depth = self.getDepthImg(self.cam_id)
-                        
-                        if img_depth is not None:
-                            img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
-                        else:
-                            img_vis = None
-                else:
-                    self.update_renderer_window_size(current_width, current_height)
-                    if not self.renderer._depth_rendering:
-                        img_vis = self.getRgbImg(self.cam_id)
-                    else:
-                        img_depth = self.getDepthImg(self.cam_id)
-                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
-            else:
-                current_width, current_height = self.config.render_set["width"], self.config.render_set["height"]
+            current_width_s_, current_height_s_ = glfw.get_framebuffer_size(self.window)
+            current_width, current_height = int(current_width_s_/self.screen_scale), int(current_height_s_/self.screen_scale)
+            if current_height == self.config.render_set["height"] and current_width == self.config.render_set["width"]:
                 if not self.renderer._depth_rendering:
                     if self.cam_id in self.config.obs_rgb_cam_id:
                         img_vis = self.img_rgb_obs_s[self.cam_id]
@@ -278,6 +254,13 @@ class SimulatorBase:
                         img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
                     else:
                         img_vis = None
+            else:
+                self.update_renderer_window_size(current_width, current_height)
+                if not self.renderer._depth_rendering:
+                    img_vis = self.getRgbImg(self.cam_id)
+                else:
+                    img_depth = self.getDepthImg(self.cam_id)
+                    img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
 
             try:
                 if glfw.window_should_close(self.window):
