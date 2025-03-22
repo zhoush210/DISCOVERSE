@@ -15,11 +15,6 @@
     <material name='groundplane' texture='groundplane' texuniform='true' texrepeat='5 5' reflectance='0.2'/>
   </asset>
 
-  <asset>
-    <texture name="wood" type="cube" file="wood.png" />
-    <material name="wood" texture="wood" rgba="1 1 1 1" />
-  </asset>
-
   <worldbody>
     <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='-1 -1 1' dir='1 1 -1'/>
     <light directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 1' dir='-1 1 -1'/>

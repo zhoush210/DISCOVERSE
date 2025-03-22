@@ -1,0 +1,73 @@
+<mujoco model="mmk2">
+
+  <include file="mmk2/mmk2_options.xml"/>
+  <include file="mmk2/mmk2_dependencies.xml"/>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <quality shadowsize="4096" offsamples="4"/>
+    <headlight diffuse='0.6 0.6 0.6' ambient='.3 .3 .3' specular='0 0 0'/>
+    <scale com="0.05" camera="0.06" framelength="0.5" framewidth="0.02" forcewidth="0.1" contactwidth="0.01" contactheight="0.05"/>
+  </visual>
+
+  <asset>
+    <texture type='2d' name='groundplane' builtin='checker' mark='edge' rgb1='0.2 0.3 0.4' rgb2='0.1 0.2 0.3' markrgb='0.8 0.8 0.8' width='300' height='300'/>
+    <material name='groundplane' texture='groundplane' texuniform='true' texrepeat='5 5' reflectance='0.2'/>
+  </asset>
+
+  <worldbody>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='-1 -1 1' dir='1 1 -1'/>
+    <light directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 0 1' dir='-1 1 -1'/>
+    <light castshadow="false" directional='true' diffuse='.3 .3 .3' specular='0.3 0.3 0.3' pos='0 1 1' dir='0 -1 -1'/>
+    <geom name='floor' type='plane' size='10 10 0.01' material='groundplane' pos='0 0 0'/>
+    <body name='mmk2' pos="0 0 0">
+      <joint type="free" frictionloss="0.0001" />
+      <include file="mmk2/mmk2.xml"/>
+    </body>
+
+    <geom type="plane" size="1 5 0.1" pos="4 1 1" euler="0 1.5708 0" contype="0" conaffinity="0" rgba="0.9 0.9 0.9 1"/>
+    <geom type="plane" size="5 1 0.1" pos="-1 -4 1" euler="1.5708 0 0" contype="0" conaffinity="0" rgba="0.9 0.9 0.9 1"/>
+    
+    <!-- 盒子 -->
+    <geom name="box1" type="box" size="0.5 0.5 0.5" pos="2 0 0.5" euler="0.785 -0.785 0" rgba="1 0 0 1"/>
+    <geom name="box2" type="box" size="0.3 0.8 0.2" pos="-2 -1 0.2" rgba="1 0 0 0.7"/>
+    
+    <!-- 球体 -->
+    <geom name="sphere1" type="sphere" size="0.5" pos="0 2 0.4" rgba="0 1 0 1"/>
+    <geom name="sphere2" type="sphere" size="0.3" pos="-1 2 0.2" rgba="0 1 0 0.7"/>
+    
+    <!-- 圆柱体 -->
+    <geom name="cylinder1" type="cylinder" size="0.4 0.6" pos="0 -2 0.4" euler="0 1.5708 0" rgba="0 0 1 1"/>
+    <geom name="cylinder2" type="cylinder" size="0.2 0.3" pos="2 -2 0.2" rgba="0 0 1 0.7"/>
+    
+    <!-- 椭球体 -->
+    <geom name="ellipsoid1" type="ellipsoid" size="0.4 0.3 0.35" pos="3 2 0.2" euler="-1 1 0" rgba="1 1 0 1"/>
+    <geom name="ellipsoid2" type="ellipsoid" size="0.2 0.4 0.2" pos="3 -1 0.2" euler="0.5 0 1.1" rgba="1 1 0 0.7"/>
+    
+    <!-- 胶囊体 -->
+    <geom name="capsule1" type="capsule" size="0.3 0.5" pos="-3 1 0.4" euler="0 0.785 0" rgba="1 0 1 1"/>
+    <geom name="capsule2" type="capsule" size="0.2 0.4" pos="-3 -2 0.4" euler="0.785 0 0.785" rgba="1 0 1 0.7"/>
+    
+    <!-- 角落放置一组排列的几何体 -->
+    <body pos="-3 3 0">
+      <geom type="box" size="0.2 0.2 0.2" pos="0 0 0.2" rgba="0.5 0.5 0.5 1"/>
+      <geom type="sphere" size="0.2" pos="-0.5 0 0.2" rgba="0.7 0.7 0.7 1"/>
+      <geom type="cylinder" size="0.2 0.2" pos="0.5 0.5 0.2" rgba="0.6 0.6 0.6 1"/>
+      <geom type="capsule" size="0.1 0.3" pos="1.5 0.5 0.2" rgba="0.8 0.8 0.8 1" euler="0 0.785 0.785"/>
+    </body>
+
+  </worldbody>
+
+  <actuator>
+    <include file="mmk2/mmk2_control.xml"/>
+  </actuator>
+
+  <sensor>
+    <include file="mmk2/mmk2_sensor.xml"/>
+  </sensor>
+
+  <keyframe>
+    <key name="pick" qpos='0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'/>
+  </keyframe>
+
+</mujoco>

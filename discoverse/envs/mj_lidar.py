@@ -51,7 +51,10 @@ class MjLidarSensor:
         # 初始化几何体静态数据
         for i in range(self.n_geoms):
             geom = mj_scene.geoms[i]
-            self.geom_types[i] = geom.type
+            if geom.objtype != 5: # 5 is mjOBJ_GEOM
+                self.geom_types[i] = -1
+            else:
+                self.geom_types[i] = geom.type
             self.geom_sizes[i] = ti.math.vec3(geom.size[0], geom.size[1], geom.size[2])
             self.geom_positions[i] = ti.math.vec3(geom.pos[0], geom.pos[1], geom.pos[2])
             # 保存旋转矩阵
@@ -566,6 +569,7 @@ class MjLidarSensor:
                     self.hit_points_world[i] = ti.math.vec3(hit_result.x, hit_result.y, hit_result.z)
                     min_distance = hit_result.w
                     self.hit_mask[i] = 1  # 标记此射线有命中
+                    # print(f"射线{i}命中几何体{j}，距离为{min_distance}")
 
             # 在遍历完当前射线的所有几何体后，进行坐标转换
             if self.hit_mask[i] == 1:  # 如果有命中
@@ -681,6 +685,12 @@ def create_lidar_rays(horizontal_resolution=360, vertical_resolution=32, horizon
     rays_theta = theta_grid.flatten()
     return rays_phi, rays_theta
 
+def create_lidar_single_line(horizontal_resolution=360, horizontal_fov=2*np.pi):
+    """创建激光雷达扫描线的角度数组，仅包含水平方向"""
+    h_angles = np.linspace(-horizontal_fov/2, horizontal_fov/2, horizontal_resolution)
+    v_angles = np.zeros_like(h_angles)
+    return h_angles, v_angles
+    
 
 def create_demo_scene():
     """创建一个用于测试的mujoco场景，包含所有支持的几何体类型"""

@@ -6,7 +6,7 @@
     <body name="head_pitch_link" pos="0.00099952 3.1059e-05 0.058" quat="0.5 -0.5 0.5 -0.5">
       <inertial pos="-0.0352711 0.123044 -0.0165046" quat="0.714586 0.699243 0.0178013 0.0104566" mass="0.767298" diaginertia="0.00394021 0.00338829 0.00196438"/>
       <joint name="head_pitch_joint" class='head_pitch_joint'/>
-      <geom type="box" rgba="0 0 1 0" size="0.07 0.08 0.06" pos="0.015 -0.14 0"/>
+      <geom type="box" rgba="0 0 1 1" group="4" size="0.07 0.08 0.06" pos="0.015 -0.14 0"/>
       <geom type="cylinder" rgba="0 0 0 1" size="0.015 0.025"/>
       <geom mesh="head_green" rgba="0.57 0.95 0.95 1" class="visual"/>
       <geom mesh="head_black" material="Paint_Matte_Black__1" class="visual"/>
