@@ -5,7 +5,7 @@ try:
     from sensor_msgs.msg import Joy
 
     class JoyTeleopRos1:
-        NUM_BUTTON = 12
+        NUM_BUTTON = 11
         def __init__(self) -> None:
 
             self.joy_cmd = Joy()

@@ -1,4 +1,5 @@
 import mujoco
+import threading
 import numpy as np
 import taichi as ti
 from scipy.spatial.transform import Rotation
@@ -6,13 +7,13 @@ from scipy.spatial.transform import Rotation
 import rospy
 import tf2_ros
 from sensor_msgs.msg import PointCloud2
-
+from visualization_msgs.msg import MarkerArray
 from discoverse.utils import get_site_tmat
 from discoverse.envs.mmk2_base import MMK2Cfg
-from discoverse.examples.ros1.mmk2_joy_ros1 import MMK2JOY
+from discoverse.examples.ros1.mmk2_ros1_joy import MMK2ROS1JoyCtl
 
 from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_single_line
-from discoverse.examples.sensor_lidar.lidar_vis_ros1 import broadcast_tf, publish_point_cloud
+from discoverse.examples.sensor_lidar.lidar_vis_ros1 import broadcast_tf, publish_point_cloud, publish_scene
 
 if __name__ == "__main__":
     rospy.init_node('mmk2_lidar_node', anonymous=True)
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     cfg.use_gaussian_renderer = False
 
     # 初始化仿真环境
-    exec_node = MMK2JOY(cfg)
+    exec_node = MMK2ROS1JoyCtl(cfg)
     exec_node.reset()
 
     # 创建TF广播者
@@ -64,6 +65,19 @@ if __name__ == "__main__":
     # 创建ROS发布者，用于将激光雷达数据发布为PointCloud2类型消息
     pub_lidar_s2 = rospy.Publisher('/mmk2/lidar_s2', PointCloud2, queue_size=1)
 
+    def publish_scene_thread():
+        # 创建场景可视化标记发布者
+        rate = rospy.Rate(1)
+        pub_scene = rospy.Publisher('/mujoco_scene', MarkerArray, queue_size=1)
+        while exec_node.running and not rospy.is_shutdown():
+            # 发布场景可视化标记
+            publish_scene(pub_scene, exec_node.renderer.scene)
+            rate.sleep()
+    # 创建一个线程，用于发布场景可视化标记
+
+    scene_pub_thread = threading.Thread(target=publish_scene_thread)
+    scene_pub_thread.start()
+
     sim_step_cnt = 0
     lidar_pub_cnt = 0
 
@@ -91,3 +105,5 @@ if __name__ == "__main__":
             broadcast_tf(tf_broadcaster, "world", lidar_frame_id, lidar_position, lidar_orientation)
 
         sim_step_cnt += 1
+
+    scene_pub_thread.join()

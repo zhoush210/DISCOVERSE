@@ -7,8 +7,8 @@ from sensor_msgs.msg import Joy
 
 from discoverse.mmk2 import MMK2FIK
 from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.examples.ros2.mmk2_ros2 import MMK2ROS2
 from discoverse.utils.joy_stick_ros2 import JoyTeleopRos2
-from discoverse.examples.ros2.mmk2_ros2 import MMK2ROS2, cfg
 
 class MMK2ROS2JoyCtl(MMK2ROS2):
     arm_action_init_position = {
@@ -30,7 +30,7 @@ class MMK2ROS2JoyCtl(MMK2ROS2):
         self.rgt_arm_target_pose = self.arm_action_init_position[self.arm_action]["r"].copy()
         self.rgt_end_euler = np.zeros(3)
 
-        # joy
+        # joy control
         self.teleop = JoyTeleopRos2()
         self.sub = self.create_subscription(Joy, '/joy', self.teleop.joy_callback, 10)
 
@@ -53,7 +53,6 @@ class MMK2ROS2JoyCtl(MMK2ROS2):
     def teleopProcess(self):
         linear_vel  = 0.0
         angular_vel = 0.0
-
         if self.teleop.joy_cmd.buttons[4]:   # left arm
             tmp_lft_arm_target_pose = self.lft_arm_target_pose.copy()
             tmp_lft_arm_target_pose[0] += self.teleop.joy_cmd.axes[7] * 0.1 / self.render_fps
@@ -109,11 +108,14 @@ class MMK2ROS2JoyCtl(MMK2ROS2):
             self.tctr_head[0] = np.clip(self.tctr_head[0], self.mj_model.joint("head_yaw_joint").range[0], self.mj_model.joint("head_yaw_joint").range[1])
             self.tctr_head[1] = np.clip(self.tctr_head[1], self.mj_model.joint("head_pitch_joint").range[0], self.mj_model.joint("head_pitch_joint").range[1])
 
-            linear_vel  = 3.0 * self.teleop.joy_cmd.axes[1]**2 * np.sign(self.teleop.joy_cmd.axes[1])
-            angular_vel = 1.0 * self.teleop.joy_cmd.axes[0]**2 * np.sign(self.teleop.joy_cmd.axes[0])
+            linear_vel  = 1.0 * self.teleop.joy_cmd.axes[1]**2 * np.sign(self.teleop.joy_cmd.axes[1])
+            angular_vel = 1.5 * self.teleop.joy_cmd.axes[0]**2 * np.sign(self.teleop.joy_cmd.axes[0])
 
-        self.tctr_base[0] = linear_vel
-        self.tctr_base[1] = angular_vel
+        self.base_move(linear_vel, angular_vel)
+
+    def base_move(self, linear_vel, angular_vel):
+        self.tctr_base[0] = (linear_vel - angular_vel * self.wheel_distance) / self.wheel_radius
+        self.tctr_base[1] = (linear_vel + angular_vel * self.wheel_distance) / self.wheel_radius
 
     def printMessage(self):
         super().printMessage()
@@ -125,8 +127,9 @@ class MMK2ROS2JoyCtl(MMK2ROS2):
 if __name__ == "__main__":
     rclpy.init()
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
-
-    cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
+    
+    cfg = MMK2Cfg()
+    cfg.mjcf_file_path = "mjcf/mmk2_floor.xml"
     cfg.init_key = "pick"
     cfg.render_set     = {
         "fps"    : 30,

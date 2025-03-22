@@ -21,8 +21,8 @@
     </default>
 
     <default class='wheel'>
-      <joint axis='0 0 -1' damping='.3' frictionloss='10'/>
-      <motor ctrlrange='-.5 .5' gear='30' forcerange='-500 500'/>
+      <joint axis='0 0 -1' damping='0.5' frictionloss='0.1'/>
+      <motor ctrlrange='-35 35' forcerange='-35 35'/>
     </default>
 
   </default>

@@ -1,0 +1,459 @@
+<mujoco model="mmk2">
+  <compiler angle="radian" meshdir="../../meshes/" texturedir="../../textures/"/>
+
+  <option integrator="RK4" solver="Newton" timestep="0.001"/>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <headlight ambient="0.3 0.3 0.3" diffuse="0.6 0.6 0.6" specular="0 0 0"/>
+    <scale contactwidth="0.01" contactheight="0.05" com="0.05" camera="0.06" framelength="0.5" framewidth="0.02"/>
+  </visual>
+
+  <default>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="arm">
+      <default class="joint1">
+        <joint range="-3.14 2.09" actuatorfrcrange="-20 20"/>
+        <position ctrlrange="-3.14 2.09"/>
+      </default>
+      <default class="joint2">
+        <joint range="-2.96 0.17" actuatorfrcrange="-20 20"/>
+        <position ctrlrange="-2.96 0.17" />
+      </default>
+      <default class="joint3">
+        <joint range="-0.087 3.14" actuatorfrcrange="-20 20"/>
+        <position ctrlrange='-0.087 3.14'/>
+      </default>
+      <default class="joint4">
+        <joint range="-2.96 2.96" actuatorfrcrange="-8 8"/>
+        <position ctrlrange="-2.96 2.96"/>
+      </default>
+      <default class="joint5">
+        <joint range="-1.74 1.74" actuatorfrcrange="-8 8"/>
+        <position ctrlrange="-1.74 1.74"/>
+      </default>
+      <default class="joint6">
+        <joint range="-3.14 3.14" actuatorfrcrange="-8 8"/>
+        <position ctrlrange="-3.14 3.14"/>
+      </default>
+      <default class="finger1">
+        <joint type="slide" range="-0.04 0"/>
+      </default>
+      <default class="finger2">
+        <joint type="slide" range="0 0.04"/>
+      </default>
+    </default>
+    <default class="slide_joint">
+      <joint type="slide" range="-0.04 0.87" actuatorfrcrange="-1600 1000" damping="100" frictionloss="1000"/>
+      <position ctrlrange='-0.04 0.87' kp='50000'/>
+    </default>
+    <default class="head_yaw_joint">
+      <joint range="-0.5 0.5"/>
+      <position ctrlrange='-0.5 0.5' kp='1' kv='.1'/>
+    </default>
+    <default class="head_pitch_joint">
+      <joint range="-0.16 1.18"/>
+      <position ctrlrange='-0.16 1.18' kp='100' kv='10'/>
+    </default>
+    <default class="wheel">
+      <joint damping="0.01" frictionloss="0.1"/>
+      <motor ctrlrange='-1 1' gear='10' forcerange='-10 10'/>
+    </default>
+  </default>
+
+  <equality>
+    <joint joint1="lft_finger_left_joint" joint2="lft_finger_right_joint" polycoef="0 -1 0 0 0"/>
+    <joint joint1="rgt_finger_left_joint" joint2="rgt_finger_right_joint" polycoef="0 -1 0 0 0"/>
+  </equality>
+
+  <tendon>
+    <fixed name="lft_gripper_gear">
+      <joint joint="lft_finger_left_joint" coef="-12.5"/>
+      <joint joint="lft_finger_right_joint" coef="12.5"/>
+    </fixed>
+    <fixed name="rgt_gripper_gear">
+      <joint joint="rgt_finger_left_joint" coef="-12.5"/>
+      <joint joint="rgt_finger_right_joint" coef="12.5"/>
+    </fixed>
+  </tendon>
+
+  <asset>
+    <texture type="2d" name="____________1_204599_color" file="airbot_play/____________1_204599_color.png"/>
+    <texture type="2d" name="lift_light_color" file="mmk2/lift_light_color.png"/>
+    <texture type="2d" name="Layer_04_204592_color" file="mmk2/head.png"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="Paint_Matte_Black" rgba="0.00111266 0.00111266 0.00111266 1"/>
+    <material name="Paint_Metallic_Cool_Grey" rgba="0.928523 0.928523 0.928523 1"/>
+    <material name="________________Emissive_White__1_2" texture="____________1_204599_color"/>
+    <material name="Paint_Metallic_Cool_Grey__1" rgba="0.928523 0.928523 0.928523 1"/>
+    <material name="Paint_Matte_Black__1" rgba="0.00111266 0.00111266 0.00111266 1"/>
+    <material name="Clear_Shiny_Plastic_Black__1" rgba="0 0 0 1"/>
+    <material name="Copper_Textured__1_1" rgba="0.539052 0.539052 0.539052 1"/>
+    <material name="material_lift_light_color" texture="lift_light_color" specular="1" shininess="0"/>
+    <material name="________________Emissive_White__1" texture="Layer_04_204592_color"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+    <mesh name="arm_base_0" file="airbot_play/arm_base_0.obj"/>
+    <mesh name="arm_base_1" file="airbot_play/arm_base_1.obj"/>
+    <mesh name="link1" file="airbot_play/link1.obj"/>
+    <mesh name="link2_0" file="airbot_play/link2_0.obj"/>
+    <mesh name="link2_1" file="airbot_play/link2_1.obj"/>
+    <mesh name="link3_0" file="airbot_play/link3_0.obj"/>
+    <mesh name="link3_1" file="airbot_play/link3_1.obj"/>
+    <mesh name="link4" file="airbot_play/link4.obj"/>
+    <mesh name="link5_0" file="airbot_play/link5_0.obj"/>
+    <mesh name="link5_1" file="airbot_play/link5_1.obj"/>
+    <mesh name="link6" file="airbot_play/link6.obj"/>
+    <mesh name="left" file="airbot_play/left.obj"/>
+    <mesh name="right" file="airbot_play/right.obj"/>
+    <mesh name="lft_wheel_link" file="mmk2/lft_wheel_link.STL"/>
+    <mesh name="rgt_wheel_link" file="mmk2/rgt_wheel_link.STL"/>
+    <mesh name="rgt_behind_wheel_link" file="mmk2/rgt_behind_wheel_link.obj"/>
+    <mesh name="lft_behind_wheel_link" file="mmk2/lft_behind_wheel_link.obj"/>
+    <mesh name="rgt_front_wheel_link" file="mmk2/rgt_front_wheel_link.obj"/>
+    <mesh name="lft_front_wheel_link" file="mmk2/lft_front_wheel_link.obj"/>
+    <mesh name="head_yaw_link" file="mmk2/head_yaw_link.STL"/>
+    <mesh name="mmk2_agv_0" file="mmk2/mmk2_agv_0.obj"/>
+    <mesh name="mmk2_agv_1" file="mmk2/mmk2_agv_1.obj"/>
+    <mesh name="mmk2_agv_2" file="mmk2/mmk2_agv_2.obj"/>
+    <mesh name="mmk2_agv_3" file="mmk2/mmk2_agv_3.obj"/>
+    <mesh name="mmk2_agv_4" file="mmk2/mmk2_agv_4.obj"/>
+    <mesh name="slide_link_white" file="mmk2/slide_link_white.obj"/>
+    <mesh name="slide_link_black" file="mmk2/slide_link_black.obj"/>
+    <mesh name="mmk2_lift_link_0" file="mmk2/mmk2_lift_link_0.obj"/>
+    <mesh name="mmk2_lift_link_1" file="mmk2/mmk2_lift_link_1.STL"/>
+    <mesh name="mmk2_lift_link_2" file="mmk2/mmk2_lift_link_2.obj"/>
+    <mesh name="mmk2_head_0" file="mmk2/mmk2_head_0.obj"/>
+    <mesh name="mmk2_head_1" file="mmk2/mmk2_head_1.obj"/>
+    <mesh name="mmk2_head_2" file="mmk2/mmk2_head_2.obj"/>
+    <mesh name="head_white" file="mmk2/head_white.obj"/>
+    <mesh name="head_black" file="mmk2/head_black.obj"/>
+    <mesh name="head_green" file="mmk2/head_green.obj"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="5 5 0.01" type="plane" material="groundplane"/>
+    <light pos="-1 -1 1" dir="0.57735 0.57735 -0.57735" directional="true" castshadow="false" diffuse="0.3 0.3 0.3"/>
+    <light pos="0 0 1" dir="-0.57735 0.57735 -0.57735" directional="true" diffuse="0.3 0.3 0.3"/>
+    <light pos="0 1 1" dir="0 -0.707107 -0.707107" directional="true" castshadow="false" diffuse="0.3 0.3 0.3"/>
+    <body name="mmk2">
+      <joint type="free" limited="false" actuatorfrclimited="false" frictionloss="0.0001"/>
+      <body name="agv_link" pos="0.02371 0 0">
+        <geom class="visual" material="Paint_Matte_Black__1" mesh="mmk2_agv_0"/>
+        <geom class="visual" material="Copper_Textured__1_1" mesh="mmk2_agv_1"/>
+        <geom class="visual" material="Paint_Metallic_Cool_Grey__1" mesh="mmk2_agv_2"/>
+        <geom class="visual" material="Paint_Matte_Black__1" mesh="mmk2_agv_3"/>
+        <geom class="visual" rgba="0.592 0.9 0.9 1" mesh="mmk2_agv_4"/>
+        <geom size="0.21 0.2 0.005" pos="-0.015 0 0.235" type="box" group="4" density="725" rgba="1 0 0 1"/>
+        <geom size="0.21 0.2 0.08" pos="-0.015 0 0.11" type="box" group="4" density="725" rgba="1 0 0 1"/>
+        <geom size="0.125 0.15 0.675" pos="-0.08 0 0.915" type="box" group="4" density="200" rgba="1 0 0 1"/>
+        <geom name="rgt_front_wheel" size="0.06" pos="0.13045 -0.089989 0.0585" condim="1" group="4" priority="1" mass="1.1566" rgba="1 0 0 1"/>
+        <geom name="lft_front_wheel" size="0.06" pos="0.13045 0.090011 0.0585" condim="1" group="4" priority="1" mass="1.1566" rgba="1 0 0 1"/>
+        <geom name="rgt_behind_wheel" size="0.06" pos="-0.15755 -0.099989 0.0585" condim="1" group="4" priority="1" mass="1.1566" rgba="1 0 0 1"/>
+        <geom name="lft_behind_wheel" size="0.06" pos="-0.15755 0.10001 0.0585" condim="1" group="4" priority="1" mass="1.1566" rgba="1 0 0 1"/>
+        <geom class="visual" pos="0.13045 -0.089989 0.085" quat="0.707105 0 0 0.707108" rgba="0.2 0.2 0.2 1" mesh="rgt_front_wheel_link"/>
+        <geom class="visual" pos="0.13045 0.090011 0.085" quat="0.707105 0 0 0.707108" rgba="0.2 0.2 0.2 1" mesh="lft_front_wheel_link"/>
+        <geom class="visual" pos="-0.15755 -0.099989 0.085" quat="0.707105 0 0 0.707108" rgba="0.2 0.2 0.2 1" mesh="rgt_behind_wheel_link"/>
+        <geom class="visual" pos="-0.15755 0.10001 0.085" quat="0.707105 0 0 0.707108" rgba="0.2 0.2 0.2 1" mesh="lft_behind_wheel_link"/>
+        <geom class="visual" pos="-0.006 0 0.244" quat="0.707105 0 0 0.707108" material="material_lift_light_color" mesh="mmk2_lift_link_0"/>
+        <geom class="visual" pos="-0.0062 0 0.24" quat="0.707105 0 0 0.707108" material="Paint_Metallic_Cool_Grey__1" mesh="mmk2_lift_link_1"/>
+        <geom class="visual" pos="0.002 0 0.264" quat="0.707105 0 0 0.707108" material="Paint_Matte_Black__1" mesh="mmk2_lift_link_2"/>
+        <site name="mmk2_base" pos="-0.02371 0 0" size="0.001"/>
+        <site name="mmk2_lidar_s2" pos="0.09 0 0.215" size="0.001"/>
+        <body name="lft_wheel_link" pos="-0.02371 0.16325 0.082" quat="0.707107 0.707107 0 0">
+          <inertial pos="2.9309e-07 5.2077e-06 -0.029871" quat="0.28052 0.649078 -0.280681 0.649018" mass="1.1566" diaginertia="0.0035528 0.0021045 0.0021045"/>
+          <joint name="lft_wheel_joint" class="wheel" pos="0 0 0" axis="0 0 -1"/>
+          <geom name="lft_wheel" class="visual" rgba="0.2 0.2 0.2 1" mesh="lft_wheel_link"/>
+          <geom size="0.0838 0.005" type="cylinder" group="4" friction="0.95" rgba="0 1 0 1"/>
+        </body>
+        <body name="rgt_wheel_link" pos="-0.02371 -0.16325 0.082" quat="0.707107 0.707107 0 0">
+          <inertial pos="2.9312e-07 5.2196e-06 0.029871" quat="0.620108 0.339813 -0.620017 0.339959" mass="1.1566" diaginertia="0.0035528 0.0021045 0.0021045"/>
+          <joint name="rgt_wheel_joint" class="wheel" pos="0 0 0" axis="0 0 -1"/>
+          <geom name="rgt_wheel" class="visual" rgba="0.2 0.2 0.2 1" mesh="rgt_wheel_link"/>
+          <geom size="0.0838 0.005" type="cylinder" group="4" friction="0.95" rgba="0 1 0 1"/>
+        </body>
+        <body name="slide_link" pos="0 0 1.311">
+          <joint name="slide_joint" class="slide_joint" pos="0 0 0" axis="0 0 -1"/>
+          <geom class="visual" material="Clear_Shiny_Plastic_Black__1" mesh="slide_link_black"/>
+          <geom class="visual" material="Paint_Metallic_Cool_Grey__1" mesh="slide_link_white"/>
+          <geom size="0.15 0.15 0.1" pos="0.035 0 0" quat="0.923879 0 0 0.382684" type="box" group="4" density="80" rgba="1 0 0 1"/>
+          <body name="head_yaw_link" pos="0.18375 0 0.023" quat="0.707105 0 0 0.707108">
+            <inertial pos="-0.00312418 -0.000118833 -0.00687158" quat="0.945671 0.00553657 -0.32491 0.0104641" mass="0.083111" diaginertia="4.83755e-05 4.39275e-05 2.73932e-05"/>
+            <joint name="head_yaw_joint" class="head_yaw_joint" pos="0 0 0" axis="0 0 1"/>
+            <geom class="visual" material="Paint_Matte_Black__1" mesh="head_yaw_link"/>
+            <body name="head_pitch_link" pos="0.00099952 3.1059e-05 0.058" quat="0.5 -0.5 0.5 -0.5">
+              <inertial pos="-0.0352711 0.123044 -0.0165046" quat="0.714586 0.699243 0.0178013 0.0104566" mass="0.767298" diaginertia="0.00394021 0.00338829 0.00196438"/>
+              <joint name="head_pitch_joint" class="head_pitch_joint" pos="0 0 0" axis="0 0 1"/>
+              <geom size="0.07 0.08 0.06" pos="0.015 -0.14 0" type="box" group="4" rgba="0 0 1 1"/>
+              <geom size="0.015 0.025" type="cylinder" rgba="0 0 0 1"/>
+              <geom class="visual" rgba="0.57 0.95 0.95 1" mesh="head_green"/>
+              <geom class="visual" material="Paint_Matte_Black__1" mesh="head_black"/>
+              <geom class="visual" material="Paint_Metallic_Cool_Grey__1" mesh="head_white"/>
+              <body pos="0.0755 -0.1855 0" quat="0 0.707107 0 -0.707107">
+                <body name="head_cam" pos="-0.035 0 0" quat="0.986418 -0.164252 0 0">
+                  <site name="headeye" pos="0 0 0" quat="-3.67321e-06 1 0 0" size="0.001"/>
+                  <camera name="head_cam" pos="0 0 0" fovy="72.5377"/>
+                </body>
+              </body>
+            </body>
+          </body>
+          <body name="lft_arm_base" pos="0.034 0.1015 0" quat="0.653281 -0.653281 0.2706 -0.2706">
+            <geom class="visual" material="Paint_Matte_Black" mesh="arm_base_1"/>
+            <body name="lft_arm_link1" pos="0 0 0.1172">
+              <inertial pos="7.9126e-05 -0.002527 -0.0041359" quat="0.696716 0.716558 0.0238919 -0.0236876" mass="0.5571" diaginertia="0.000346294 0.000325437 0.000286269"/>
+              <joint name="lft_arm_joint1" class="joint1" pos="0 0 0" axis="0 0 1"/>
+              <geom name="lft_arm_link1" class="visual" rgba="0.1 0.1 0.1 1" mesh="link1"/>
+              <body name="lft_arm_link2" quat="0.135866 0.135867 -0.69393 0.693932">
+                <inertial pos="0.22493 0.0047721 0.008023" quat="-0.210875 0.632473 -0.273056 0.693506" mass="0.64621" diaginertia="0.00516535 0.00505042 0.000418626"/>
+                <joint name="lft_arm_joint2" class="joint2" pos="0 0 0" axis="0 0 1"/>
+                <geom size="0.11 0.03 0.04" pos="0.08 0.015 0" quat="0.997189 0 0 0.0749297" type="box" group="4" rgba="1 0 0 1"/>
+                <geom size="0.065 0.025 0.045" pos="0.235 0.015 0" quat="0.988771 0 0 -0.149438" type="box" group="4" rgba="1 0 0 1"/>
+                <geom class="visual" material="Paint_Matte_Black" mesh="link2_0"/>
+                <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link2_1"/>
+                <body name="lft_arm_link3" pos="0.27009 0 0" quat="0.192144 0 0 -0.981367">
+                  <inertial pos="0.16813 -5.5576e-05 0.0031184" quat="0.511278 0.488423 0.489191 0.510617" mass="0.26829" diaginertia="0.0031527 0.0030951 0.000239403"/>
+                  <joint name="lft_arm_joint3" class="joint3" pos="0 0 0" axis="0 0 1"/>
+                  <geom size="0.13 0.025 0.025" pos="0.13 0 0" type="box" group="4" rgba="1 0 0 1"/>
+                  <geom class="visual" material="Paint_Matte_Black" mesh="link3_0"/>
+                  <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link3_1"/>
+                  <body name="lft_arm_link4" pos="0.29015 0 0" quat="-2.59734e-06 0.707105 2.59735e-06 0.707108">
+                    <inertial pos="5.2436e-06 0.00040412 -0.03228" quat="0.999969 -0.000174762 -0.00792041 -6.98144e-05" mass="0.34876" diaginertia="0.000423574 0.000412 0.000126826"/>
+                    <joint name="lft_arm_joint4" class="joint4" pos="0 0 0" axis="0 0 1"/>
+                    <geom size="0.03 0.03" quat="0.707105 0.707108 0 0" type="cylinder" group="4" rgba="1 0 0 1"/>
+                    <geom name="lft_arm_link4" class="visual" rgba="0.1 0.1 0.1 1" mesh="link4"/>
+                    <body name="lft_arm_link5" quat="0.707105 0.707108 0 0">
+                      <inertial pos="8.3328e-06 0.026148 0.002525" quat="0.531568 0.4663 0.4663 0.531568" mass="0.36132" diaginertia="0.0004677 0.000432922 0.000178178"/>
+                      <joint name="lft_arm_joint5" class="joint5" pos="0 0 0" axis="0 0 1"/>
+                      <geom size="0.03 0.03" pos="0 0.06 0" quat="0.707105 0.707108 0 0" type="cylinder" group="4" rgba="1 0 0 1"/>
+                      <geom class="visual" material="Paint_Matte_Black" mesh="link5_0"/>
+                      <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link5_1"/>
+                      <body name="lft_arm_link6" pos="0 0.23645 0" quat="0.5 -0.5 0.5 0.5">
+                        <inertial pos="0.020482 2.5483e-05 -0.079685" mass="0.40081" diaginertia="0.00109963 0.00109963 0.00109963"/>
+                        <joint name="lft_arm_joint6" class="joint6" pos="0 0 0" axis="0 0 1"/>
+                        <geom size="0.03 0.03" pos="0 0 -0.11" type="cylinder" group="4" rgba="1 0 0 1"/>
+                        <geom size="0.025 0.08 0.015" pos="0 0 -0.07" type="box" group="4" rgba="1 0 0 1"/>
+                        <geom class="visual" rgba="0.1 0.1 0.1 1" mesh="link6"/>
+                        <site name="lft_endpoint" pos="0 0 0" quat="0.707105 0 -0.707108 0" size="0.001"/>
+                        <body pos="-0.105 0 -0.12" quat="-2.59734e-06 0.707105 -0.707108 -2.59735e-06">
+                          <site name="left_cam" pos="0 0 0" quat="-3.67321e-06 1 0 0" size="0.001"/>
+                          <camera name="lft_handeye" pos="0 0 0" quat="0.965926 -0.25882 0 0" fovy="72.5377"/>
+                        </body>
+                        <body name="lft_finger_right_link">
+                          <inertial pos="-0.048742 0.0096369 0.00044322" quat="0.757393 0.0415116 0.0313705 0.650883" mass="0.0626" diaginertia="2.79281e-05 1.90181e-05 1.21737e-05"/>
+                          <joint name="lft_finger_right_joint" class="finger2" pos="0 0 0" axis="0 1 0"/>
+                          <geom type="mesh" condim="4" solref="0.01" solimp="2 1 0.01" rgba="0.1 0.1 0.1 1" mesh="right"/>
+                        </body>
+                        <body name="lft_finger_left_link">
+                          <inertial pos="-0.049039 -0.0096764 0.00038868" quat="0.650491 0.0296695 0.0398251 0.757889" mass="0.061803" diaginertia="2.74809e-05 1.88104e-05 1.19127e-05"/>
+                          <joint name="lft_finger_left_joint" class="finger1" pos="0 0 0" axis="0 1 0"/>
+                          <geom type="mesh" condim="4" solref="0.01" solimp="2 1 0.01" rgba="0.1 0.1 0.1 1" mesh="left"/>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+          <body name="rgt_arm_base" pos="0.034 -0.1015 0" quat="0.653281 0.653281 0.2706 0.2706">
+            <geom class="visual" material="Paint_Matte_Black" mesh="arm_base_1"/>
+            <body name="rgt_arm_link1" pos="0 0 0.1172">
+              <inertial pos="7.9126e-05 -0.002527 -0.0041359" quat="0.696716 0.716558 0.0238919 -0.0236876" mass="0.5571" diaginertia="0.000346294 0.000325437 0.000286269"/>
+              <joint name="rgt_arm_joint1" class="joint1" pos="0 0 0" axis="0 0 1"/>
+              <geom name="rgt_arm_link1" class="visual" rgba="0.1 0.1 0.1 1" mesh="link1"/>
+              <body name="rgt_arm_link2" quat="0.135866 0.135867 -0.69393 0.693932">
+                <inertial pos="0.22493 0.0047721 0.008023" quat="-0.210875 0.632473 -0.273056 0.693506" mass="0.64621" diaginertia="0.00516535 0.00505042 0.000418626"/>
+                <joint name="rgt_arm_joint2" class="joint2" pos="0 0 0" axis="0 0 1"/>
+                <geom size="0.11 0.03 0.04" pos="0.08 0.015 0" quat="0.997189 0 0 0.0749297" type="box" group="4" rgba="1 0 0 1"/>
+                <geom size="0.065 0.025 0.045" pos="0.235 0.015 0" quat="0.988771 0 0 -0.149438" type="box" group="4" rgba="1 0 0 1"/>
+                <geom class="visual" material="Paint_Matte_Black" mesh="link2_0"/>
+                <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link2_1"/>
+                <body name="rgt_arm_link3" pos="0.27009 0 0" quat="0.192144 0 0 -0.981367">
+                  <inertial pos="0.16813 -5.5576e-05 0.0031184" quat="0.511278 0.488423 0.489191 0.510617" mass="0.26829" diaginertia="0.0031527 0.0030951 0.000239403"/>
+                  <joint name="rgt_arm_joint3" class="joint3" pos="0 0 0" axis="0 0 1"/>
+                  <geom size="0.13 0.025 0.025" pos="0.13 0 0" type="box" group="4" rgba="1 0 0 1"/>
+                  <geom class="visual" material="Paint_Matte_Black" mesh="link3_0"/>
+                  <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link3_1"/>
+                  <body name="rgt_arm_link4" pos="0.29015 0 0" quat="-2.59734e-06 0.707105 2.59735e-06 0.707108">
+                    <inertial pos="5.2436e-06 0.00040412 -0.03228" quat="0.999969 -0.000174762 -0.00792041 -6.98144e-05" mass="0.34876" diaginertia="0.000423574 0.000412 0.000126826"/>
+                    <joint name="rgt_arm_joint4" class="joint4" pos="0 0 0" axis="0 0 1"/>
+                    <geom size="0.03 0.03" quat="0.707105 0.707108 0 0" type="cylinder" group="4" rgba="1 0 0 1"/>
+                    <geom name="rgt_arm_link4" class="visual" rgba="0.1 0.1 0.1 1" mesh="link4"/>
+                    <body name="rgt_arm_link5" quat="0.707105 0.707108 0 0">
+                      <inertial pos="8.3328e-06 0.026148 0.002525" quat="0.531568 0.4663 0.4663 0.531568" mass="0.36132" diaginertia="0.0004677 0.000432922 0.000178178"/>
+                      <joint name="rgt_arm_joint5" class="joint5" pos="0 0 0" axis="0 0 1"/>
+                      <geom size="0.03 0.03" pos="0 0.06 0" quat="0.707105 0.707108 0 0" type="cylinder" group="4" rgba="1 0 0 1"/>
+                      <geom class="visual" material="Paint_Matte_Black" mesh="link5_0"/>
+                      <geom class="visual" material="Paint_Metallic_Cool_Grey" mesh="link5_1"/>
+                      <body name="rgt_arm_link6" pos="0 0.23645 0" quat="0.499998 -0.5 0.5 0.500002">
+                        <inertial pos="0.020482 2.5483e-05 -0.079685" mass="0.40081" diaginertia="0.00109963 0.00109963 0.00109963"/>
+                        <joint name="rgt_arm_joint6" class="joint6" pos="0 0 0" axis="0 0 1"/>
+                        <geom size="0.03 0.03" pos="0 0 -0.11" type="cylinder" group="4" rgba="1 0 0 1"/>
+                        <geom size="0.025 0.08 0.015" pos="0 0 -0.07" type="box" group="4" rgba="1 0 0 1"/>
+                        <geom class="visual" rgba="0.1 0.1 0.1 1" mesh="link6"/>
+                        <site name="rgt_endpoint" pos="0 0 0" quat="0.707105 0 -0.707108 0" size="0.001"/>
+                        <body pos="-0.105 0 -0.12" quat="-2.59734e-06 0.707105 -0.707108 -2.59735e-06">
+                          <site name="right_cam" pos="0 0 0" quat="-3.67321e-06 1 0 0" size="0.001"/>
+                          <camera name="rgt_handeye" pos="0 0 0" quat="0.965926 -0.25882 0 0" fovy="72.5377"/>
+                        </body>
+                        <body name="rgt_finger_right_link">
+                          <inertial pos="-0.048742 0.0096369 0.00044322" quat="0.757393 0.0415116 0.0313705 0.650883" mass="0.0626" diaginertia="2.79281e-05 1.90181e-05 1.21737e-05"/>
+                          <joint name="rgt_finger_right_joint" class="finger2" pos="0 0 0" axis="0 1 0"/>
+                          <geom type="mesh" condim="4" solref="0.01" solimp="2 1 0.01" rgba="0.1 0.1 0.1 1" mesh="right"/>
+                        </body>
+                        <body name="rgt_finger_left_link">
+                          <inertial pos="-0.049039 -0.0096764 0.00038868" quat="0.650491 0.0296695 0.0398251 0.757889" mass="0.061803" diaginertia="2.74809e-05 1.88104e-05 1.19127e-05"/>
+                          <joint name="rgt_finger_left_joint" class="finger1" pos="0 0 0" axis="0 1 0"/>
+                          <geom type="mesh" condim="4" solref="0.01" solimp="2 1 0.01" rgba="0.1 0.1 0.1 1" mesh="left"/>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <exclude body1="slide_link" body2="head_yaw_link"/>
+    <exclude body1="slide_link" body2="head_pitch_link"/>
+    <exclude body1="slide_link" body2="lft_arm_link2"/>
+    <exclude body1="slide_link" body2="rgt_arm_link2"/>
+  </contact>
+
+  <actuator>
+    <motor name="lft_wheel_motor" class="wheel" joint="lft_wheel_joint"/>
+    <motor name="rgt_wheel_motor" class="wheel" joint="rgt_wheel_joint"/>
+
+    <position name="lift" class="slide_joint" joint="slide_joint"/>
+    <position name="head_yaw" class="head_yaw_joint" joint="head_yaw_joint"/>
+    <position name="head_pitch" class="head_pitch_joint" joint="head_pitch_joint"/>
+
+    <position name="lft_joint1_position"  joint="lft_arm_joint1"    kp="15"  class="joint1"/>
+    <position name="lft_joint2_position"  joint="lft_arm_joint2"    kp="15"  class="joint2"/>
+    <position name="lft_joint3_position"  joint="lft_arm_joint3"    kp="15"  class="joint3"/>
+    <position name="lft_joint4_position"  joint="lft_arm_joint4"    kp="2.5" class="joint4"/>
+    <position name="lft_joint5_position"  joint="lft_arm_joint5"    kp="2.5" class="joint5"/>
+    <position name="lft_joint6_position"  joint="lft_arm_joint6"    kp="2.5" class="joint6"/>
+    <position name="lft_gripper_position" tendon="lft_gripper_gear" kp="3" ctrllimited="true" ctrlrange="0 1" forcelimited="true" forcerange="-1 1" />
+    <position name="rgt_joint1_position"  joint="rgt_arm_joint1"    kp="15"  class="joint1"/>
+    <position name="rgt_joint2_position"  joint="rgt_arm_joint2"    kp="15"  class="joint2"/>
+    <position name="rgt_joint3_position"  joint="rgt_arm_joint3"    kp="15"  class="joint3"/>
+    <position name="rgt_joint4_position"  joint="rgt_arm_joint4"    kp="2.5" class="joint4"/>
+    <position name="rgt_joint5_position"  joint="rgt_arm_joint5"    kp="2.5" class="joint5"/>
+    <position name="rgt_joint6_position"  joint="rgt_arm_joint6"    kp="2.5" class="joint6"/>
+    <position name="rgt_gripper_position" tendon="rgt_gripper_gear" kp="3" ctrllimited="true" ctrlrange="0 1" forcelimited="true" forcerange="-1 1" />
+
+    <velocity name="lft_joint1_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint1"    kv="0.15"  forcelimited="true" forcerange="-20 20"/>
+    <velocity name="lft_joint2_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint2"    kv="0.175" forcelimited="true" forcerange="-20 20"/>
+    <velocity name="lft_joint3_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint3"    kv="0.15"  forcelimited="true" forcerange="-20 20"/>
+    <velocity name="lft_joint4_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint4"    kv="0.05"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="lft_joint5_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint5"    kv="0.15"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="lft_joint6_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="lft_arm_joint6"    kv="0.05"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="lft_gripper_velocity" ctrllimited="true" ctrlrange="-6.283 6.283" tendon="lft_gripper_gear" kv="0.05"  forcelimited="true" forcerange="-1 1"/>
+    <velocity name="rgt_joint1_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint1"    kv="0.15"  forcelimited="true" forcerange="-20 20"/>
+    <velocity name="rgt_joint2_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint2"    kv="0.175" forcelimited="true" forcerange="-20 20"/>
+    <velocity name="rgt_joint3_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint3"    kv="0.15"  forcelimited="true" forcerange="-20 20"/>
+    <velocity name="rgt_joint4_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint4"    kv="0.05"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="rgt_joint5_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint5"    kv="0.15"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="rgt_joint6_velocity"  ctrllimited="true" ctrlrange="-6.283 6.283" joint="rgt_arm_joint6"    kv="0.05"  forcelimited="true" forcerange="-8 8 "/>
+    <velocity name="rgt_gripper_velocity" ctrllimited="true" ctrlrange="-6.283 6.283" tendon="rgt_gripper_gear" kv="0.05"  forcelimited="true" forcerange="-1 1"/>
+
+    <motor name="lft_joint1_motor"  ctrllimited="true" ctrlrange="-20 20" joint="lft_arm_joint1"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="lft_joint2_motor"  ctrllimited="true" ctrlrange="-20 20" joint="lft_arm_joint2"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="lft_joint3_motor"  ctrllimited="true" ctrlrange="-20 20" joint="lft_arm_joint3"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="lft_joint4_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="lft_arm_joint4"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="lft_joint5_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="lft_arm_joint5"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="lft_joint6_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="lft_arm_joint6"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="lft_gripper_motor" ctrllimited="true" ctrlrange="-1 1"   tendon="lft_gripper_gear" forcelimited="true" forcerange="-1 1"/>
+    <motor name="rgt_joint1_motor"  ctrllimited="true" ctrlrange="-20 20" joint="rgt_arm_joint1"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="rgt_joint2_motor"  ctrllimited="true" ctrlrange="-20 20" joint="rgt_arm_joint2"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="rgt_joint3_motor"  ctrllimited="true" ctrlrange="-20 20" joint="rgt_arm_joint3"    forcelimited="true" forcerange="-20 20"/>
+    <motor name="rgt_joint4_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="rgt_arm_joint4"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="rgt_joint5_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="rgt_arm_joint5"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="rgt_joint6_motor"  ctrllimited="true" ctrlrange="-8 8 "  joint="rgt_arm_joint6"    forcelimited="true" forcerange="-8 8 "/>
+    <motor name="rgt_gripper_motor" ctrllimited="true" ctrlrange="-1 1"   tendon="rgt_gripper_gear" forcelimited="true" forcerange="-1 1"/>
+
+  </actuator>
+
+  <sensor>
+    <jointpos joint="lft_wheel_joint" name="lft_wheel_pos"/>
+    <jointpos joint="rgt_wheel_joint" name="rgt_wheel_pos"/>
+    <jointpos joint="slide_joint" name="lift_pos"/>
+    <jointpos joint="head_yaw_joint" name="head_yaw_pos"/>
+    <jointpos joint="head_pitch_joint" name="head_pitch_pos"/>
+    <jointpos joint="lft_arm_joint1" name="lft_joint1_pos"/>
+    <jointpos joint="lft_arm_joint2" name="lft_joint2_pos"/>
+    <jointpos joint="lft_arm_joint3" name="lft_joint3_pos"/>
+    <jointpos joint="lft_arm_joint4" name="lft_joint4_pos"/>
+    <jointpos joint="lft_arm_joint5" name="lft_joint5_pos"/>
+    <jointpos joint="lft_arm_joint6" name="lft_joint6_pos"/>
+    <tendonpos tendon="lft_gripper_gear" name="lft_gripper_pos"/>
+    <jointpos joint="rgt_arm_joint1" name="rgt_joint1_pos"/>
+    <jointpos joint="rgt_arm_joint2" name="rgt_joint2_pos"/>
+    <jointpos joint="rgt_arm_joint3" name="rgt_joint3_pos"/>
+    <jointpos joint="rgt_arm_joint4" name="rgt_joint4_pos"/>
+    <jointpos joint="rgt_arm_joint5" name="rgt_joint5_pos"/>
+    <jointpos joint="rgt_arm_joint6" name="rgt_joint6_pos"/>
+    <tendonpos tendon="rgt_gripper_gear" name="rgt_gripper_pos"/>
+
+    <jointvel joint="lft_wheel_joint" name="lft_wheel_vel"/>
+    <jointvel joint="rgt_wheel_joint" name="rgt_wheel_vel"/>
+    <jointvel joint="slide_joint" name="lift_vel"/>
+    <jointvel joint="head_yaw_joint" name="head_yaw_vel"/>
+    <jointvel joint="head_pitch_joint" name="head_pitch_vel"/>
+    <jointvel joint="lft_arm_joint1" name="lft_joint1_vel"/>
+    <jointvel joint="lft_arm_joint2" name="lft_joint2_vel"/>
+    <jointvel joint="lft_arm_joint3" name="lft_joint3_vel"/>
+    <jointvel joint="lft_arm_joint4" name="lft_joint4_vel"/>
+    <jointvel joint="lft_arm_joint5" name="lft_joint5_vel"/>
+    <jointvel joint="lft_arm_joint6" name="lft_joint6_vel"/>
+    <tendonvel tendon="lft_gripper_gear" name="lft_gripper_vel"/>
+    <jointvel joint="rgt_arm_joint1" name="rgt_joint1_vel"/>
+    <jointvel joint="rgt_arm_joint2" name="rgt_joint2_vel"/>
+    <jointvel joint="rgt_arm_joint3" name="rgt_joint3_vel"/>
+    <jointvel joint="rgt_arm_joint4" name="rgt_joint4_vel"/>
+    <jointvel joint="rgt_arm_joint5" name="rgt_joint5_vel"/>
+    <jointvel joint="rgt_arm_joint6" name="rgt_joint6_vel"/>
+    <tendonvel tendon="rgt_gripper_gear" name="rgt_gripper_vel"/>
+
+    <jointactuatorfrc joint="lft_wheel_joint" name="lft_wheel_force"/>
+    <jointactuatorfrc joint="rgt_wheel_joint" name="rgt_wheel_force"/>
+    <jointactuatorfrc joint="slide_joint" name="lift_force"/>
+    <jointactuatorfrc joint="head_yaw_joint" name="head_yaw_force"/>
+    <jointactuatorfrc joint="head_pitch_joint" name="head_pitch_force"/>
+    <jointactuatorfrc joint="lft_arm_joint1" name="lft_joint1_force"/>
+    <jointactuatorfrc joint="lft_arm_joint2" name="lft_joint2_force"/>
+    <jointactuatorfrc joint="lft_arm_joint3" name="lft_joint3_force"/>
+    <jointactuatorfrc joint="lft_arm_joint4" name="lft_joint4_force"/>
+    <jointactuatorfrc joint="lft_arm_joint5" name="lft_joint5_force"/>
+    <jointactuatorfrc joint="lft_arm_joint6" name="lft_joint6_force"/>
+    <jointactuatorfrc joint="lft_finger_right_joint" name="lft_gripper_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint1" name="rgt_joint1_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint2" name="rgt_joint2_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint3" name="rgt_joint3_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint4" name="rgt_joint4_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint5" name="rgt_joint5_force"/>
+    <jointactuatorfrc joint="rgt_arm_joint6" name="rgt_joint6_force"/>
+    <jointactuatorfrc joint="rgt_finger_right_joint" name="rgt_gripper_force"/>
+
+    <framepos objtype="site" objname="mmk2_base" name="mmk2_base_posi"/>
+    <framequat objtype="site" objname="mmk2_base" name="mmk2_base_quat"/>
+    <framelinvel objtype="site" objname="mmk2_base" name="mmk2_base_linear_vel"/>
+    <gyro site="mmk2_base" name="mmk2_base_gyro"/>
+    <accelerometer site="mmk2_base" name="mmk2_base_acc"/>
+    <framepos objtype="site" objname="lft_endpoint" reftype="site" refname="mmk2_base" name="lft_arm_endpoint_posi"/>
+    <framequat objtype="site" objname="lft_endpoint" reftype="site" refname="mmk2_base" name="lft_arm_endpoint_quat"/>
+    <framepos objtype="site" objname="rgt_endpoint" reftype="site" refname="mmk2_base" name="rgt_arm_endpoint_posi"/>
+    <framequat objtype="site" objname="rgt_endpoint" reftype="site" refname="mmk2_base" name="rgt_arm_endpoint_quat"/>
+  </sensor>
+
+  <keyframe>
+    <key name="home"/>
+  </keyframe>
+</mujoco>

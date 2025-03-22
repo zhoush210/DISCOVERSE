@@ -277,7 +277,7 @@ class MjLidarSensor:
         local_start, local_direction = self.transform_ray_to_local(ray_start, ray_direction, center, rotation)
         
         radius = size[0]
-        half_height = size[1]
+        half_height = size[2]
         
         hit_result = ti.math.vec4(0.0, 0.0, 0.0, -1.0)
         
@@ -371,14 +371,19 @@ class MjLidarSensor:
         # 将问题转换为单位球相交，通过缩放空间
         inv_size = ti.math.vec3(1.0/size.x, 1.0/size.y, 1.0/size.z)
         
-        # 缩放局部坐标系中的射线
-        scaled_start = local_start * inv_size
-        scaled_dir = local_direction * inv_size
-        scaled_dir_norm = scaled_dir.norm()
-        if scaled_dir_norm > 1e-6:  # 避免除以零
-            scaled_dir = scaled_dir / scaled_dir_norm  # 重新归一化
+        # 缩放局部坐标系中的射线（不要归一化方向向量，这会改变t的意义）
+        scaled_start = ti.math.vec3(
+            local_start.x * inv_size.x,
+            local_start.y * inv_size.y,
+            local_start.z * inv_size.z
+        )
+        scaled_dir = ti.math.vec3(
+            local_direction.x * inv_size.x,
+            local_direction.y * inv_size.y,
+            local_direction.z * inv_size.z
+        )
         
-        # 现在执行标准球体相交测试
+        # 解二次方程 at² + bt + c = 0
         a = scaled_dir.dot(scaled_dir)
         b = 2.0 * scaled_start.dot(scaled_dir)
         c = scaled_start.dot(scaled_start) - 1.0  # 单位球半径为1
@@ -386,22 +391,16 @@ class MjLidarSensor:
         discriminant = b * b - 4 * a * c
         
         if discriminant >= 0:
-            t = (-b - ti.sqrt(discriminant)) / (2.0 * a)
+            # 计算两个可能的t值，取最小的正值
+            t1 = (-b - ti.sqrt(discriminant)) / (2.0 * a)
+            t2 = (-b + ti.sqrt(discriminant)) / (2.0 * a)
             
-            # 如果t为负，则使用较大的t值
-            if t < 0:
-                t = (-b + ti.sqrt(discriminant)) / (2.0 * a)
+            t = t1 if t1 >= 0 else t2
             
             # 如果t为正，表示有有效交点
             if t >= 0:
-                # 计算缩放空间中的交点
-                scaled_hit = scaled_start + t * scaled_dir
-                
-                # 恢复到局部未缩放空间
-                local_hit = scaled_hit * size
-                
-                # 计算实际射线参数t（考虑方向向量可能已被归一化）
-                actual_t = local_hit.norm() / local_direction.norm()
+                # 使用原始射线方程计算交点
+                local_hit = local_start + t * local_direction
                 
                 # 转换回世界坐标系
                 world_hit = self.transform_point_to_world(local_hit, center, rotation)
@@ -419,7 +418,7 @@ class MjLidarSensor:
         local_start, local_direction = self.transform_ray_to_local(ray_start, ray_direction, center, rotation)
         
         radius = size[0]
-        half_height = size[1]
+        half_height = size[2]
         
         hit_result = ti.math.vec4(0.0, 0.0, 0.0, -1.0)
         
@@ -429,7 +428,7 @@ class MjLidarSensor:
         sphere2_center = ti.math.vec3(0.0, 0.0, -half_height)
         
         # 为圆柱部分创建新的size
-        cylinder_size = ti.math.vec3(radius, half_height, 0.0)
+        cylinder_size = ti.math.vec3(radius, radius, half_height)
         identity_mat = ti.Matrix.identity(ti.f32, 3)  # 局部坐标系中用单位矩阵
         
         # 首先检查与圆柱体部分的交点（在局部坐标系中）
@@ -700,18 +699,20 @@ def create_demo_scene():
         <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
         <!-- 平面 -->
         <geom name="ground1" type="plane" size="10 10 0.1" pos="0 0 0" rgba="0.9 0.9 0.9 1"/>
-        <geom name="ground2" type="plane" size="5 5 0.1" pos="5 0 5" euler="0 -60 0" rgba="0.9 0.9 0.9 1"/>
+        <geom name="ground2" type="plane" size="5 5 0.1" pos="6 0 5" euler="0 -60 0" rgba="0.9 0.9 0.9 1"/>
         
         <!-- 盒子 -->
         <geom name="box1" type="box" size="0.5 0.5 0.5" pos="2 0 0.5" euler="45 -45 0" rgba="1 0 0 1"/>
         <geom name="box2" type="box" size="0.3 0.8 0.2" pos="-2 -1 0.2" rgba="1 0 0 0.7"/>
+        <geom name="box3" type="box" size="0.2 0.2 0.3" pos="2.4 -2 0.3" rgba="1 0 0 0.7"/>
+        <geom name="box4" type="box" size="0.2 0.2 0.4" pos="0 -2.2 0.4" rgba="1 0 0 0.7"/>
         
         <!-- 球体 -->
         <geom name="sphere1" type="sphere" size="0.5" pos="0 2 0.5" rgba="0 1 0 1"/>
         <geom name="sphere2" type="sphere" size="0.3" pos="-1 2 0.3" rgba="0 1 0 0.7"/>
         
         <!-- 圆柱体 -->
-        <geom name="cylinder1" type="cylinder" size="0.4 0.6" pos="0 -2 0.6" euler="0 90 0" rgba="0 0 1 1"/>
+        <geom name="cylinder1" type="cylinder" size="0.4 0.6" pos="0 -2 0.4" euler="0 90 0" rgba="0 0 1 1"/>
         <geom name="cylinder2" type="cylinder" size="0.2 0.3" pos="2 -2 0.3" rgba="0 0 1 0.7"/>
         
         <!-- 椭球体 -->

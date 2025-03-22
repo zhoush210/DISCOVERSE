@@ -1,12 +1,15 @@
-import rospy
+import threading
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+import rospy
+
 from discoverse.mmk2 import MMK2FIK
-from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
+from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.examples.ros1.mmk2_ros1 import MMK2ROS1
 from discoverse.utils.joy_stick_ros1 import JoyTeleopRos1
 
-class MMK2JOY(MMK2Base):
+class MMK2ROS1JoyCtl(MMK2ROS1):
     arm_action_init_position = {
         "pick" : {
             "l" : np.array([0.254,  0.216,  1.069]),
@@ -18,18 +21,7 @@ class MMK2JOY(MMK2Base):
         },
     }
 
-    target_control = np.zeros(19)
-    
     def __init__(self, config: MMK2Cfg):
-        self.arm_action = config.init_key
-        self.tctr_base = self.target_control[:2]
-        self.tctr_slide = self.target_control[2:3]
-        self.tctr_head = self.target_control[3:5]
-        self.tctr_left_arm = self.target_control[5:11]
-        self.tctr_lft_gripper = self.target_control[11:12]
-        self.tctr_right_arm = self.target_control[12:18]
-        self.tctr_rgt_gripper = self.target_control[18:19]
-
         super().__init__(config)
 
         self.lft_arm_target_pose = self.arm_action_init_position[self.arm_action]["l"].copy()
@@ -37,9 +29,11 @@ class MMK2JOY(MMK2Base):
         self.rgt_arm_target_pose = self.arm_action_init_position[self.arm_action]["r"].copy()
         self.rgt_end_euler = np.zeros(3)
 
+        # joy control
         self.teleop = JoyTeleopRos1()
 
-        self.objects = []  # 用于存储物体信息
+    def init_topic_subscriber(self):
+        return
 
     def resetState(self):
         super().resetState()
@@ -108,13 +102,14 @@ class MMK2JOY(MMK2Base):
             self.tctr_head[0] = np.clip(self.tctr_head[0], self.mj_model.joint("head_yaw_joint").range[0], self.mj_model.joint("head_yaw_joint").range[1])
             self.tctr_head[1] = np.clip(self.tctr_head[1], self.mj_model.joint("head_pitch_joint").range[0], self.mj_model.joint("head_pitch_joint").range[1])
 
-            linear_vel  = 3.0 * self.teleop.joy_cmd.axes[1]**2 * np.sign(self.teleop.joy_cmd.axes[1])
-            angular_vel = 1.0 * self.teleop.joy_cmd.axes[0]**2 * np.sign(self.teleop.joy_cmd.axes[0])
+            linear_vel  = 1.0 * self.teleop.joy_cmd.axes[1]**2 * np.sign(self.teleop.joy_cmd.axes[1])
+            angular_vel = 1.5 * self.teleop.joy_cmd.axes[0]**2 * np.sign(self.teleop.joy_cmd.axes[0])
+
         self.base_move(linear_vel, angular_vel)
 
     def base_move(self, linear_vel, angular_vel):
-        self.tctr_base[0] = linear_vel
-        self.tctr_base[1] = angular_vel
+        self.tctr_base[0] = (linear_vel - angular_vel * self.wheel_distance) / self.wheel_radius
+        self.tctr_base[1] = (linear_vel + angular_vel * self.wheel_distance) / self.wheel_radius
 
     def printMessage(self):
         super().printMessage()
@@ -128,23 +123,23 @@ if __name__ == "__main__":
 
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
 
-    cfg = MMK2Cfg()
-    
+    cfg = MMK2Cfg()    
+    cfg.mjcf_file_path = "mjcf/mmk2_floor.xml"
     cfg.init_key = "pick"
-    cfg.use_gaussian_renderer = False
-    cfg.obs_rgb_cam_id = None
-    cfg.obs_depth_cam_id = None
-
     cfg.render_set     = {
         "fps"    : 30,
-        "width"  : 1920,
-        "height" : 1080
+        "width"  : 640,
+        "height" : 480
     }
-    cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
 
-    exec_node = MMK2JOY(cfg)
+    exec_node = MMK2ROS1JoyCtl(cfg)
     exec_node.reset()
 
-    while exec_node.running:
+    pubtopic_thread = threading.Thread(target=exec_node.thread_pubrostopic, args=(100,))
+    pubtopic_thread.start()
+
+    while exec_node.running and not rospy.is_shutdown():
         exec_node.teleopProcess()
-        obs, _, _, _, _ = exec_node.step(exec_node.target_control)
+        exec_node.step(exec_node.target_control)
+
+    pubtopic_thread.join()

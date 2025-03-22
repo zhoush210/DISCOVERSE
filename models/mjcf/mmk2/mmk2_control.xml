@@ -1,7 +1,7 @@
 <mujocoinclude>
 
-  <motor name='forward' tendon='forward' class='wheel'/>
-  <motor name='turn' tendon='turn' class='wheel'/>
+  <motor name="lft_wheel_motor" class="wheel" joint="lft_wheel_joint"/>
+  <motor name="rgt_wheel_motor" class="wheel" joint="rgt_wheel_joint"/>
 
   <position name='lift' joint='slide_joint' class='slide_joint'/>
   <position name='head_yaw' joint='head_yaw_joint' class='head_yaw_joint'/>

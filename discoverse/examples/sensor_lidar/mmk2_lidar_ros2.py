@@ -1,20 +1,45 @@
 import mujoco
+import threading
 import numpy as np
 import taichi as ti
 from scipy.spatial.transform import Rotation
 
 import rclpy
-from rclpy.node import Node
+from std_msgs.msg import Header
 from tf2_ros import TransformBroadcaster
+from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import PointCloud2, PointField
-from std_msgs.msg import Header
 
 from discoverse.utils import get_site_tmat
 from discoverse.envs.mmk2_base import MMK2Cfg
-from discoverse.examples.ros2.mmk2_joy_ros2 import MMK2ROS2JoyCtl
+from discoverse.examples.ros2.mmk2_ros2_joy import MMK2ROS2JoyCtl
 
 from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_single_line
+from discoverse.examples.sensor_lidar.visual_utils import create_marker_from_geom
+
+def publish_scene(publisher, mj_scene, frame_id, stamp):
+    """将MuJoCo场景发布为ROS可视化标记数组"""
+    marker_array = MarkerArray()
+    
+    # 记录当前使用的标记ID
+    current_id = 0
+    
+    # 创建每个几何体的标记
+    for i in range(mj_scene.ngeom):
+        geom = mj_scene.geoms[i]
+        # 创建标记并返回一个标记列表
+        markers = create_marker_from_geom(geom, current_id, frame_id)
+        
+        # 添加所有返回的标记到标记数组
+        for marker in markers:
+            # 在ROS2中，需要设置stamp为ROS2的时间类型
+            marker.header.stamp = stamp
+            marker_array.markers.append(marker)
+            current_id += 1
+    
+    # 发布标记数组
+    publisher.publish(marker_array)
 
 def broadcast_tf_ros2(broadcaster, parent_frame, child_frame, translation, rotation, stamp):
     """
@@ -150,9 +175,22 @@ if __name__ == "__main__":
     points = lidar_s2.ray_cast_taichi(rays_phi, rays_theta, np.eye(4), exec_node.renderer.scene)
     # 同步Taichi并行计算操作，确保计算完成
     ti.sync()
-
+    
     # 创建ROS发布者，用于将激光雷达数据发布为PointCloud2类型消息
     pub_lidar_s2 = exec_node.create_publisher(PointCloud2, '/mmk2/lidar_s2', 1)
+
+    def publish_scene_thread():
+        # 创建ROS发布者，用于将MuJoCo场景发布为MarkerArray类型消息
+        rate = exec_node.create_rate(1)
+        pub_scene = exec_node.create_publisher(MarkerArray, '/mujoco_scene', 1)
+        while exec_node.running and rclpy.ok():
+            stamp = exec_node.get_clock().now().to_msg()
+            publish_scene(pub_scene, exec_node.renderer.scene, "world", stamp)
+            rate.sleep()
+
+    # 创建一个线程，用于发布场景可视化标记
+    scene_pub_thread = threading.Thread(target=publish_scene_thread)
+    scene_pub_thread.start()
 
     sim_step_cnt = 0
     lidar_pub_cnt = 0
@@ -179,6 +217,7 @@ if __name__ == "__main__":
             ti.sync()
 
             stamp = exec_node.get_clock().now().to_msg()
+
             publish_point_cloud_ros2(pub_lidar_s2, points, lidar_frame_id, stamp)
            
             lidar_position = lidar_pose[:3, 3]
@@ -190,3 +229,4 @@ if __name__ == "__main__":
     # 清理资源
     exec_node.destroy_node()
     rclpy.shutdown()
+    scene_pub_thread.join()

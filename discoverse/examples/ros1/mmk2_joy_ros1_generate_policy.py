@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from discoverse.envs.mmk2_base import MMK2Cfg
 from discoverse.utils import get_site_tmat, get_body_tmat
-from discoverse.examples.ros1.mmk2_joy_ros1 import MMK2JOY
+from discoverse.examples.ros1.mmk2_ros1_joy import MMK2ROS1JoyCtl
 
 def read_object_positions(xml_path):
     # 解析XML文件
@@ -28,7 +28,7 @@ def read_object_positions(xml_path):
 
     return objects
 
-class MMK2GP(MMK2JOY):
+class MMK2ROS1GP(MMK2ROS1JoyCtl):
 
     def on_key(self, window, key, scancode, action, mods):
         super().on_key(window, key, scancode, action, mods)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     }
     cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
 
-    exec_node = MMK2GP(cfg)
+    exec_node = MMK2ROS1GP(cfg)
     exec_node.reset()
 
     while exec_node.running:

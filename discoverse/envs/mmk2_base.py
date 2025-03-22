@@ -57,10 +57,12 @@ class MMK2Cfg(BaseConfig):
     }
     
 class MMK2Base(SimulatorBase):
-    def __init__(self, config: MMK2Cfg):
-        self.njq = 28
-        self.njctrl = 19
+    njq = 28
+    njctrl = 19
+    wheel_radius = 0.0838
+    wheel_distance = 0.189
 
+    def __init__(self, config: MMK2Cfg):
         super().__init__(config)
 
     def post_load_mjcf(self):

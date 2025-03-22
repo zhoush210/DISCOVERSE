@@ -4,7 +4,7 @@ try:
     import rclpy
     from sensor_msgs.msg import Joy
     class JoyTeleopRos2:
-        NUM_BUTTON = 12
+        NUM_BUTTON = 11
         def __init__(self):
             self.joy_cmd = Joy()
             self.joy_cmd.header.stamp = rclpy.time.Time().to_msg()

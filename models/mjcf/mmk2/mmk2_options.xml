@@ -10,14 +10,6 @@
   </contact>
 
   <tendon>
-    <fixed name='forward'>
-      <joint joint='lft_wheel_joint' coef='1.'/>
-      <joint joint='rgt_wheel_joint' coef='1.'/>
-    </fixed>
-    <fixed name='turn'>
-      <joint joint='lft_wheel_joint' coef='-1.'/>
-      <joint joint='rgt_wheel_joint' coef='1.'/>
-    </fixed>
     <fixed name='lft_gripper_gear'>
       <joint joint='lft_finger_left_joint'  coef='-12.5'/>
       <joint joint='lft_finger_right_joint' coef='12.5'/>
