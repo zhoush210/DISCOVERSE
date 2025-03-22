@@ -65,7 +65,7 @@ class MMK2ROS2(MMK2Base, Node):
         self.bridge = CvBridge()
 
         # image publisher, camera info publisher,  Initialize camera info messages
-        if 0 in cfg.obs_rgb_cam_id:
+        if 0 in self.config.obs_rgb_cam_id:
             self.head_color_puber  = self.create_publisher(Image, '/mmk2/head_camera/color/image_raw', 2)
             self.head_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/color/camera_info', 2)
             self.head_color_info = CameraInfo()
@@ -73,7 +73,7 @@ class MMK2ROS2(MMK2Base, Node):
             self.head_color_info.height = self.config.render_set["height"]
             self.head_color_info.k = camera2k(self.mj_model.cam_fovy[0] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
-        if 1 in cfg.obs_rgb_cam_id:
+        if 1 in self.config.obs_rgb_cam_id:
             self.left_color_puber  = self.create_publisher(Image, '/mmk2/left_camera/color/image_raw', 2)
             self.left_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/left_camera/color/camera_info', 2)
             self.left_color_info = CameraInfo()
@@ -81,7 +81,7 @@ class MMK2ROS2(MMK2Base, Node):
             self.left_color_info.height = self.config.render_set["height"]
             self.left_color_info.k = camera2k(self.mj_model.cam_fovy[1] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
-        if 2 in cfg.obs_rgb_cam_id:
+        if 2 in self.config.obs_rgb_cam_id:
             self.right_color_puber = self.create_publisher(Image, '/mmk2/right_camera/color/image_raw', 2)
             self.right_color_info_puber = self.create_publisher(CameraInfo, '/mmk2/right_camera/color/camera_info', 2)
             self.right_color_info = CameraInfo()
@@ -89,7 +89,7 @@ class MMK2ROS2(MMK2Base, Node):
             self.right_color_info.height = self.config.render_set["height"]
             self.right_color_info.k = camera2k(self.mj_model.cam_fovy[2] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
-        if 0 in cfg.obs_depth_cam_id:
+        if 0 in self.config.obs_depth_cam_id:
             self.head_depth_puber  = self.create_publisher(Image, '/mmk2/head_camera/aligned_depth_to_color/image_raw', 2)
             self.head_depth_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/aligned_depth_to_color/camera_info', 2)
             self.head_depth_info = CameraInfo()
@@ -97,7 +97,7 @@ class MMK2ROS2(MMK2Base, Node):
             self.head_depth_info.height = self.config.render_set["height"]
             self.head_depth_info.k = camera2k(self.mj_model.cam_fovy[0] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
  
-        if (cfg.obs_rgb_cam_id is not None) or (cfg.obs_depth_cam_id is not None):            
+        if (self.config.obs_rgb_cam_id is not None) or (self.config.obs_depth_cam_id is not None):            
             # Publish camera info periodically
             self.create_timer(1.0, self.publish_camera_info)
 

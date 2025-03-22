@@ -4,7 +4,6 @@ from scipy.spatial.transform import Rotation
 
 from pynput import keyboard
 
-import rospy
 from visualization_msgs.msg import Marker
 
 class KeyboardListener:
@@ -131,56 +130,55 @@ def create_marker_from_geom(geom, marker_id, frame_id="world"):
     # 其他几何体正常处理，返回单个标记
     marker = Marker()
     marker.header.frame_id = frame_id
-    marker.header.stamp = rospy.Time.now()
     marker.ns = "mujoco_geoms"
     marker.id = marker_id
     marker.action = Marker.ADD
     
     # 设置位置
-    marker.pose.position.x = geom.pos[0]
-    marker.pose.position.y = geom.pos[1]
-    marker.pose.position.z = geom.pos[2]
+    marker.pose.position.x = float(geom.pos[0])
+    marker.pose.position.y = float(geom.pos[1])
+    marker.pose.position.z = float(geom.pos[2])
     
     # 设置旋转（从四元数）
     quat = Rotation.from_matrix(geom.mat.reshape(3, 3)).as_quat()
-    marker.pose.orientation.x = quat[0]
-    marker.pose.orientation.y = quat[1]
-    marker.pose.orientation.z = quat[2]
-    marker.pose.orientation.w = quat[3]
+    marker.pose.orientation.x = float(quat[0])
+    marker.pose.orientation.y = float(quat[1])
+    marker.pose.orientation.z = float(quat[2])
+    marker.pose.orientation.w = float(quat[3])
     
     # 设置颜色
-    marker.color.r = geom.rgba[0]
-    marker.color.g = geom.rgba[1]
-    marker.color.b = geom.rgba[2]
-    marker.color.a = geom.rgba[3]
+    marker.color.r = float(geom.rgba[0])
+    marker.color.g = float(geom.rgba[1])
+    marker.color.b = float(geom.rgba[2])
+    marker.color.a = float(geom.rgba[3])
     
     # 根据几何体类型设置标记类型和大小
     if geom.type == 0:  # PLANE
         marker.type = Marker.CUBE
-        marker.scale.x = geom.size[0] * 2  # 平面的长度
-        marker.scale.y = geom.size[1] * 2  # 平面的宽度
+        marker.scale.x = float(geom.size[0]) * 2  # 平面的长度
+        marker.scale.y = float(geom.size[1]) * 2  # 平面的宽度
         marker.scale.z = 1e-3  # 平面的高度
     elif geom.type == 2:  # SPHERE
         marker.type = Marker.SPHERE
-        marker.scale.x = geom.size[0] * 2  # 直径 = 半径 * 2
-        marker.scale.y = geom.size[1] * 2
-        marker.scale.z = geom.size[2] * 2
+        marker.scale.x = float(geom.size[0]) * 2  # 直径 = 半径 * 2
+        marker.scale.y = float(geom.size[1]) * 2
+        marker.scale.z = float(geom.size[2]) * 2
     elif geom.type == 4:  # ELLIPSOID
         marker.type = Marker.SPHERE
         # 椭球体通过缩放球体来显示
-        marker.scale.x = geom.size[0] * 2
-        marker.scale.y = geom.size[1] * 2
-        marker.scale.z = geom.size[2] * 2
+        marker.scale.x = float(geom.size[0]) * 2
+        marker.scale.y = float(geom.size[1]) * 2
+        marker.scale.z = float(geom.size[2]) * 2
     elif geom.type == 5:  # CYLINDER
         marker.type = Marker.CYLINDER
-        marker.scale.x = geom.size[0] * 2  # 直径
-        marker.scale.y = geom.size[1] * 2
-        marker.scale.z = geom.size[2] * 2  # 高度
+        marker.scale.x = float(geom.size[0]) * 2  # 直径
+        marker.scale.y = float(geom.size[1]) * 2
+        marker.scale.z = float(geom.size[2]) * 2  # 高度
     elif geom.type == 6:  # BOX
         marker.type = Marker.CUBE
-        marker.scale.x = geom.size[0] * 2
-        marker.scale.y = geom.size[1] * 2
-        marker.scale.z = geom.size[2] * 2
+        marker.scale.x = float(geom.size[0]) * 2
+        marker.scale.y = float(geom.size[1]) * 2
+        marker.scale.z = float(geom.size[2]) * 2
     else:
         return []
         # 不支持的几何体类型
@@ -190,8 +188,8 @@ def create_marker_from_geom(geom, marker_id, frame_id="world"):
 def create_capsule_markers(geom, marker_id, frame_id="world"):
     """创建胶囊体的可视化标记（一个圆柱体和两个半球）"""
     markers = []
-    radius = geom.size[0]         # 半径
-    half_height = geom.size[2]    # 圆柱部分的半高
+    radius = float(geom.size[0])         # 半径
+    half_height = float(geom.size[2])    # 圆柱部分的半高
     
     # 获取旋转矩阵和四元数
     rot_matrix = geom.mat.reshape(3, 3)
@@ -212,29 +210,28 @@ def create_capsule_markers(geom, marker_id, frame_id="world"):
     # 1. 创建中间的圆柱体
     cylinder = Marker()
     cylinder.header.frame_id = frame_id
-    cylinder.header.stamp = rospy.Time.now()
     cylinder.ns = "mujoco_geoms"
     cylinder.id = marker_id * 3     # 使用基础ID的3倍，确保唯一性
     cylinder.type = Marker.CYLINDER
     cylinder.action = Marker.ADD
     
-    cylinder.pose.position.x = center[0]
-    cylinder.pose.position.y = center[1]
-    cylinder.pose.position.z = center[2]
+    cylinder.pose.position.x = float(center[0])
+    cylinder.pose.position.y = float(center[1])
+    cylinder.pose.position.z = float(center[2])
     
-    cylinder.pose.orientation.x = quat[0]
-    cylinder.pose.orientation.y = quat[1]
-    cylinder.pose.orientation.z = quat[2]
-    cylinder.pose.orientation.w = quat[3]
+    cylinder.pose.orientation.x = float(quat[0])
+    cylinder.pose.orientation.y = float(quat[1])
+    cylinder.pose.orientation.z = float(quat[2])
+    cylinder.pose.orientation.w = float(quat[3])
     
     cylinder.scale.x = radius * 2  # 直径
     cylinder.scale.y = radius * 2
     cylinder.scale.z = cylinder_height  # 高度
     
-    cylinder.color.r = geom.rgba[0]
-    cylinder.color.g = geom.rgba[1]
-    cylinder.color.b = geom.rgba[2]
-    cylinder.color.a = geom.rgba[3]
+    cylinder.color.r = float(geom.rgba[0])
+    cylinder.color.g = float(geom.rgba[1])
+    cylinder.color.b = float(geom.rgba[2])
+    cylinder.color.a = float(geom.rgba[3])
     
     markers.append(cylinder)
     
@@ -246,58 +243,56 @@ def create_capsule_markers(geom, marker_id, frame_id="world"):
     # 2. 创建上半球
     top_sphere = Marker()
     top_sphere.header.frame_id = frame_id
-    top_sphere.header.stamp = rospy.Time.now()
     top_sphere.ns = "mujoco_geoms"
     top_sphere.id = marker_id * 3 + 1  # 使用基础ID的3倍+1
     top_sphere.type = Marker.SPHERE
     top_sphere.action = Marker.ADD
     
-    top_sphere.pose.position.x = sphere1_center[0]
-    top_sphere.pose.position.y = sphere1_center[1]
-    top_sphere.pose.position.z = sphere1_center[2]
+    top_sphere.pose.position.x = float(sphere1_center[0])
+    top_sphere.pose.position.y = float(sphere1_center[1])
+    top_sphere.pose.position.z = float(sphere1_center[2])
     
-    top_sphere.pose.orientation.x = quat[0]
-    top_sphere.pose.orientation.y = quat[1]
-    top_sphere.pose.orientation.z = quat[2]
-    top_sphere.pose.orientation.w = quat[3]
+    top_sphere.pose.orientation.x = float(quat[0])
+    top_sphere.pose.orientation.y = float(quat[1])
+    top_sphere.pose.orientation.z = float(quat[2])
+    top_sphere.pose.orientation.w = float(quat[3])
     
     top_sphere.scale.x = radius * 2
     top_sphere.scale.y = radius * 2
     top_sphere.scale.z = radius * 2
     
-    top_sphere.color.r = geom.rgba[0]
-    top_sphere.color.g = geom.rgba[1]
-    top_sphere.color.b = geom.rgba[2]
-    top_sphere.color.a = geom.rgba[3]
+    top_sphere.color.r = float(geom.rgba[0])
+    top_sphere.color.g = float(geom.rgba[1])
+    top_sphere.color.b = float(geom.rgba[2])
+    top_sphere.color.a = float(geom.rgba[3])
     
     markers.append(top_sphere)
     
     # 3. 创建下半球
     bottom_sphere = Marker()
     bottom_sphere.header.frame_id = frame_id
-    bottom_sphere.header.stamp = rospy.Time.now()
     bottom_sphere.ns = "mujoco_geoms"
     bottom_sphere.id = marker_id * 3 + 2  # 使用基础ID的3倍+2
     bottom_sphere.type = Marker.SPHERE
     bottom_sphere.action = Marker.ADD
     
-    bottom_sphere.pose.position.x = sphere2_center[0]
-    bottom_sphere.pose.position.y = sphere2_center[1]
-    bottom_sphere.pose.position.z = sphere2_center[2]
+    bottom_sphere.pose.position.x = float(sphere2_center[0])
+    bottom_sphere.pose.position.y = float(sphere2_center[1])
+    bottom_sphere.pose.position.z = float(sphere2_center[2])
     
-    bottom_sphere.pose.orientation.x = quat[0]
-    bottom_sphere.pose.orientation.y = quat[1]
-    bottom_sphere.pose.orientation.z = quat[2]
-    bottom_sphere.pose.orientation.w = quat[3]
+    bottom_sphere.pose.orientation.x = float(quat[0])
+    bottom_sphere.pose.orientation.y = float(quat[1])
+    bottom_sphere.pose.orientation.z = float(quat[2])
+    bottom_sphere.pose.orientation.w = float(quat[3])
     
     bottom_sphere.scale.x = radius * 2
     bottom_sphere.scale.y = radius * 2
     bottom_sphere.scale.z = radius * 2
     
-    bottom_sphere.color.r = geom.rgba[0]
-    bottom_sphere.color.g = geom.rgba[1]
-    bottom_sphere.color.b = geom.rgba[2]
-    bottom_sphere.color.a = geom.rgba[3]
+    bottom_sphere.color.r = float(geom.rgba[0])
+    bottom_sphere.color.g = float(geom.rgba[1])
+    bottom_sphere.color.b = float(geom.rgba[2])
+    bottom_sphere.color.a = float(geom.rgba[3])
     
     markers.append(bottom_sphere)
     

@@ -1,9 +1,10 @@
 import time
 import mujoco
+import argparse
+import traceback
 import numpy as np
 import taichi as ti
 from scipy.spatial.transform import Rotation
-import argparse
 
 
 import rclpy
@@ -207,14 +208,14 @@ class LidarVisualizer(Node):
         t.header.frame_id = parent_frame
         t.child_frame_id = child_frame
         
-        t.transform.translation.x = translation[0]
-        t.transform.translation.y = translation[1]
-        t.transform.translation.z = translation[2]
+        t.transform.translation.x = float(translation[0])
+        t.transform.translation.y = float(translation[1])
+        t.transform.translation.z = float(translation[2])
         
-        t.transform.rotation.x = rotation[0]
-        t.transform.rotation.y = rotation[1]
-        t.transform.rotation.z = rotation[2]
-        t.transform.rotation.w = rotation[3]
+        t.transform.rotation.x = float(rotation[0])
+        t.transform.rotation.y = float(rotation[1])
+        t.transform.rotation.z = float(rotation[2])
+        t.transform.rotation.w = float(rotation[3])
         
         broadcaster.sendTransform(t)
 
@@ -266,6 +267,7 @@ def main():
         print("用户中断，正在退出...")
     except Exception as e:
         print(f"发生错误: {e}")
+        traceback.print_exc()
     finally:
         # 清理资源
         node.destroy_node()

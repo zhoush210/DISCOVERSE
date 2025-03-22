@@ -199,6 +199,7 @@ if __name__ == "__main__":
     print("1. 添加TF显示，用于查看坐标系")
     print("2. 添加PointCloud2显示，话题为/mmk2/lidar_s2")
     print("3. 设置Fixed Frame为'world'")
+    print("4. 添加MarkerArray显示，话题为/mujoco_scene")
 
     while exec_node.running and rclpy.ok():
         # 处理ROS消息
