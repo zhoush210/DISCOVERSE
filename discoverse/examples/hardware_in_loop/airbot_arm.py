@@ -13,9 +13,11 @@ class AirbotArm(SimulatorBase):
     def __init__(self, config: BaseConfig):
 
         if config.eef_type == "none":
-            config.mjcf_file_path = "mjcf/hardware_in_loop/airbot_play_short.xml"
+            # config.mjcf_file_path = "mjcf/hardware_in_loop/airbot_play_short.xml"
+            config.mjcf_file_path = "mjcf/hardware_in_loop/airbot_play.xml"
         elif config.eef_type == "G2" or config.eef_type == "E2B" or config.eef_type == "PE2":
-            config.mjcf_file_path = f"mjcf/hardware_in_loop/airbot_play_short_{config.eef_type}.xml"
+            # config.mjcf_file_path = f"mjcf/hardware_in_loop/airbot_play_short_{config.eef_type}.xml"
+            config.mjcf_file_path = f"mjcf/hardware_in_loop/airbot_play_{config.eef_type}.xml"
         else:
             raise NotImplementedError
 
