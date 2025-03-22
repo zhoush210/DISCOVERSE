@@ -5,22 +5,23 @@ try:
     from sensor_msgs.msg import Joy
 
     class JoyTeleopRos1:
+        NUM_BUTTON = 12
         def __init__(self) -> None:
 
             self.joy_cmd = Joy()
             self.joy_cmd.header.stamp = rospy.Time.now()
             self.joy_cmd.axes = [0., 0., 1., 0., 0., 1., 0., 0.]
-            self.joy_cmd.buttons = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            self.last_buttons = np.zeros(11, np.bool_)
-            self.raising_sig = np.zeros(11, np.bool_)
-            self.falling_sig = np.zeros(11, np.bool_)
+            self.joy_cmd.buttons = [0] * self.NUM_BUTTON
+            self.last_buttons = np.zeros(self.NUM_BUTTON, np.bool_)
+            self.raising_sig = np.zeros(self.NUM_BUTTON, np.bool_)
+            self.falling_sig = np.zeros(self.NUM_BUTTON, np.bool_)
             self.joyCmdRecv = False
 
             rospy.Subscriber("/joy", Joy, self.joy_callback)
 
         def reset(self):
             self.joy_cmd.axes = [0., 0., 1., 0., 0., 1., 0., 0.]
-            self.joy_cmd.buttons = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            self.joy_cmd.buttons = [0] * self.NUM_BUTTON
             self.raising_sig[:] = False
             self.falling_sig[:] = False
             self.joyCmdRecv = False

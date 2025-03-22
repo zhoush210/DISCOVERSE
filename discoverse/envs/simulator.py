@@ -6,7 +6,6 @@ from abc import abstractmethod
 
 import cv2
 import glfw
-import pyautogui
 import OpenGL.GL as gl
 
 import mujoco
@@ -198,7 +197,12 @@ class SimulatorBase:
             elif self.config.obs_depth_cam_id is None:
                 self.config.obs_depth_cam_id = []
 
-            screen_width, screen_height = pyautogui.size()
+            try:
+                import pyautogui
+                screen_width, screen_height = pyautogui.size()
+            except Exception as e:
+                screen_width, screen_height = 1920, 1080
+                print(f"pyautogui error: {e}, using default screen size: {screen_width}x{screen_height}")
             self.mj_model.vis.global_.offwidth = max(self.mj_model.vis.global_.offwidth, screen_width)
             self.mj_model.vis.global_.offheight = max(self.mj_model.vis.global_.offheight, screen_height)
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
