@@ -16,7 +16,7 @@ from discoverse.examples.ros2.mmk2_joy_ros2 import MMK2ROS2JoyCtl
 
 from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_single_line
 
-def broadcast_tf_ros2(broadcaster, parent_frame, child_frame, translation, rotation):
+def broadcast_tf_ros2(broadcaster, parent_frame, child_frame, translation, rotation, stamp):
     """
     广播TF变换 - ROS2版本
     
@@ -28,7 +28,7 @@ def broadcast_tf_ros2(broadcaster, parent_frame, child_frame, translation, rotat
     rotation: 旋转四元数[x, y, z, w]
     """
     t = TransformStamped()
-    t.header.stamp = Node.get_clock(broadcaster).now().to_msg()
+    t.header.stamp = stamp
     t.header.frame_id = parent_frame
     t.child_frame_id = child_frame
     
@@ -43,7 +43,7 @@ def broadcast_tf_ros2(broadcaster, parent_frame, child_frame, translation, rotat
     
     broadcaster.sendTransform(t)
 
-def publish_point_cloud_ros2(publisher, points, frame_id):
+def publish_point_cloud_ros2(publisher, points, frame_id, stamp):
     """
     将点云数据发布为ROS2 PointCloud2消息
     
@@ -55,8 +55,8 @@ def publish_point_cloud_ros2(publisher, points, frame_id):
     # 创建消息头
     header = Header()
     header.frame_id = frame_id
-    header.stamp = Node.get_clock(publisher).now().to_msg()
-    
+    header.stamp = stamp
+
     # 定义点云字段
     fields = [
         PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
@@ -177,11 +177,13 @@ if __name__ == "__main__":
             lidar_pose = get_site_tmat(exec_node.mj_data, lidar_frame_id)
             points = lidar_s2.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, exec_node.renderer.scene)
             ti.sync()
-            publish_point_cloud_ros2(pub_lidar_s2, points, lidar_frame_id)
+
+            stamp = exec_node.get_clock().now().to_msg()
+            publish_point_cloud_ros2(pub_lidar_s2, points, lidar_frame_id, stamp)
            
             lidar_position = lidar_pose[:3, 3]
             lidar_orientation = Rotation.from_matrix(lidar_pose[:3, :3]).as_quat()
-            broadcast_tf_ros2(tf_broadcaster, "world", lidar_frame_id, lidar_position, lidar_orientation)
+            broadcast_tf_ros2(tf_broadcaster, "world", lidar_frame_id, lidar_position, lidar_orientation, stamp)
 
         sim_step_cnt += 1
 
