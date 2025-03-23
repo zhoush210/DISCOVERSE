@@ -520,8 +520,8 @@ class MjLidarSensor:
             min_distance = 1e10
 
             # 计算射线方向（球坐标系转笛卡尔坐标系）
-            theta = rays_theta[i]  # 垂直角度
-            phi = rays_phi[i]      # 水平角度
+            phi = rays_phi[i]      # 垂直角度
+            theta = rays_theta[i]  # 水平角度
             
             # 预计算三角函数值
             cos_theta = ti.cos(theta)
@@ -530,9 +530,9 @@ class MjLidarSensor:
             sin_phi = ti.sin(phi)
 
             dir_local = ti.Vector([
-                cos_theta * cos_phi,  # x分量
-                cos_theta * sin_phi,  # y分量
-                sin_theta             # z分量
+                cos_phi * cos_theta,  # x分量
+                cos_phi * sin_theta,  # y分量
+                sin_phi               # z分量
             ]).normalized()  # 单位化方向向量
 
             ray_direction = (sensor_pose @ ti.Vector([dir_local.x, dir_local.y, dir_local.z, 0.0])).xyz.normalized()
@@ -581,8 +581,8 @@ class MjLidarSensor:
         """
         使用Taichi进行真正的并行光线追踪
         Params:
-            rays_phi: 水平角度数组
-            rays_theta: 垂直角度数组
+            rays_phi: 垂直角度数组
+            rays_theta: 水平角度数组
             sensor_pose: 4x4 matrix, the pose of the sensor in the world frame
             mj_scene: mujoco.MjvScene object, the scene to cast rays into
         Return:
@@ -677,12 +677,12 @@ def create_lidar_rays(horizontal_resolution=360, vertical_resolution=32, horizon
     h_angles = np.linspace(-horizontal_fov/2, horizontal_fov/2, horizontal_resolution)
     v_angles = np.linspace(-vertical_fov/2, vertical_fov/2, vertical_resolution)
 
-    phi_grid, theta_grid = np.meshgrid(h_angles, v_angles)
+    theta_grid, phi_grid = np.meshgrid(h_angles, v_angles)
     
     # 展平网格为一维数组
-    rays_phi = phi_grid.flatten()
     rays_theta = theta_grid.flatten()
-    return rays_phi, rays_theta
+    rays_phi = phi_grid.flatten()
+    return rays_theta, rays_phi
 
 def create_lidar_single_line(horizontal_resolution=360, horizontal_fov=2*np.pi):
     """创建激光雷达扫描线的角度数组，仅包含水平方向"""
@@ -698,8 +698,9 @@ def create_demo_scene():
         <worldbody>
         <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
         <!-- 平面 -->
-        <geom name="ground1" type="plane" size="10 10 0.1" pos="0 0 0" rgba="0.9 0.9 0.9 1"/>
-        <geom name="ground2" type="plane" size="5 5 0.1" pos="6 0 5" euler="0 -60 0" rgba="0.9 0.9 0.9 1"/>
+        <geom name="ground" type="plane" size="10 10 0.1" pos="0 0 0" rgba="0.9 0.9 0.9 1"/>
+        <geom name="plane1" type="plane" size="5 5 0.1" pos="6 0 5" euler="0 -60 0" rgba="0.9 0.9 0.9 1"/>
+        <geom name="plane2" type="plane" size="5 3 0.1" pos="-1 -4 3" euler="90 0 0" contype="0" conaffinity="0" rgba="0.9 0.9 0.9 1"/>
         
         <!-- 盒子 -->
         <geom name="box1" type="box" size="0.5 0.5 0.5" pos="2 0 0.5" euler="45 -45 0" rgba="1 0 0 1"/>
@@ -776,7 +777,7 @@ if __name__ == "__main__":
     # 创建激光雷达射线 - 使用命令行参数指定的分辨率
     h_res = int(np.sqrt(args.rays) * 2)  # 近似水平分辨率
     v_res = max(1, args.rays // h_res)   # 计算得到的垂直分辨率
-    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=h_res, vertical_resolution=v_res)
+    rays_theta, rays_phi = create_lidar_rays(horizontal_resolution=h_res, vertical_resolution=v_res)
     if args.verbose:
         print(f"射线数量: {len(rays_phi)}, 水平分辨率: {h_res}, 垂直分辨率: {v_res}")
 

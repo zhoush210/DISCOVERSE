@@ -14,7 +14,11 @@ from visualization_msgs.msg import MarkerArray
 
 from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_rays, create_demo_scene
 from discoverse.examples.sensor_lidar.visual_utils import KeyboardListener, create_marker_from_geom
-
+from discoverse.examples.sensor_lidar.genera_lidar_scan_pattern import \
+    LivoxGenerator, \
+    generate_HDL64, \
+    generate_vlp32, \
+    generate_os128
 
 def publish_scene(publisher, mj_scene, frame_id="world"):
     """将MuJoCo场景发布为ROS可视化标记数组"""
@@ -162,9 +166,17 @@ if __name__ == "__main__":
     # 创建激光雷达传感器
     lidar = MjLidarSensor(scene, enable_profiling=args.profiling, verbose=args.verbose)
 
+    # livox模式: avia mid40 mid70 mid360 tele
+    livox_generator = LivoxGenerator("mid360")
+    rays_theta, rays_phi = livox_generator.sample_ray_angles()
+
     # 创建激光雷达射线 - 使用参数指定的分辨率
-    rays_phi, rays_theta = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
-    print(f"射线数量: {len(rays_phi)}, 水平分辨率: {args.h_res}, 垂直分辨率: {args.v_res}")
+    # rays_theta, rays_phi = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
+    # rays_theta, rays_phi = generate_avia_lidar(t=0.) # Livox Avia
+    # rays_theta, rays_phi = generate_vlp32() # VLP-32
+    # rays_theta, rays_phi = generate_os128()
+
+    print(f"射线数量: {len(rays_phi)}")
 
     # 设置激光雷达位置
     lidar_position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -217,6 +229,9 @@ if __name__ == "__main__":
             
             # 执行光线追踪
             start_time = time.time()
+
+            rays_theta, rays_phi = livox_generator.sample_ray_angles()
+
             points = lidar.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, scene)
             ti.sync()
             end_time = time.time()
