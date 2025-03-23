@@ -799,7 +799,7 @@ if __name__ == "__main__":
     )
     
     # 是否跳过性能测试
-    if not args.skip_test:
+    if not args.skip_test and args.profiling:
         print("=" * 50)
         print("性能测试 - 不同射线数量")
         print("=" * 50)
@@ -809,6 +809,11 @@ if __name__ == "__main__":
         prepare_times = []
         kernel_times = []
         update_geom_times = []
+        # 添加准备阶段各操作的时间收集列表
+        sensor_pose_times = []
+        memory_alloc_times = []
+        rays_update_times = []
+        sync_times = []
         
         for count in ray_counts:
             print(f"\n测试射线数量: {count}")
@@ -826,6 +831,11 @@ if __name__ == "__main__":
             prepare_time_sum = 0
             kernel_time_sum = 0
             update_geom_time_sum = 0
+            # 新增准备阶段各操作时间累加变量
+            sensor_pose_time_sum = 0
+            memory_alloc_time_sum = 0
+            rays_update_time_sum = 0
+            sync_time_sum = 0
             
             for i in range(n_tests+1):
                 # 执行光线追踪
@@ -838,15 +848,30 @@ if __name__ == "__main__":
                 prepare_time_sum += lidar.prepare_time
                 kernel_time_sum += lidar.kernel_time
                 update_geom_time_sum += lidar.update_geom_time
+                # 累加准备阶段各操作时间
+                sensor_pose_time_sum += lidar.convert_sensor_pose_time
+                memory_alloc_time_sum += lidar.memory_allocation_time
+                rays_update_time_sum += lidar.update_rays_time
+                sync_time_sum += lidar.sync_time
             
             # 计算平均时间
             avg_prepare_time = prepare_time_sum / n_tests
             avg_kernel_time = kernel_time_sum / n_tests
             avg_update_geom_time = update_geom_time_sum / n_tests
+            # 计算准备阶段各操作的平均时间
+            avg_sensor_pose_time = sensor_pose_time_sum / n_tests
+            avg_memory_alloc_time = memory_alloc_time_sum / n_tests
+            avg_rays_update_time = rays_update_time_sum / n_tests
+            avg_sync_time = sync_time_sum / n_tests
             
             prepare_times.append(avg_prepare_time)
             kernel_times.append(avg_kernel_time)
             update_geom_times.append(avg_update_geom_time)
+            # 保存准备阶段各操作的平均时间
+            sensor_pose_times.append(avg_sensor_pose_time)
+            memory_alloc_times.append(avg_memory_alloc_time)
+            rays_update_times.append(avg_rays_update_time)
+            sync_times.append(avg_sync_time)
             
             print(f"平均准备时间: {avg_prepare_time:.2f}ms")
             print(f"平均内核时间: {avg_kernel_time:.2f}ms")
@@ -862,9 +887,15 @@ if __name__ == "__main__":
         geom_prepare_times = []
         geom_kernel_times = []
         geom_update_times = []
+        # 添加各操作时间的收集列表
+        geom_sensor_pose_times = []
+        geom_memory_alloc_times = []
+        geom_rays_update_times = []
+        geom_sync_times = []
         
         # 使用固定数量的射线
         test_rays_phi, test_rays_theta = create_lidar_rays(horizontal_resolution=1800, vertical_resolution=64)
+        test_rays_count = len(test_rays_phi)  # 记录测试用的射线数量
         
         for num_geom in num_geoms:
             print(f"\n测试几何体数量: {num_geom}")
@@ -925,6 +956,11 @@ if __name__ == "__main__":
             prepare_time_sum = 0
             kernel_time_sum = 0
             update_geom_time_sum = 0
+            # 添加各操作时间的累加变量
+            sensor_pose_time_sum = 0
+            memory_alloc_time_sum = 0
+            rays_update_time_sum = 0
+            sync_time_sum = 0
             
             for i in range(n_tests+1):
                 # 执行光线追踪
@@ -937,19 +973,35 @@ if __name__ == "__main__":
                 prepare_time_sum += test_lidar.prepare_time
                 kernel_time_sum += test_lidar.kernel_time
                 update_geom_time_sum += test_lidar.update_geom_time
+                # 累加各操作时间
+                sensor_pose_time_sum += test_lidar.convert_sensor_pose_time
+                memory_alloc_time_sum += test_lidar.memory_allocation_time
+                rays_update_time_sum += test_lidar.update_rays_time
+                sync_time_sum += test_lidar.sync_time
             
             # 计算平均时间
             avg_prepare_time = prepare_time_sum / n_tests
             avg_kernel_time = kernel_time_sum / n_tests
             avg_update_geom_time = update_geom_time_sum / n_tests
+            # 计算各操作的平均时间
+            avg_sensor_pose_time = sensor_pose_time_sum / n_tests
+            avg_memory_alloc_time = memory_alloc_time_sum / n_tests
+            avg_rays_update_time = rays_update_time_sum / n_tests
+            avg_sync_time = sync_time_sum / n_tests
             
             geom_prepare_times.append(avg_prepare_time)
             geom_kernel_times.append(avg_kernel_time)
             geom_update_times.append(avg_update_geom_time)
+            # 保存各操作的平均时间
+            geom_sensor_pose_times.append(avg_sensor_pose_time)
+            geom_memory_alloc_times.append(avg_memory_alloc_time)
+            geom_rays_update_times.append(avg_rays_update_time)
+            geom_sync_times.append(avg_sync_time)
             
             print(f"平均准备时间: {avg_prepare_time:.2f}ms")
             print(f"平均内核时间: {avg_kernel_time:.2f}ms")
             print(f"平均几何体更新时间: {avg_update_geom_time:.2f}ms")
+
         
         # 绘制性能结果图表
         plt.figure(figsize=(12, 10))
@@ -975,6 +1027,12 @@ if __name__ == "__main__":
             kernel_legend = 'Kernel Time'
             update_legend = 'Geometry Update Time'
             total_legend = 'Total Preparation Time'
+            total_time_legend = 'Total Time'
+            # 添加新的图例标签
+            sensor_pose_legend = 'Sensor Pose Conversion'
+            memory_alloc_legend = 'Memory Allocation'
+            rays_update_legend = 'Rays Data Update'
+            sync_legend = 'Synchronization'
         else:
             # 使用中文标签
             ray_count_title = '射线数量对性能的影响'
@@ -990,11 +1048,20 @@ if __name__ == "__main__":
             kernel_legend = '内核时间'
             update_legend = '几何体更新时间'
             total_legend = '总准备时间'
+            total_time_legend = '总时间'
+            # 添加新的图例标签
+            sensor_pose_legend = '传感器位姿转换'
+            memory_alloc_legend = '内存分配'
+            rays_update_legend = '光线数据更新'
+            sync_legend = '同步操作'
         
         # 射线数量对性能的影响
         plt.subplot(2, 2, 1)
         plt.plot(ray_counts, prepare_times, 'o-', label=prep_legend)
         plt.plot(ray_counts, kernel_times, 's-', label=kernel_legend)
+        # 添加总时间曲线
+        total_times = [p + k for p, k in zip(prepare_times, kernel_times)]
+        plt.plot(ray_counts, total_times, '^-', label=total_time_legend)
         plt.xlabel(ray_label, **label_font)
         plt.ylabel(time_label, **label_font)
         plt.title(ray_count_title, **title_font)
@@ -1004,12 +1071,17 @@ if __name__ == "__main__":
         
         # 准备时间的细分
         plt.subplot(2, 2, 2)
-        plt.plot(ray_counts, update_geom_times, 'o-', label=update_legend)
-        plt.plot(ray_counts, prepare_times, 's-', label=total_legend)
+        # 绘制各个操作的时间曲线，使用不同的标记和颜色
+        plt.plot(ray_counts, sensor_pose_times, 'o-', label=sensor_pose_legend, color='purple')
+        plt.plot(ray_counts, memory_alloc_times, 's-', label=memory_alloc_legend, color='orange')
+        plt.plot(ray_counts, rays_update_times, '^-', label=rays_update_legend, color='green')
+        plt.plot(ray_counts, update_geom_times, 'D-', label=update_legend, color='red')
+        plt.plot(ray_counts, sync_times, 'x-', label=sync_legend, color='brown')
+        plt.plot(ray_counts, prepare_times, '*-', label=total_legend, color='blue', linewidth=2)
         plt.xlabel(ray_label, **label_font)
         plt.ylabel(time_label, **label_font)
         plt.title(prep_time_title, **title_font)
-        plt.legend(prop={'size': 10})
+        plt.legend(prop={'size': 9}, loc='upper left')
         plt.grid(True)
         plt.tick_params(labelsize=10)
         
@@ -1017,21 +1089,31 @@ if __name__ == "__main__":
         plt.subplot(2, 2, 3)
         plt.plot(num_geoms, geom_prepare_times, 'o-', label=prep_legend)
         plt.plot(num_geoms, geom_kernel_times, 's-', label=kernel_legend)
+        # 添加总时间曲线
+        geom_total_times = [p + k for p, k in zip(geom_prepare_times, geom_kernel_times)]
+        plt.plot(num_geoms, geom_total_times, '^-', label=total_time_legend)
         plt.xlabel(geom_label, **label_font)
         plt.ylabel(time_label, **label_font)
-        plt.title(geom_count_title, **title_font)
+        # 修改标题，添加测试用的雷达点数
+        plt.title(f"{geom_count_title} ({test_rays_count} 射线)", **title_font)
         plt.legend(prop={'size': 10})
         plt.grid(True)
         plt.tick_params(labelsize=10)
         
         # 几何体数量对update_geom_positions的影响
         plt.subplot(2, 2, 4)
-        plt.plot(num_geoms, geom_update_times, 'o-', label=update_legend)
-        plt.plot(num_geoms, geom_prepare_times, 's-', label=total_legend)
+        # 绘制各个操作的时间曲线，使用不同的标记和颜色
+        plt.plot(num_geoms, geom_sensor_pose_times, 'o-', label=sensor_pose_legend, color='purple')
+        plt.plot(num_geoms, geom_memory_alloc_times, 's-', label=memory_alloc_legend, color='orange')
+        plt.plot(num_geoms, geom_rays_update_times, '^-', label=rays_update_legend, color='green')
+        plt.plot(num_geoms, geom_update_times, 'D-', label=update_legend, color='red')
+        plt.plot(num_geoms, geom_sync_times, 'x-', label=sync_legend, color='brown')
+        plt.plot(num_geoms, geom_prepare_times, '*-', label=total_legend, color='blue', linewidth=2)
         plt.xlabel(geom_label, **label_font)
         plt.ylabel(time_label, **label_font)
-        plt.title(geom_update_title, **title_font)
-        plt.legend(prop={'size': 10})
+        # 修改标题，添加测试用的雷达点数
+        plt.title(f"{geom_update_title} ({test_rays_count} 射线)", **title_font)
+        plt.legend(prop={'size': 9}, loc='upper left')
         plt.grid(True)
         plt.tick_params(labelsize=10)
         
@@ -1056,31 +1138,12 @@ if __name__ == "__main__":
         
         # 表格2：准备时间的细分
         print("\n表格2: 准备时间的细分")
-        print("-" * 70)
-        print(f"{'射线数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
-        print("-" * 70)
+        print("-" * 140)
+        print(f"{'射线数量':^10} | {'传感器位姿转换':^15} | {'内存分配':^12} | {'光线数据更新':^15} | {'几何体更新':^15} | {'同步操作':^12} | {'总准备时间':^15}")
+        print("-" * 140)
         for i, count in enumerate(ray_counts):
-            print(f"{count:^12} | {update_geom_times[i]:^20.2f} | {prepare_times[i]:^15.2f}")
-        print("-" * 70)
-        
-        # 表格3：几何体数量对性能的影响
-        print("\n表格3: 几何体数量对性能的影响")
-        print("-" * 70)
-        print(f"{'几何体数量':^12} | {'准备时间 (ms)':^15} | {'内核时间 (ms)':^15} | {'总时间 (ms)':^15}")
-        print("-" * 70)
-        for i, count in enumerate(num_geoms):
-            total_time = geom_prepare_times[i] + geom_kernel_times[i]
-            print(f"{count:^12} | {geom_prepare_times[i]:^15.2f} | {geom_kernel_times[i]:^15.2f} | {total_time:^15.2f}")
-        print("-" * 70)
-        
-        # 表格4：几何体数量对update_geom_positions的影响
-        print("\n表格4: 几何体数量对update_geom_positions的影响")
-        print("-" * 70)
-        print(f"{'几何体数量':^12} | {'几何体更新时间 (ms)':^20} | {'总准备时间 (ms)':^15}")
-        print("-" * 70)
-        for i, count in enumerate(num_geoms):
-            print(f"{count:^12} | {geom_update_times[i]:^20.2f} | {geom_prepare_times[i]:^15.2f}")
-        print("-" * 70)
+            print(f"{count:^10} | {sensor_pose_times[i]:^15.2f} | {memory_alloc_times[i]:^12.2f} | {rays_update_times[i]:^15.2f} | {update_geom_times[i]:^15.2f} | {sync_times[i]:^12.2f} | {prepare_times[i]:^15.2f}")
+        print("-" * 140)
     
     # 执行标准光线追踪测试
     print("\n执行标准光线追踪测试:")
