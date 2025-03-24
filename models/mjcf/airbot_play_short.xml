@@ -5,7 +5,6 @@
 
   <option integrator="RK4" solver="Newton" />
   <compiler angle="radian" inertiafromgeom="auto" inertiagrouprange="4 5" meshdir="../meshes/" texturedir="../textures/"/>
-  <size njmax="10000" nconmax="10000"/>
 
   <contact>
     <exclude body1='arm_base' body2='link2'/>
