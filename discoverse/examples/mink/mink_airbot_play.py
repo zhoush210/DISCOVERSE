@@ -45,9 +45,9 @@ if __name__ == "__main__":
     # 生成mocap刚体XML
     mocap_body_xml = generate_mocap_xml(mocap_name)
     # 生成mocap传感器XML，参考坐标系为机械臂基座
-    sensor_xml = generate_mocap_sensor_xml(mocap_name, ref_name="arm_base", ref_type="body")
+    sensor_xml = generate_mocap_sensor_xml(mocap_name, ref_name="armbasepoint", ref_type="site")
     # 将mocap刚体和传感器添加到模型中
-    mj_model = add_mocup_body_to_mjcf(mjcf_path, mocap_body_xml, sensor_xml, keep_tmp_xml=False)
+    mj_model = add_mocup_body_to_mjcf(mjcf_path, mocap_body_xml, sensor_xml, keep_tmp_xml=True)
     # 计算渲染间隔，确保按照指定帧率渲染
     render_gap = int(1.0 / render_fps / mj_model.opt.timestep)
 

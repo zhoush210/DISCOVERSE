@@ -198,13 +198,17 @@ class SimulatorBase:
                     assert -2 < cam_id < len(self.camera_names), "Invalid obs_depth_cam_id {}".format(cam_id)
             elif self.config.obs_depth_cam_id is None:
                 self.config.obs_depth_cam_id = []
-
+        
             try:
-                import pyautogui
-                screen_width, screen_height = pyautogui.size()
+                import screeninfo
+                monitors = screeninfo.get_monitors()
+                for m in monitors:
+                    if m.is_primary:
+                        screen_width, screen_height = m.width, m.height
+                        break
             except Exception as e:
                 screen_width, screen_height = 1920, 1080
-                print(f"pyautogui error: {e}, using default screen size: {screen_width}x{screen_height}")
+                print(f"screeninfo error: {e}, using default screen size: {screen_width}x{screen_height}")
             self.mj_model.vis.global_.offwidth = max(self.mj_model.vis.global_.offwidth, screen_width)
             self.mj_model.vis.global_.offheight = max(self.mj_model.vis.global_.offheight, screen_height)
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])

@@ -124,6 +124,7 @@ def generate_mocap_xml(name, box_size=(0.05, 0.05, 0.05), arrow_length=0.05, rgb
     """
     return f"""
     <body name="{name}" pos="0 0 0" quat="1 0 0 0" mocap="true">
+      <inertial pos="0 0 0" mass="1e-4" diaginertia="1e-9 1e-9 1e-9"/>
       <site name="{name}_site" size='0.001' type='sphere'/>
       <geom name="{name}_box" type="box" size="{box_size[0]} {box_size[1]} {box_size[1]}" density="0" contype="0" conaffinity="0" rgba="{rgba[0]} {rgba[1]} {rgba[2]} {rgba[3]}"/>
       <geom type="cylinder" pos="{arrow_length} 0 0" euler="0 1.5708 0" size=".01 {arrow_length}" density="0" contype="0" conaffinity="0" rgba="1 0 0 .2"/>
