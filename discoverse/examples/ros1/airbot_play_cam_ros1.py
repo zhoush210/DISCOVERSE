@@ -64,12 +64,12 @@ class AirbotPlayCam(AirbotPlayBase):
         self.tar_jq[6] = 0.0 if msg.data else 1.0
 
     def gripper_float_cmd_cb(self, msg: Float64):
-        self.tar_jq[6] = msg.data
+        self.tar_jq[6] = np.clip(msg.data, 0.25, 1)
 
     def pub_joint_states(self, event):
         self.joint_state.header.stamp = rospy.Time.now()
         qpos = self.sensor_joint_qpos.tolist()
-        eef = qpos[6]
+        eef = qpos[6] * 0.025
         self.joint_state.position = qpos + [-eef]
         self.joint_state.velocity = self.sensor_joint_qvel.tolist() + [-eef]
         self.joint_state.effort = self.sensor_joint_force.tolist() + [-eef]
