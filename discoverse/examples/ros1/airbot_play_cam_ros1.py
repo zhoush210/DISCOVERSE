@@ -73,15 +73,16 @@ class AirbotPlayCam(AirbotPlayBase):
         self.joint_state_puber.publish(self.joint_state)
 
     def pub_image(self, event):
-        image = self.img_rgb_obs_s.get(0, None)
-        if image is not None:
-            self.image_puber.publish(cv_bridge.CvBridge().cv2_to_imgmsg(image[:, :, ::-1]))
-            info = CameraInfo()
-            info.header.stamp = rospy.Time.now()
-            h, w, _ = image.shape
-            info.width = w
-            info.height = h
-            self.camera_info_puber.publish(info)
+        if self.obs is None:
+            return
+        image = self.obs["img"][0]
+        self.image_puber.publish(cv_bridge.CvBridge().cv2_to_imgmsg(image[:, :, ::-1]))
+        info = CameraInfo()
+        info.header.stamp = rospy.Time.now()
+        h, w, _ = image.shape
+        info.width = w
+        info.height = h
+        self.camera_info_puber.publish(info)
 
 
 if __name__ == "__main__":
