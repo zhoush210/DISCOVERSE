@@ -76,7 +76,7 @@ class AirbotPlayCam(AirbotPlayBase):
         if self.obs is None:
             return
         image = self.obs["img"][0]
-        self.image_puber.publish(cv_bridge.CvBridge().cv2_to_imgmsg(image[:, :, ::-1]))
+        self.image_puber.publish(cv_bridge.CvBridge().cv2_to_imgmsg(image[:, :, ::-1], "rgb8"))
         info = CameraInfo()
         info.header.stamp = rospy.Time.now()
         h, w, _ = image.shape
