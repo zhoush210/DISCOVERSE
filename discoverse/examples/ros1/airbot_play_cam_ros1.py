@@ -15,6 +15,9 @@ class AirbotPlayCam(AirbotPlayBase):
         self.joint_state_puber = rospy.Publisher(
             "/airbot_play/joint_states", JointState, queue_size=5
         )
+        self.gripper_position_puber = rospy.Publisher(
+            "/airbot_play/gripper/position", Float64, queue_size=5
+        )
         self.arm_joint_cmd_suber = rospy.Subscriber(
             "/airbot_play/joint_cmd", JointState, self.arm_cmd_cb
         )
@@ -71,6 +74,7 @@ class AirbotPlayCam(AirbotPlayBase):
         self.joint_state.velocity = self.sensor_joint_qvel.tolist() + [-eef]
         self.joint_state.effort = self.sensor_joint_force.tolist() + [-eef]
         self.joint_state_puber.publish(self.joint_state)
+        self.gripper_position_puber.publish(Float64(data=eef))
 
     def pub_image(self, event):
         if self.obs is None:
