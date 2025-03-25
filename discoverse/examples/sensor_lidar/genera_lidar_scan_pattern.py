@@ -281,7 +281,7 @@ if __name__ == "__main__":
         rays_theta, rays_phi = generate_HDL64()
     end_time = time.time()
     print(f"生成HDL64模式 点数: {len(rays_theta)} 平均时间: {1e3*(end_time-start_time)/test_times:.4f} ms")
-    visulize_lidar_scan_pattern(rays_theta, rays_phi, "Livox HDL64 Pattern", 50)
+    visulize_lidar_scan_pattern(rays_theta, rays_phi, "HDL64 Pattern", 50)
 
     # 测试VLP-32模式
     rays_theta, rays_phi = generate_vlp32()
@@ -290,7 +290,7 @@ if __name__ == "__main__":
         rays_theta, rays_phi = generate_vlp32()
     end_time = time.time()
     print(f"生成VLP-32模式 点数: {len(rays_theta)} 平均时间: {1e3*(end_time-start_time)/test_times:.4f} ms")
-    visulize_lidar_scan_pattern(rays_theta, rays_phi, "Livox VLP-32 Pattern", 10)
+    visulize_lidar_scan_pattern(rays_theta, rays_phi, "VLP-32 Pattern", 10)
 
     # 测试OS-128模式
     rays_theta, rays_phi = generate_os128()
@@ -299,6 +299,6 @@ if __name__ == "__main__":
         rays_theta, rays_phi = generate_os128()
     end_time = time.time()
     print(f"生成OS-128模式 点数: {len(rays_theta)} 平均时间: {1e3*(end_time-start_time)/test_times:.4f} ms")
-    visulize_lidar_scan_pattern(rays_theta, rays_phi, "Livox OS-128 Pattern", 50)
+    visulize_lidar_scan_pattern(rays_theta, rays_phi, "OS-128 Pattern", 50)
 
     plt.show()

@@ -39,6 +39,8 @@ def setRenderOptions(options):
 class SimulatorBase:
     running = True
     obs = None
+    img_rgb_obs_s = {}
+    img_depth_obs_s = {}
 
     cam_id = -1  # -1表示自由视角
     last_cam_id = -1
@@ -226,13 +228,11 @@ class SimulatorBase:
         
         depth_rendering = self.renderer._depth_rendering
         self.renderer.disable_depth_rendering()
-        self.img_rgb_obs_s = {}
         for id in self.config.obs_rgb_cam_id:
             img = self.getRgbImg(id)
             self.img_rgb_obs_s[id] = img
         
         self.renderer.enable_depth_rendering()
-        self.img_depth_obs_s = {}
         for id in self.config.obs_depth_cam_id:
             img = self.getDepthImg(id)
             self.img_depth_obs_s[id] = img
