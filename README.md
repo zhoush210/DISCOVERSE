@@ -168,7 +168,14 @@ Thanks to the open-sourcing of the [lucidsim](https://github.com/lucidsim/lucids
 
 1. `diff-gaussian-rasterization` fails to install due to mismatched pytorch and cuda versions: Please install the specified version of pytorch.
 
-2. If you want to use it on a server, please specify the environment variable:
+2. `DISCOVERSE/submodules/diff-gaussian-rasterization/cuda_rasterizer/rasterizer_impl.cu:23:10: fatal error: glm/glm.hpp: no such file` :
+    ```bash
+    conda install -c conda-forge glm
+    export CPATH=$CONDA_PREFIX/include:$CPATH
+    pip install submodules/diff-gaussian-rasterization
+    ```
+
+3. If you want to use it on a server, please specify the environment variable:
 
     ```bash
     export MUJOCO_GL=egl
