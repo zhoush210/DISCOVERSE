@@ -71,6 +71,7 @@ class MMK2FIK:
     }
 
     def __init__(self) -> None:
+        print("\033[33m接口即将弃用, 请使用discoverse.mmk2.mmk2_ik\033[0m")
         self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
     
     def get_3dposition_wrt_arm_base(self, point3d, q):
