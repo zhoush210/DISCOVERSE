@@ -17,6 +17,11 @@ from visualization_msgs.msg import MarkerArray
 
 from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_rays, create_demo_scene
 from discoverse.examples.sensor_lidar.visual_utils import KeyboardListener, create_marker_from_geom
+from discoverse.examples.sensor_lidar.genera_lidar_scan_pattern import \
+    LivoxGenerator, \
+    generate_HDL64, \
+    generate_vlp32, \
+    generate_os128
 
 class LidarVisualizer(Node):
     def __init__(self, args):
@@ -49,9 +54,16 @@ class LidarVisualizer(Node):
         # 创建激光雷达传感器
         self.lidar = MjLidarSensor(self.scene, enable_profiling=args.profiling, verbose=args.verbose)
 
+        # livox模式: avia mid40 mid70 mid360 tele
+        self.livox_generator = LivoxGenerator("mid360")
+        rays_theta, rays_phi = self.livox_generator.sample_ray_angles()
+
         # 创建激光雷达射线 - 使用参数指定的分辨率
-        self.rays_phi, self.rays_theta = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
-        self.get_logger().info(f"射线数量: {len(self.rays_phi)}, 水平分辨率: {args.h_res}, 垂直分辨率: {args.v_res}")
+        # rays_theta, rays_phi = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
+        # rays_theta, rays_phi = generate_avia_lidar(t=0.) # Livox Avia
+        # rays_theta, rays_phi = generate_vlp32() # VLP-32
+        # rays_theta, rays_phi = generate_os128()
+        self.get_logger().info(f"射线数量: {len(rays_phi)}")
 
         # 设置激光雷达位置
         self.lidar_position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -102,7 +114,10 @@ class LidarVisualizer(Node):
         
         # 执行光线追踪
         start_time = time.time()
-        points = self.lidar.ray_cast_taichi(self.rays_phi, self.rays_theta, lidar_pose, self.scene)
+
+        rays_theta, rays_phi = self.livox_generator.sample_ray_angles()
+
+        points = self.lidar.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, self.scene)
         ti.sync()
         end_time = time.time()
         
@@ -242,6 +257,7 @@ def main():
     print(f"- 详细输出: {'启用' if args.verbose else '禁用'}")
     print("=" * 60)
     print("控制说明:")
+    print("  选中python终端窗口，按下以下键盘按键控制:")
     print("  WASD: 控制水平移动")
     print("  Q/E: 控制高度上升/下降")
     print("  方向键上/下: 控制俯仰角")
@@ -250,10 +266,11 @@ def main():
     print("=" * 60 + "\n")
 
     print("在RViz2中设置以下显示：")
-    print("1. 添加TF显示，用于查看坐标系")
-    print("2. 添加PointCloud2显示，话题为/lidar_points_taichi")
-    print("3. 添加MarkerArray显示，话题为/mujoco_scene")
-    print("4. 设置Fixed Frame为'world'")
+    print("1. 设置Fixed Frame为'world'")
+    print("2. 添加TF显示，用于查看坐标系")
+    print("3. 添加PointCloud2显示，话题为/lidar_points_taichi")
+    print("4. 添加MarkerArray显示，话题为/mujoco_scene")
+    print("5. 设置PointCloud2，size=0.03,Color Transformer=AxisColor")
 
     # 初始化ROS2
     rclpy.init()

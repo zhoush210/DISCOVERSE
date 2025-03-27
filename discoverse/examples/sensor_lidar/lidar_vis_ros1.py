@@ -129,6 +129,7 @@ if __name__ == "__main__":
     print(f"- 详细输出: {'启用' if args.verbose else '禁用'}")
     print("=" * 60)
     print("控制说明:")
+    print("  选中python终端窗口，按下以下键盘按键控制:")
     print("  WASD: 控制水平移动")
     print("  Q/E: 控制高度上升/下降")
     print("  方向键上/下: 控制俯仰角")
@@ -190,11 +191,12 @@ if __name__ == "__main__":
     last_time = time.time()
 
     print("在RViz中设置以下显示：")
-    print("1. 添加TF显示，用于查看坐标系")
-    print("2. 添加PointCloud2显示，话题为/lidar_points_taichi")
-    print("3. 添加MarkerArray显示，话题为/mujoco_scene")
-    print("4. 设置Fixed Frame为'world'")
-       
+    print("1. 设置Fixed Frame为'world'")
+    print("2. 添加TF显示，用于查看坐标系")
+    print("3. 添加PointCloud2显示，话题为/lidar_points_taichi")
+    print("4. 添加MarkerArray显示，话题为/mujoco_scene")
+    print("5. 设置PointCloud2，size=0.03,Color Transformer=AxisColor")
+    
     try:
         while not rospy.is_shutdown():
             # 计算时间增量
