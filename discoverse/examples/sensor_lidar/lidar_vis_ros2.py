@@ -56,14 +56,14 @@ class LidarVisualizer(Node):
 
         # livox模式: avia mid40 mid70 mid360 tele
         self.livox_generator = LivoxGenerator("mid360")
-        rays_theta, rays_phi = self.livox_generator.sample_ray_angles()
+        self.rays_theta, self.rays_phi = self.livox_generator.sample_ray_angles()
 
         # 创建激光雷达射线 - 使用参数指定的分辨率
-        # rays_theta, rays_phi = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
-        # rays_theta, rays_phi = generate_avia_lidar(t=0.) # Livox Avia
-        # rays_theta, rays_phi = generate_vlp32() # VLP-32
-        # rays_theta, rays_phi = generate_os128()
-        self.get_logger().info(f"射线数量: {len(rays_phi)}")
+        # self.rays_theta, self.rays_phi = create_lidar_rays(horizontal_resolution=args.h_res, vertical_resolution=args.v_res)
+        # self.rays_theta, self.rays_phi = generate_avia_lidar(t=0.) # Livox Avia
+        # self.rays_theta, self.rays_phi = generate_vlp32() # VLP-32
+        # self.rays_theta, self.rays_phi = generate_os128()
+        self.get_logger().info(f"射线数量: {len(self.rays_phi)}")
 
         # 设置激光雷达位置
         self.lidar_position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -115,9 +115,10 @@ class LidarVisualizer(Node):
         # 执行光线追踪
         start_time = time.time()
 
-        rays_theta, rays_phi = self.livox_generator.sample_ray_angles()
+        if hasattr(self, "livox_generator"):
+            self.rays_theta, self.rays_phi = self.livox_generator.sample_ray_angles()
 
-        points = self.lidar.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, self.scene)
+        points = self.lidar.ray_cast_taichi(self.rays_phi, self.rays_theta, lidar_pose, self.scene)
         ti.sync()
         end_time = time.time()
         
