@@ -159,6 +159,7 @@ class AirbotArm(SimulatorBase):
             "jq"   : self.sensor_joint_qpos.tolist(),
             "jv"   : self.sensor_joint_qvel.tolist(),
             "jf"   : self.sensor_joint_force.tolist(),
+            "img"  : self.img_rgb_obs_s,
         }
         return self.obs
 
@@ -173,11 +174,6 @@ cfg.decimation = 4
 cfg.timestep = 0.001
 cfg.sync = True
 cfg.headless = False
-cfg.render_set = {
-    "fps"    : 30,
-    "width"  : 1280,
-    "height" : 720
-}
 
 if __name__ == "__main__":
     import time
@@ -190,6 +186,13 @@ if __name__ == "__main__":
     parser.add_argument('--eef_type', type=str, choices=["G2", "E2B", "PE2", "none"], help='Name of the eef', default="none")
     # :TODO: PE2
     parser.add_argument('--discoverse_viewer', action='store_true', help='Use discoverse viewer')
+    parser.add_argument('--video_fps', type=int, default=30, help='FPS of video, only used when --discoverse_viewer is set')
+    parser.add_argument('--video_width', type=int, default=1280, help='Width of video, only used when --discoverse_viewer is set')
+    parser.add_argument('--video_height', type=int, default=720, help='Height of video, only used when --discoverse_viewer is set')
+
+    parser.add_argument('--record_video', action='store_true', help='record video')
+    parser.add_argument('--save_video_path', type=str, default="airbot_play_short.mp4", help='Path to save video, only used when --record_video is set')
+
     args = parser.parse_args()
 
     cfg.arm_type = args.arm_type
@@ -197,6 +200,15 @@ if __name__ == "__main__":
     if not args.discoverse_viewer:
         import mujoco.viewer
         cfg.enable_render = False
+    else:
+        if args.record_video:
+            import mediapy
+            cfg.obs_rgb_cam_id = [-1] # -1 表示第三视角的相机
+            imgs = []
+
+    cfg.render_set["fps"] = args.video_fps
+    cfg.render_set["width"] = args.video_width
+    cfg.render_set["height"] = args.video_height
 
     exec_node = AirbotArm(cfg)
 
@@ -205,14 +217,24 @@ if __name__ == "__main__":
     def func_while_running():
         exec_node.action[:exec_node.nj] = 0.15
         obs, pri_obs, rew, ter, info = exec_node.step()
-
+        if args.record_video and args.discoverse_viewer:
+            img_3view = obs["img"][-1]
+            imgs.append(img_3view)
+    
     if args.discoverse_viewer:
-        while exec_node.running:
-            step_start = time.time()
-            func_while_running()
-            time_until_next_step = exec_node.delta_t - (time.time() - step_start)
-            if time_until_next_step > 0:
-                time.sleep(time_until_next_step)
+        try:
+            while exec_node.running:
+                step_start = time.time()
+                func_while_running()
+                time_until_next_step = exec_node.delta_t - (time.time() - step_start)
+                if time_until_next_step > 0:
+                    time.sleep(time_until_next_step)
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt")
+        finally:
+            if args.record_video:
+                mediapy.write_video(args.save_video_path, imgs, fps=args.video_fps)
+                print(f"Video saved to {args.save_video_path}")
     else:
         with mujoco.viewer.launch_passive(exec_node.mj_model, exec_node.mj_data, key_callback=exec_node.windowKeyPressCallback) as viewer:
             while viewer.is_running():
@@ -222,3 +244,4 @@ if __name__ == "__main__":
                 time_until_next_step = exec_node.delta_t - (time.time() - step_start)
                 if time_until_next_step > 0:
                     time.sleep(time_until_next_step)
+                    
