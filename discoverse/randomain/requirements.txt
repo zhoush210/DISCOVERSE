@@ -1,4 +1,4 @@
 safetensors
 transformers
-PIL
+Pillow
 params_proto

@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
     parser.add_argument("--dim17", action="store_true", help="genegrate 17 joint num mmk2 data")
+    parser.add_argument("--save_segment", action="store_true", help="save segment videos")
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
@@ -88,6 +89,11 @@ if __name__ == "__main__":
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_disk")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+
+    if args.save_segment:
+        cfg.obs_depth_cam_id = list(set(cfg.obs_rgb_cam_id + ([] if cfg.obs_depth_cam_id is None else cfg.obs_depth_cam_id)))
+        from discoverse.randomain.utils import SampleforDR
+        samples = SampleforDR(objs=cfg.obj_list, robot_parts=cfg.rb_link_list, cam_ids=cfg.obs_rgb_cam_id, save_dir=os.path.join(save_dir, "segment"), fps=cfg.render_set["fps"])
 
     sim_node = SimNode(cfg)
     sim_node.teleop = None
@@ -111,6 +117,8 @@ if __name__ == "__main__":
             stm.reset()
             action[:] = sim_node.target_control[:]
             act_lst, obs_lst = [], []
+            if args.save_segment:
+                samples.reset()
 
         try:
             if stm.trigger():
@@ -218,6 +226,8 @@ if __name__ == "__main__":
             elif cfg.io_dim == 17:
                 act_lst.append(action[2:].tolist().copy())
             obs_lst.append(obs)
+            if args.save_segment:
+                samples.sampling(sim_node)
 
         if stm.state_idx >= stm.max_state_cnt:
             if sim_node.check_success():
@@ -225,6 +235,10 @@ if __name__ == "__main__":
                 process = mp.Process(target=recoder_mmk2, args=(save_path, act_lst, obs_lst, cfg))
                 process.start()
                 process_list.append(process)
+                if args.save_segment:
+                    seg_process = mp.Process(target=samples.save)
+                    seg_process.start()
+                    process_list.append(seg_process)
 
                 data_idx += 1
                 print("\r{:4}/{:4} ".format(data_idx, data_set_size), end="")

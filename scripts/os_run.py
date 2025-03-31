@@ -2,6 +2,7 @@ import os
 from discoverse import DISCOVERSE_ROOT_DIR
 from concurrent.futures import ThreadPoolExecutor
 import argparse
+import subprocess
 
 if __name__ == "__main__":
 
@@ -12,23 +13,26 @@ if __name__ == "__main__":
     parser.add_argument('--task_name', type=str, required=True, help='Name of the task, see discoverse/examples/tasks_{robot_name}')
     parser.add_argument('--track_num', type=int, default=100, help='Number of tracks')
     parser.add_argument('--nw', type=int, required=True, default=8, help='Number of workers')
-    parser.add_argument("--dim17", action="store_true", help="genegrate 17 joint num mmk2 data")
+    parser.add_argument("--dim17", action="store_true", help="Generate 17 joint num mmk2 data")
+    parser.add_argument("--save_segment", action="store_true", help="Save segment videos")
     args = parser.parse_args()
 
-    robot_name = args.robot_name
-    task_name = args.task_name
-    track_num = args.track_num
-    nw = args.nw
-    dim17 = args.dim17
+    n = args.track_num // args.nw
 
     def do_something(i):
-        n = track_num // nw
-        py_path = os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/examples", f"tasks_{robot_name}/{task_name}.py")
-        if dim17:
-            os.system(f"{py_dir} {py_path} --data_idx {i*n} --data_set_size {n} --auto --dim17")
-        else:
-            os.system(f"{py_dir} {py_path} --data_idx {i*n} --data_set_size {n} --auto")
+        py_path = os.path.join(os.getenv("DISCOVERSE_ROOT_DIR", ""), "discoverse/examples", f"tasks_{args.robot_name}/{args.task_name}.py")
+        
+        # 构建命令参数列表
+        cmd = [py_dir, py_path, "--data_idx", str(i * n), "--data_set_size", str(n), "--auto"]
+        if args.dim17:
+            cmd.append("--dim17")
+        if args.save_segment:
+            cmd.append("--save_segment")
 
-    # 使用with语句创建线程池，它会在with块结束时自动关闭
-    with ThreadPoolExecutor(max_workers=nw) as executor:
-        executor.map(do_something, range(nw))
+        # 执行命令
+        subprocess.run(cmd, check=True)
+
+    # 多线程执行任务
+    with ThreadPoolExecutor(max_workers=args.nw) as executor:
+        executor.map(do_something, range(args.nw))
+
