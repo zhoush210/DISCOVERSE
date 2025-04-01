@@ -12,17 +12,22 @@ if __name__ == "__main__":
     parser.add_argument('--task_name', type=str, required=True, help='Name of the task, see discoverse/examples/tasks_{robot_name}')
     parser.add_argument('--track_num', type=int, default=100, help='Number of tracks')
     parser.add_argument('--nw', type=int, required=True, default=8, help='Number of workers')
+    parser.add_argument("--dim17", action="store_true", help="genegrate 17 joint num mmk2 data")
     args = parser.parse_args()
 
     robot_name = args.robot_name
     task_name = args.task_name
     track_num = args.track_num
     nw = args.nw
+    dim17 = args.dim17
 
     def do_something(i):
         n = track_num // nw
         py_path = os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/examples", f"tasks_{robot_name}/{task_name}.py")
-        os.system(f"{py_dir} {py_path} --data_idx {i*n} --data_set_size {n} --auto")
+        if dim17:
+            os.system(f"{py_dir} {py_path} --data_idx {i*n} --data_set_size {n} --auto --dim17")
+        else:
+            os.system(f"{py_dir} {py_path} --data_idx {i*n} --data_set_size {n} --auto")
 
     # 使用with语句创建线程池，它会在with块结束时自动关闭
     with ThreadPoolExecutor(max_workers=nw) as executor:
