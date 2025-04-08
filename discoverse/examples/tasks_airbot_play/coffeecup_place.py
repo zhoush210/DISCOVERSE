@@ -69,8 +69,8 @@ cfg.sync         = False #True
 cfg.headless     = False
 cfg.render_set   = {
     "fps"    : 20,
-    "width"  : 448, #1920, #640,
-    "height" : 448, #1080  #480
+    "width"  : 640, #1920, #640,
+    "height" : 480, #1080  #480
 }
 cfg.obs_rgb_cam_id = [0, 1]
 cfg.save_mjb_and_task_config = True
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/coffeecup_place_448_448")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/coffeecup_place")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

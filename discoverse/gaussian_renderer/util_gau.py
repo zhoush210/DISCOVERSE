@@ -180,6 +180,12 @@ def load_ply(path, gamma=1):
     rots = rots / np.linalg.norm(rots, axis=-1, keepdims=True)
     rots = rots.astype(np.float32)
     scales = np.exp(scales)
+
+    # if 2dgs
+    if len(scale_names) == 2:
+        print(f"len(scale_names) = {len(scale_names)} (2dgs ply model)")
+        scales = np.hstack([scales, 1e-9 * np.ones_like(scales[:, :1])])
+
     scales = scales.astype(np.float32)
     opacities = 1/(1 + np.exp(-opacities))
     opacities = opacities.astype(np.float32)

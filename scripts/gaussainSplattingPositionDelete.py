@@ -11,7 +11,16 @@ def read_binply_proc(input_file, output_file):
     body = binary_data[header_end:]
 
     offset = 0
-    vertex_format = '<3f3f3f45f1f3f4f'
+
+    sh_num = 0
+    if sh_num == 3:
+        vertex_format = '<3f3f3f45f1f3f4f'
+    elif sh_num == 2:
+        vertex_format = '<3f3f3f21f1f3f4f'
+    elif sh_num == 1:
+        vertex_format = '<3f3f3f9f1f3f4f'
+    elif sh_num == 0:
+        vertex_format = '<3f3f3f1f3f4f'
 
     vertex_size = struct.calcsize(vertex_format)
     vertex_count = int(header.split('element vertex ')[1].split()[0])
@@ -20,18 +29,22 @@ def read_binply_proc(input_file, output_file):
         print(f"Error: body size {len(body)} does not match vertex count {vertex_count} * vertex size {vertex_size}")
         return
 
+    print(f"vertex_count: {vertex_count}")
     data = []
     for _ in tqdm.trange(vertex_count):
         vertex_data = list(struct.unpack_from(vertex_format, body, offset))
         offset += vertex_size
-        xyz = np.array(vertex_data[:3])
+        # xyz = np.array(vertex_data[:3])
+        scale = np.exp(vertex_data[10:13])
 
-        if 0.1 < xyz[2] < 0.85 and -1.4 < xyz[0] < 1.4 and -1.4 < xyz[1] < 1.4:
+        if max(scale) > 1.:
+        # if 0.1 < xyz[2] < 0.85 and -1.4 < xyz[0] < 1.4 and -1.4 < xyz[1] < 1.4:
             continue
         else:
             data.append(vertex_data)
 
     data_arr = np.array(data)
+    print(f"data_arr.shape: {data_arr.shape}")
 
     with open(output_file, 'wb') as f:
         f.write(header.replace(f"{vertex_count}", f"{data_arr.shape[0]}").encode('utf-8'))

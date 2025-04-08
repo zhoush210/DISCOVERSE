@@ -32,6 +32,8 @@ def transform_shs(shs_feat, rotation_matrix):
     one_degree_shs = einops.rearrange(one_degree_shs, 'n rgb shs_num -> n shs_num rgb')
     shs_feat[:, 0:3] = one_degree_shs
 
+    if shs_feat.shape[1] < 8:
+        return shs_feat    
     two_degree_shs = shs_feat[:, 3:8]
     two_degree_shs = einops.rearrange(two_degree_shs, 'n shs_num rgb -> n rgb shs_num')
     two_degree_shs = einsum(
@@ -41,6 +43,8 @@ def transform_shs(shs_feat, rotation_matrix):
         )
     two_degree_shs = einops.rearrange(two_degree_shs, 'n rgb shs_num -> n shs_num rgb')
     shs_feat[:, 3:8] = two_degree_shs
+    if shs_feat.shape[1] < 15:
+        return shs_feat
 
     three_degree_shs = shs_feat[:, 8:15]
     three_degree_shs = einops.rearrange(three_degree_shs, 'n shs_num rgb -> n rgb shs_num')
@@ -71,8 +75,16 @@ def ply_bin_transpose(input_file, output_file, transformMatrix, scale_factor=1.)
     header = binary_data[:header_end].decode('utf-8')
     body = binary_data[header_end:]
 
+    sh_dc_num = 0
+    sh_rest_num = 0
+    for line in header.split('\n'):
+        if line.startswith('property float f_dc_'):
+            sh_dc_num += 1
+        if line.startswith('property float f_rest_'):
+            sh_rest_num += 1
+
     offset = 0
-    vertex_format = '<3f3f3f45f1f3f4f'  
+    vertex_format = f'<3f3f{sh_dc_num}f{sh_rest_num}f1f3f4f'  
     
     vertex_size = struct.calcsize(vertex_format)
     vertex_count = int(header.split('element vertex ')[1].split()[0])
@@ -102,15 +114,16 @@ def ply_bin_transpose(input_file, output_file, transformMatrix, scale_factor=1.)
     data_arr[:,-4:] = quat_arr[:,[3,0,1,2]]
 
     RMat = transformMatrix[:3,:3]
+    
+    if sh_rest_num > 0:
+        f_rest = torch.from_numpy(data_arr[:,9:9+sh_rest_num].reshape((-1, sh_dc_num, sh_rest_num//sh_dc_num)).transpose(0,2,1))
+        shs = transform_shs(f_rest, RMat).numpy()
+        shs = shs.transpose(0,2,1).reshape(-1,sh_rest_num)
+        data_arr[:,9:9+sh_rest_num] = shs
 
-    f_rest = torch.from_numpy(data_arr[:,9:54].reshape((-1, 3, 15)).transpose(0,2,1))
-    shs = transform_shs(f_rest, RMat).numpy()
-    shs = shs.transpose(0,2,1).reshape(-1,45)
-    data_arr[:,9:54] = shs
-
-    xyz, scales = rescale(data_arr[:,:3], data_arr[:,55:58], scale_factor)
-    data_arr[:,:3]    = xyz
-    data_arr[:,55:58] = scales
+    xyz, scales = rescale(data_arr[:,:3], data_arr[:,9+sh_rest_num+1:9+sh_rest_num+1+3], scale_factor)
+    data_arr[:,:3] = xyz
+    data_arr[:,9+sh_rest_num+1:9+sh_rest_num+1+3] = scales
 
     offset = 0
     with open(output_file, 'wb') as f:
@@ -125,11 +138,11 @@ if __name__ == "__main__":
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
 
     parser = argparse.ArgumentParser(description='example: python3 scripts/ply_transpose.py -i data/ply/000000.ply -o data/ply/000000_trans.ply -t [0, 0, 0] -r [0.707, 0., 0., 0.707] -s 1')
-    parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to the input binary PLY file')
+    parser.add_argument('input_file', type=str, help='Path to the input binary PLY file')
     parser.add_argument('-o', '--output_file', type=str, help='Path to the output PLY file', default=None)
     parser.add_argument('-t', '--transform', nargs=3, type=float, help='transformation', default=None)
     parser.add_argument('-r', '--rotation', nargs=4, type=float, help='rotation quaternion xyzw', default=None)
-    parser.add_argument('-s', '--scale', type=float, help='Scale factor', default=1)
+    parser.add_argument('-s', '--scale', type=float, help='Scale factor', default=1.0)
     args = parser.parse_args()
 
     Tmat = np.eye(4)
@@ -142,4 +155,4 @@ if __name__ == "__main__":
     if args.output_file is None:
         args.output_file = args.input_file.replace('.ply', '_trans.ply')
 
-    ply_bin_transpose(args.input_file, args.output_file, Tmat, scale_factor=1)
+    ply_bin_transpose(args.input_file, args.output_file, Tmat, scale_factor=args.scale)

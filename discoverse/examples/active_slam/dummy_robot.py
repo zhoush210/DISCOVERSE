@@ -1,4 +1,3 @@
-import cv2
 import glfw
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -28,6 +27,9 @@ class DummyRobot(SimulatorBase):
 
     def get_base_pose(self):
         return self.mj_model.body(self.config.robot_name).pos.copy(), self.mj_model.body(self.config.robot_name).quat.copy()
+
+    def post_load_mjcf(self):
+        pass
 
     def getObservation(self):
         rgb_cam_pose_lst = [self.getCameraPose(id) for id in self.config.obs_rgb_cam_id]
@@ -134,8 +136,8 @@ class DummyRobot(SimulatorBase):
         super().printHelp()
         print("-------------------------------------")
         print("dummy robot control:")
-        print("w/s down    : move forward/backward")
-        print("a/d right : move left/right")
+        print("w/s : move forward/backward")
+        print("a/d : move left/right")
         print("q/e : pitch up/down")
         print("arrow up/down : height up/down")
         print("left mouse drag : camera move yaw and pitch")
@@ -159,7 +161,18 @@ if __name__ == "__main__":
     cfg.mjcf_file_path = "mjcf/dummy_robot.xml"
 
     cfg.use_gaussian_renderer = True
-    cfg.gs_model_dict["background"] = "scene/Air11F/air_11f.ply"
+    # cfg.gs_model_dict["background"] = "scene/Air11F/air_11f.ply"
+    # cfg.gs_model_dict["background"] = "scene/kitti/nnn_clip_trans.ply"
+    # cfg.gs_model_dict["background"] = "scene/kitti/kitti_clip.ply"
+
+    # cfg.gs_model_dict["background"] = "scene/kitti/qz_table_2dg.ply"
+    # cfg.gs_model_dict["background"] = "scene/kitti/qz_only_table_2dgs.ply"
+    # cfg.gs_model_dict["background"] = "scene/kitti/qz_table_2dg_full.ply"
+
+    # cfg.gs_model_dict["background"] = "scene/kitti/room_2dgs_sparse.ply"
+    # cfg.gs_model_dict["background"] = "scene/kitti/room_3dgs_sparse.ply"
+
+    # cfg.gs_model_dict["background"] = "scene/kitti/room_3dgs_dense.ply"
 
     robot = DummyRobot(cfg)
     robot.cam_id = dummy_robot_cam_id
