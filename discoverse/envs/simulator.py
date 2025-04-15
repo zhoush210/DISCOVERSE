@@ -139,6 +139,7 @@ class SimulatorBase:
                 glfw.set_key_callback(self.window, self.on_key)
                 glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
                 glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
+                glfw.set_scroll_callback(self.window, self.on_mouse_scroll)
 
                 if sys.platform == "darwin":
                     try:
@@ -413,6 +414,11 @@ class SimulatorBase:
             self.mouse_pressed['right'] = is_pressed
         elif button == glfw.MOUSE_BUTTON_MIDDLE:
             self.mouse_pressed['middle'] = is_pressed
+
+    def on_mouse_scroll(self, window, xoffset, yoffset):
+        self.free_camera.distance -= yoffset * 0.1
+        if self.free_camera.distance < 0.1:
+            self.free_camera.distance = 0.1
 
     def on_key(self, window, key, scancode, action, mods):
         if action == glfw.PRESS:
