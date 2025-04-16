@@ -51,13 +51,13 @@ class MMK2ROS2(MMK2Base, Node):
             self.lidar_s2.get_lidar_points(self.rays_phi, self.rays_theta, self.mj_data)
     
             self.static_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
-            self.publish_static_transform(header_frame_id='mmk2_base', child_frame_id=self.lidar_frame_id)
+            self.publish_static_transform(header_frame_id='base_link', child_frame_id=self.lidar_frame_id)
 
     def init_topic_publisher(self):
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
 
         # rostopic joint state
-        self.joint_state_puber = self.create_publisher(JointState, '/mmk2/joint_states', 5)
+        self.joint_state_puber = self.create_publisher(JointState, '/joint_states', 5)
         self.joint_state = JointState()
         self.joint_state.name = [
             "left_wheel", "right_wheel", "slide_joint", "head_yaw_joint", "head_pitch_joint",
@@ -69,51 +69,51 @@ class MMK2ROS2(MMK2Base, Node):
         self.joint_state.effort = self.sensor_force.tolist()
 
         # rostopic imu
-        self.imu_puber = self.create_publisher(Imu, '/mmk2/imu', 5)
-        self.imu_msg = Imu()
-        self.imu_msg.header.frame_id = "mmk2_imu_link"
+        # # # self.imu_puber = self.create_publisher(Imu, '/imu', 5)
+        # # self.imu_msg = Imu()
+        # # self.imu_msg.header.frame_id = "mmk2_imu_link"
 
         # rostopic odometry
-        self.odom_puber = self.create_publisher(Odometry, '/mmk2/odom', 5)
+        self.odom_puber = self.create_publisher(Odometry, '/slamware_ros_sdk_server_node/odom', 5)
         self.odom_msg = Odometry()
-        self.odom_msg.header.frame_id = "odom"
-        self.odom_msg.child_frame_id = "mmk2_base"
+        self.odom_msg.header.frame_id = "/odom"
+        # self.odom_msg.child_frame_id = "base_link"
 
         # image
         self.bridge = CvBridge()
 
         # lidar
         if self.config.lidar_s2_sim:
-            self.lidar_s2_puber = self.create_publisher(PointCloud2, '/mmk2/lidar_s2', 1)
+            self.lidar_s2_puber = self.create_publisher(PointCloud2, '/slamware_ros_sdk_server_node/scan', 1)
 
         # image publisher, camera info publisher,  Initialize camera info messages
         if 0 in self.config.obs_rgb_cam_id:
-            self.head_color_puber  = self.create_publisher(Image, '/mmk2/head_camera/color/image_raw', 2)
-            self.head_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/color/camera_info', 2)
+            self.head_color_puber  = self.create_publisher(Image, '/head_camera/color/image_raw', 2)
+            self.head_color_info_puber  = self.create_publisher(CameraInfo, '/head_camera/color/camera_info', 2)
             self.head_color_info = CameraInfo()
             self.head_color_info.width = self.config.render_set["width"]
             self.head_color_info.height = self.config.render_set["height"]
             self.head_color_info.k = camera2k(self.mj_model.cam_fovy[0] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
         if 1 in self.config.obs_rgb_cam_id:
-            self.left_color_puber  = self.create_publisher(Image, '/mmk2/left_camera/color/image_raw', 2)
-            self.left_color_info_puber  = self.create_publisher(CameraInfo, '/mmk2/left_camera/color/camera_info', 2)
+            self.left_color_puber  = self.create_publisher(Image, '/left_camera/color/image_raw', 2)
+            self.left_color_info_puber  = self.create_publisher(CameraInfo, '/left_camera/color/camera_info', 2)
             self.left_color_info = CameraInfo()
             self.left_color_info.width = self.config.render_set["width"]
             self.left_color_info.height = self.config.render_set["height"]
             self.left_color_info.k = camera2k(self.mj_model.cam_fovy[1] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
         if 2 in self.config.obs_rgb_cam_id:
-            self.right_color_puber = self.create_publisher(Image, '/mmk2/right_camera/color/image_raw', 2)
-            self.right_color_info_puber = self.create_publisher(CameraInfo, '/mmk2/right_camera/color/camera_info', 2)
+            self.right_color_puber = self.create_publisher(Image, '/right_camera/color/image_raw', 2)
+            self.right_color_info_puber = self.create_publisher(CameraInfo, '/right_camera/color/camera_info', 2)
             self.right_color_info = CameraInfo()
             self.right_color_info.width = self.config.render_set["width"]
             self.right_color_info.height = self.config.render_set["height"]
             self.right_color_info.k = camera2k(self.mj_model.cam_fovy[2] * np.pi / 180., self.config.render_set["width"], self.config.render_set["height"]).flatten().tolist()
 
         if 0 in self.config.obs_depth_cam_id:
-            self.head_depth_puber  = self.create_publisher(Image, '/mmk2/head_camera/aligned_depth_to_color/image_raw', 2)
-            self.head_depth_info_puber  = self.create_publisher(CameraInfo, '/mmk2/head_camera/aligned_depth_to_color/camera_info', 2)
+            self.head_depth_puber  = self.create_publisher(Image, '/head_camera/aligned_depth_to_color/image_raw', 2)
+            self.head_depth_info_puber  = self.create_publisher(CameraInfo, '/head_camera/aligned_depth_to_color/camera_info', 2)
             self.head_depth_info = CameraInfo()
             self.head_depth_info.width = self.config.render_set["width"]
             self.head_depth_info.height = self.config.render_set["height"]
@@ -124,11 +124,13 @@ class MMK2ROS2(MMK2Base, Node):
             self.create_timer(1.0, self.publish_camera_info)
 
     def init_topic_subscriber(self):
-        self.cmd_vel_suber = self.create_subscription(Twist, '/mmk2/cmd_vel', self.cmd_vel_callback, 5)
-        self.spine_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/spine_forward_position_controller/commands', self.cmd_spine_callback, 5)
-        self.head_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/head_forward_position_controller/commands', self.cmd_head_callback, 5)
-        self.left_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/left_arm_forward_position_controller/commands', self.cmd_left_arm_callback, 5)
-        self.right_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/mmk2/right_arm_forward_position_controller/commands', self.cmd_right_arm_callback, 5)
+        self.cmd_vel_suber = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 5)
+        self.spine_cmd_suber = self.create_subscription(Float64MultiArray, '/spine_forward_position_controller/commands', self.cmd_spine_callback, 5)
+        self.head_cmd_suber = self.create_subscription(Float64MultiArray, '/head_forward_position_controller/commands', self.cmd_head_callback, 5)
+        self.left_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/left_arm_forward_position_controller/commands', self.cmd_left_arm_callback, 5)
+        self.right_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/right_arm_forward_position_controller/commands', self.cmd_right_arm_callback, 5)
+        self.left_arm_eef_cmd_puber = self.create_publisher(Float64MultiArray, '/left_arm_eef_forward_position_controller/commands', 5)
+        self.right_arm_eef_cmd_puber = self.create_publisher(Float64MultiArray, '/right_arm_eef_forward_position_controller/commands', 5)
 
     def publish_camera_info(self):
         if 0 in self.config.obs_rgb_cam_id:
@@ -160,6 +162,7 @@ class MMK2ROS2(MMK2Base, Node):
         if len(msg.data) == 7:
             self.tctr_left_arm[:] = msg.data[:6]
             self.tctr_lft_gripper[:] = msg.data[6:]
+            self.left_arm_eef_cmd_puber.publish(Float64MultiArray(data=self.tctr_lft_gripper))
         else:
             self.get_logger().error("left arm command length error")
 
@@ -167,6 +170,7 @@ class MMK2ROS2(MMK2Base, Node):
         if len(msg.data) == 7:
             self.tctr_right_arm[:] = msg.data[:6]
             self.tctr_rgt_gripper[:] = msg.data[6:]
+            self.right_arm_eef_cmd_puber.publish(Float64MultiArray(data=self.tctr_rgt_gripper))
         else:
             self.get_logger().error("right arm command length error")
 
@@ -245,7 +249,7 @@ class MMK2ROS2(MMK2Base, Node):
             trans_msg = TransformStamped()
             trans_msg.header.stamp = time_stamp
             trans_msg.header.frame_id = "odom"
-            trans_msg.child_frame_id = "mmk2_base"
+            trans_msg.child_frame_id = "base_link"
             trans_msg.transform.translation.x = self.sensor_base_position[0]
             trans_msg.transform.translation.y = self.sensor_base_position[1]
             trans_msg.transform.translation.z = self.sensor_base_position[2]
@@ -255,18 +259,18 @@ class MMK2ROS2(MMK2Base, Node):
             trans_msg.transform.rotation.z = self.sensor_base_orientation[3]            
             self.tf_broadcaster.sendTransform(trans_msg)
 
-            self.imu_msg.header.stamp = time_stamp
-            self.imu_msg.orientation.w = self.sensor_base_orientation[0]
-            self.imu_msg.orientation.x = self.sensor_base_orientation[1]
-            self.imu_msg.orientation.y = self.sensor_base_orientation[2]
-            self.imu_msg.orientation.z = self.sensor_base_orientation[3]
-            self.imu_msg.angular_velocity.x = self.sensor_base_gyro[0]
-            self.imu_msg.angular_velocity.y = self.sensor_base_gyro[1]
-            self.imu_msg.angular_velocity.z = self.sensor_base_gyro[2]
-            self.imu_msg.linear_acceleration.x = self.sensor_base_acc[0]
-            self.imu_msg.linear_acceleration.y = self.sensor_base_acc[1]
-            self.imu_msg.linear_acceleration.z = self.sensor_base_acc[2]
-            self.imu_puber.publish(self.imu_msg)
+            # self.imu_msg.header.stamp = time_stamp
+            # self.imu_msg.orientation.w = self.sensor_base_orientation[0]
+            # self.imu_msg.orientation.x = self.sensor_base_orientation[1]
+            # self.imu_msg.orientation.y = self.sensor_base_orientation[2]
+            # self.imu_msg.orientation.z = self.sensor_base_orientation[3]
+            # self.imu_msg.angular_velocity.x = self.sensor_base_gyro[0]
+            # self.imu_msg.angular_velocity.y = self.sensor_base_gyro[1]
+            # self.imu_msg.angular_velocity.z = self.sensor_base_gyro[2]
+            # self.imu_msg.linear_acceleration.x = self.sensor_base_acc[0]
+            # self.imu_msg.linear_acceleration.y = self.sensor_base_acc[1]
+            # self.imu_msg.linear_acceleration.z = self.sensor_base_acc[2]
+            # # self.imu_puber.publish(self.imu_msg)
 
             if 0 in self.config.obs_rgb_cam_id:
                 head_color_img_msg = self.bridge.cv2_to_imgmsg(self.obs["img"][0], encoding="rgb8")
@@ -294,6 +298,7 @@ class MMK2ROS2(MMK2Base, Node):
                 self.head_depth_puber.publish(head_depth_img_msg)
 
             rate.sleep()
+
 
 if __name__ == "__main__":
     rclpy.init()

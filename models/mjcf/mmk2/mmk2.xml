@@ -2,7 +2,7 @@
 
   <body name='agv_link' pos='0.02371 0 0'>
 
-    <site name="mmk2_base" pos='-0.02371 0 0' size='0.001' type='sphere'/>
+    <site name="base_link" pos='-0.02371 0 0' size='0.001' type='sphere'/>
 
     <site name="mmk2_lidar_s2" pos='0.09 0 0.215' size='0.001' type='sphere'/>
 
