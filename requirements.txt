@@ -5,3 +5,4 @@ mediapy
 screeninfo
 opencv-python
 mujoco
+pynput

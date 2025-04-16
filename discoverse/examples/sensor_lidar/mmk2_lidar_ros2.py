@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # 返回的rays_phi和rays_theta分别表示射线的俯仰角和方位角
     # 设置激光雷达数据发布频率为12Hz
     lidar_pub_rate = 12
-    rays_phi, rays_theta = create_lidar_single_line(360, np.pi*2.)
+    rays_theta, rays_phi = create_lidar_single_line(360, np.pi*2.)
     exec_node.get_logger().info("rays_phi, rays_theta: {}, {}".format(rays_phi.shape, rays_theta.shape))
 
     # 定义激光雷达的坐标系ID，用于TF发布
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     
     # Warm Start
     # 使用Taichi库进行光线投射计算，获取激光雷达点云数据
-    lidar_s2.get_lidar_points(rays_phi, rays_theta, np.eye(4), exec_node.mj_data)
+    lidar_s2.get_lidar_points(rays_phi, rays_theta, exec_node.mj_data)
     
     # 创建ROS发布者，用于将激光雷达数据发布为PointCloud2类型消息
     pub_lidar_s2 = exec_node.create_publisher(PointCloud2, '/mmk2/lidar_s2', 1)
