@@ -18,6 +18,7 @@ class MMK2Cfg(BaseConfig):
     }
     obs_rgb_cam_id   = None
     obs_depth_cam_id = None
+    lidar_s2_sim = False
     rb_link_list   = [
         "agv_link", "slide_link", "head_yaw_link", "head_pitch_link",
         "lft_arm_base", "lft_arm_link1", "lft_arm_link2", 

@@ -7,7 +7,7 @@ from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
-from sensor_msgs.msg import Image, CameraInfo, JointState, Imu
+from sensor_msgs.msg import Image, CameraInfo, JointState, Imu, PointCloud2
 
 from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
 from discoverse.utils import PIDarray, camera2k
@@ -32,6 +32,17 @@ class MMK2ROS2(MMK2Base, Node):
             kds=np.array([  .0 ,   .0 ]),
             integrator_maxs=np.array([5.0, 5.0]),
         )
+
+        if self.config.lidar_s2_sim:
+            from mujoco_lidar.lidar_wrapper import MjLidarWrapper
+            from mujoco_lidar.scan_gen import create_lidar_single_line
+
+            self.lidar_frame_id = "mmk2_lidar_s2"
+            
+            self.rays_theta, self.rays_phi = create_lidar_single_line(360, np.pi*2.)
+
+            self.lidar_s2 = MjLidarWrapper(self.mj_model, self.mj_data, site_name=self.lidar_frame_id)
+            self.lidar_s2.get_lidar_points(self.rays_phi, self.rays_theta, self.mj_data)
 
         self.init_topic_publisher()
         self.init_topic_subscriber()
@@ -62,6 +73,10 @@ class MMK2ROS2(MMK2Base, Node):
 
         # image
         self.bridge = CvBridge()
+
+        # lidar
+        if self.config.lidar_s2_sim:
+            self.lidar_s2_puber = self.create_publisher(PointCloud2, '/mmk2/lidar_s2', 1)
 
         # image publisher, camera info publisher,  Initialize camera info messages
         if 0 in self.config.obs_rgb_cam_id:
@@ -157,6 +172,19 @@ class MMK2ROS2(MMK2Base, Node):
         self.mj_data.ctrl[:2] = np.clip(wheel_force, self.mj_model.actuator_ctrlrange[:2,0], self.mj_model.actuator_ctrlrange[:2,1])
         self.mj_data.ctrl[2:self.njctrl] = np.clip(action[2:self.njctrl], self.mj_model.actuator_ctrlrange[2:self.njctrl,0], self.mj_model.actuator_ctrlrange[2:self.njctrl,1])
 
+    def thread_publidartopic(self, freq=12):
+        if not self.config.lidar_s2_sim:
+            return
+
+        from mujoco_lidar.examples.lidar_vis_ros2 import publish_point_cloud
+        
+        rate = self.create_rate(freq)
+        while rclpy.ok() and self.running:
+            stamp = self.get_clock().now().to_msg()
+            points = self.lidar_s2.get_lidar_points(self.rays_phi, self.rays_theta, self.mj_data)
+            publish_point_cloud(self.lidar_s2_puber, points, self.lidar_frame_id, stamp)
+            rate.sleep()
+
     def thread_pubros2topic(self, freq=30):
         rate = self.create_rate(freq)
         while rclpy.ok() and self.running:
@@ -230,12 +258,13 @@ if __name__ == "__main__":
 
     cfg = MMK2Cfg()
     cfg.init_key = "pick"
-    cfg.mjcf_file_path = "mjcf/tasks_mmk2/plate_coffeecup.xml"
+    cfg.mjcf_file_path = "mjcf/mmk2_floor.xml"
     cfg.use_gaussian_renderer = False
     cfg.obs_rgb_cam_id = [0,1,2]
     cfg.obs_depth_cam_id = [0]
+    cfg.lidar_s2_sim = True
     cfg.render_set     = {
-        "fps"    : 30,
+        "fps"    : 24,
         "width"  : 640,
         "height" : 480
     }
@@ -246,6 +275,9 @@ if __name__ == "__main__":
     spin_thread = threading.Thread(target=lambda:rclpy.spin(exec_node))
     spin_thread.start()
 
+    publidar_thread = threading.Thread(target=exec_node.thread_publidartopic, args=(12,))
+    publidar_thread.start()
+    
     pubtopic_thread = threading.Thread(target=exec_node.thread_pubros2topic, args=(30,))
     pubtopic_thread.start()
 
@@ -254,5 +286,6 @@ if __name__ == "__main__":
 
     exec_node.destroy_node()
     rclpy.shutdown()
+    publidar_thread.join()
     pubtopic_thread.join()
     spin_thread.join()
