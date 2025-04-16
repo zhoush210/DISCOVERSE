@@ -1,8 +1,8 @@
 numpy
-# numpy==1.24.0
 scipy
 mediapy
-screeninfo
 opencv-python
 mujoco
 pynput
+screeninfo
+taichi
