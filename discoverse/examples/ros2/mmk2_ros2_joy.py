@@ -24,6 +24,7 @@ class MMK2ROS2JoyCtl(MMK2ROS2):
 
     def __init__(self, config: MMK2Cfg):
         super().__init__(config)
+        self.arm_action = config.init_key
 
         self.lft_arm_target_pose = self.arm_action_init_position[self.arm_action]["l"].copy()
         self.lft_end_euler = np.zeros(3)

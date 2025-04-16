@@ -51,7 +51,6 @@ class MMK2TaskBase(MMK2Base):
     set_right_arm_new_target = False
 
     def __init__(self, config: MMK2Cfg):
-        self.arm_action = config.init_key
         self.tctr_base = self.target_control[:2]
         self.tctr_slide = self.target_control[2:3]
         self.tctr_head = self.target_control[3:5]

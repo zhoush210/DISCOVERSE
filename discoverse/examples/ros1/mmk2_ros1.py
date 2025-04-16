@@ -13,7 +13,6 @@ from discoverse.utils import PIDarray
 class MMK2ROS1(MMK2Base):
     target_control = np.zeros(19)
     def __init__(self, config: MMK2Cfg):
-        self.arm_action = config.init_key
         self.tctr_base = self.target_control[:2]
         self.tctr_slide = self.target_control[2:3]
         self.tctr_head = self.target_control[3:5]
