@@ -1,19 +1,17 @@
-import mujoco
 import threading
 import numpy as np
-import taichi as ti
 from scipy.spatial.transform import Rotation
 
 import rospy
 import tf2_ros
 from sensor_msgs.msg import PointCloud2
 from visualization_msgs.msg import MarkerArray
-from discoverse.utils import get_site_tmat
 from discoverse.envs.mmk2_base import MMK2Cfg
 from discoverse.examples.ros1.mmk2_ros1_joy import MMK2ROS1JoyCtl
 
-from discoverse.envs.mj_lidar import MjLidarSensor, create_lidar_single_line
-from discoverse.examples.sensor_lidar.lidar_vis_ros1 import broadcast_tf, publish_point_cloud, publish_scene
+from mujoco_lidar.lidar_wrapper import MjLidarWrapper
+from mujoco_lidar.scan_gen import create_lidar_single_line
+from mujoco_lidar.examples.lidar_vis_ros1 import broadcast_tf, publish_scene, publish_point_cloud
 
 if __name__ == "__main__":
     rospy.init_node('mmk2_lidar_node', anonymous=True)
@@ -39,28 +37,18 @@ if __name__ == "__main__":
     # 返回的rays_phi和rays_theta分别表示射线的俯仰角和方位角
     # 设置激光雷达数据发布频率为12Hz
     lidar_pub_rate = 12
-    rays_phi, rays_theta = create_lidar_single_line(360, np.pi*2.)
+    rays_theta, rays_phi = create_lidar_single_line(360, np.pi*2.)
     rospy.loginfo("rays_phi, rays_theta: {}, {}".format(rays_phi.shape, rays_theta.shape))
 
     # 定义激光雷达的坐标系ID，用于TF发布
     lidar_frame_id = "mmk2_lidar_s2"
 
     # 创建MuJoCo激光雷达传感器对象，关联到当前渲染场景
-    # enable_profiling=False表示不启用性能分析，verbose=False表示不输出详细日志
-    lidar_s2 = MjLidarSensor(exec_node.renderer.scene, enable_profiling=False, verbose=False)
+    lidar_s2 = MjLidarWrapper(exec_node.mj_model, exec_node.mj_data, site_name="mmk2_lidar_s2")
 
-    # 更新MuJoCo场景，准备进行光线追踪 mjCAT_ALL表示更新所有类别的对象，包括几何体、关节、约束等
-    mujoco.mjv_updateScene(
-        exec_node.mj_model, exec_node.mj_data, mujoco.MjvOption(), 
-        None, mujoco.MjvCamera(), 
-        mujoco.mjtCatBit.mjCAT_ALL.value, exec_node.renderer.scene
-    )
-    
     # Warm Start
     # 使用Taichi库进行光线投射计算，获取激光雷达点云数据
-    points = lidar_s2.ray_cast_taichi(rays_phi, rays_theta, np.eye(4), exec_node.renderer.scene)
-    # 同步Taichi并行计算操作，确保计算完成
-    ti.sync()
+    lidar_s2.get_lidar_points(rays_phi, rays_theta, exec_node.mj_data)
 
     # 创建ROS发布者，用于将激光雷达数据发布为PointCloud2类型消息
     pub_lidar_s2 = rospy.Publisher('/mmk2/lidar_s2', PointCloud2, queue_size=1)
@@ -96,14 +84,11 @@ if __name__ == "__main__":
         if sim_step_cnt * exec_node.delta_t * lidar_pub_rate > lidar_pub_cnt:
             lidar_pub_cnt += 1
 
-            lidar_pose = get_site_tmat(exec_node.mj_data, lidar_frame_id)
-            points = lidar_s2.ray_cast_taichi(rays_phi, rays_theta, lidar_pose, exec_node.renderer.scene)
-            ti.sync()
+            points = lidar_s2.get_lidar_points(rays_phi, rays_theta, exec_node.mj_data)
             publish_point_cloud(pub_lidar_s2, points, lidar_frame_id)
            
-            lidar_position = lidar_pose[:3, 3]
-            lidar_orientation = Rotation.from_matrix(lidar_pose[:3, :3]).as_quat()
-            broadcast_tf(tf_broadcaster, "world", lidar_frame_id, lidar_position, lidar_orientation)
+            lidar_orientation = Rotation.from_matrix(lidar_s2.sensor_rotation).as_quat()
+            broadcast_tf(tf_broadcaster, "world", lidar_frame_id, lidar_s2.sensor_position, lidar_orientation)
 
         sim_step_cnt += 1
 

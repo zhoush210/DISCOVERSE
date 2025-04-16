@@ -8,7 +8,6 @@ models/meshes
 models/textures
 scripts
 data
-submodules*
 *.DS_Store
 *.mp4
 *log
