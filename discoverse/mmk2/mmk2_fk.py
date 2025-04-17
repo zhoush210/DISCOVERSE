@@ -29,7 +29,7 @@ class MMK2FK:
         Params:
             joint_angle: joint angle
         """
-        self.mj_data.qpos[2] = joint_angle
+        self.mj_data.qpos[9] = joint_angle
         self.pos_modifidied = True
     
     def set_head_joints(self, joint_angles):
@@ -39,7 +39,7 @@ class MMK2FK:
             joint_angles: list of joint angles
         """
         assert len(joint_angles) == 2, "Head joints should have 2 joint angles."
-        self.mj_data.qpos[3:5] = joint_angles
+        self.mj_data.qpos[10:12] = joint_angles
         self.pos_modifidied = True
 
     def set_left_arm_joints(self, joint_angles):
@@ -49,7 +49,7 @@ class MMK2FK:
             joint_angles: list of joint angles
         """
         assert len(joint_angles) == 6, "Left arm joints should have 6 joint angles"
-        self.mj_data.qpos[5:11] = joint_angles
+        self.mj_data.qpos[12:18] = joint_angles
         self.pos_modifidied = True
 
     def set_right_arm_joints(self, joint_angles):
@@ -59,7 +59,7 @@ class MMK2FK:
             joint_angles: list of joint angles
         """
         assert len(joint_angles) == 6, "Right arm joints should have 6 joint angles"
-        self.mj_data.qpos[13:19] = joint_angles
+        self.mj_data.qpos[20:26] = joint_angles
         self.pos_modifidied = True
 
     def forward_kinematics(self):
