@@ -129,8 +129,6 @@ class MMK2ROS2(MMK2Base, Node):
         self.head_cmd_suber = self.create_subscription(Float64MultiArray, '/head_forward_position_controller/commands', self.cmd_head_callback, 5)
         self.left_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/left_arm_forward_position_controller/commands', self.cmd_left_arm_callback, 5)
         self.right_arm_cmd_suber = self.create_subscription(Float64MultiArray, '/right_arm_forward_position_controller/commands', self.cmd_right_arm_callback, 5)
-        self.left_arm_eef_cmd_puber = self.create_publisher(Float64MultiArray, '/left_arm_eef_forward_position_controller/commands', 5)
-        self.right_arm_eef_cmd_puber = self.create_publisher(Float64MultiArray, '/right_arm_eef_forward_position_controller/commands', 5)
 
     def publish_camera_info(self):
         if 0 in self.config.obs_rgb_cam_id:
@@ -162,7 +160,6 @@ class MMK2ROS2(MMK2Base, Node):
         if len(msg.data) == 7:
             self.tctr_left_arm[:] = msg.data[:6]
             self.tctr_lft_gripper[:] = msg.data[6:]
-            self.left_arm_eef_cmd_puber.publish(Float64MultiArray(data=self.tctr_lft_gripper))
         else:
             self.get_logger().error("left arm command length error")
 
@@ -170,7 +167,6 @@ class MMK2ROS2(MMK2Base, Node):
         if len(msg.data) == 7:
             self.tctr_right_arm[:] = msg.data[:6]
             self.tctr_rgt_gripper[:] = msg.data[6:]
-            self.right_arm_eef_cmd_puber.publish(Float64MultiArray(data=self.tctr_rgt_gripper))
         else:
             self.get_logger().error("right arm command length error")
 
