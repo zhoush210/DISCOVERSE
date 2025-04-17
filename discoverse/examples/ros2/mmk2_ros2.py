@@ -60,13 +60,13 @@ class MMK2ROS2(MMK2Base, Node):
         self.joint_state_puber = self.create_publisher(JointState, '/joint_states', 5)
         self.joint_state = JointState()
         self.joint_state.name = [
-            "left_wheel", "right_wheel", "slide_joint", "head_yaw_joint", "head_pitch_joint",
+            "slide_joint", "head_yaw_joint", "head_pitch_joint",
             "left_arm_joint1" , "left_arm_joint2" , "left_arm_joint3" , "left_arm_joint4" , "left_arm_joint5" , "left_arm_joint6" , "left_arm_eef_gripper_joint" ,
             "right_arm_joint1", "right_arm_joint2", "right_arm_joint3", "right_arm_joint4", "right_arm_joint5", "right_arm_joint6", "right_arm_eef_gripper_joint",
         ]
-        self.joint_state.position = self.sensor_qpos.tolist()
-        self.joint_state.velocity = self.sensor_qvel.tolist()
-        self.joint_state.effort = self.sensor_force.tolist()
+        self.joint_state.position = self.sensor_qpos[2:].tolist()
+        self.joint_state.velocity = self.sensor_qvel[2:].tolist()
+        self.joint_state.effort = self.sensor_force[2:].tolist()
 
         # rostopic imu
         # # # self.imu_puber = self.create_publisher(Imu, '/imu', 5)
@@ -221,9 +221,9 @@ class MMK2ROS2(MMK2Base, Node):
             time_stamp = self.get_clock().now().to_msg()
 
             self.joint_state.header.stamp = time_stamp
-            self.joint_state.position = self.sensor_qpos.tolist()
-            self.joint_state.velocity = self.sensor_qvel.tolist()
-            self.joint_state.effort = self.sensor_force.tolist()
+            self.joint_state.position = self.sensor_qpos[2:].tolist()
+            self.joint_state.velocity = self.sensor_qvel[2:].tolist()
+            self.joint_state.effort = self.sensor_force[2:].tolist()
             self.joint_state_puber.publish(self.joint_state)
 
             self.odom_msg.header.stamp = time_stamp
