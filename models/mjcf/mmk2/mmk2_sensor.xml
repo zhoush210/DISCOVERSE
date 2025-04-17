@@ -60,16 +60,16 @@
   <jointactuatorfrc name="rgt_joint6_force" joint="rgt_arm_joint6" />
   <jointactuatorfrc name="rgt_gripper_force" joint="rgt_finger_right_joint"/>
 
-  <framepos name="mmk2_base_posi" objtype="site" objname="mmk2_base"/>
-  <framequat name="mmk2_base_quat" objtype="site" objname="mmk2_base"/>
-  <framelinvel name="mmk2_base_linear_vel" objtype="site" objname="mmk2_base"/>
-  <gyro name="mmk2_base_gyro" site="mmk2_base"/>
-  <accelerometer name="mmk2_base_acc" site="mmk2_base"/>
+  <framepos name="mmk2_base_posi" objtype="site" objname="base_link"/>
+  <framequat name="mmk2_base_quat" objtype="site" objname="base_link"/>
+  <framelinvel name="mmk2_base_linear_vel" objtype="site" objname="base_link"/>
+  <gyro name="mmk2_base_gyro" site="base_link"/>
+  <accelerometer name="mmk2_base_acc" site="base_link"/>
 
-  <framepos name="lft_arm_endpoint_posi" objtype="site" objname="lft_endpoint" reftype="site" refname="mmk2_base"/>
-  <framequat name="lft_arm_endpoint_quat" objtype="site" objname="lft_endpoint" reftype="site" refname="mmk2_base"/>
+  <framepos name="lft_arm_endpoint_posi" objtype="site" objname="lft_endpoint" reftype="site" refname="base_link"/>
+  <framequat name="lft_arm_endpoint_quat" objtype="site" objname="lft_endpoint" reftype="site" refname="base_link"/>
 
-  <framepos name="rgt_arm_endpoint_posi" objtype="site" objname="rgt_endpoint" reftype="site" refname="mmk2_base"/>
-  <framequat name="rgt_arm_endpoint_quat" objtype="site" objname="rgt_endpoint" reftype="site" refname="mmk2_base"/>
+  <framepos name="rgt_arm_endpoint_posi" objtype="site" objname="rgt_endpoint" reftype="site" refname="base_link"/>
+  <framequat name="rgt_arm_endpoint_quat" objtype="site" objname="rgt_endpoint" reftype="site" refname="base_link"/>
 
 </mujocoinclude>
