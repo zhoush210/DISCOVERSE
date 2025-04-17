@@ -5,8 +5,6 @@ from gymnasium import spaces
 from discoverse.examples.tasks_mmk2.pick_kiwi import SimNode, cfg
 from discoverse.task_base import MMK2TaskBase
 from discoverse.utils import get_body_tmat
-from skimage.transform import resize
-
 
 class Env(gymnasium.Env):
     def __init__(self, task_base=None, render=False):
@@ -22,6 +20,10 @@ class Env(gymnasium.Env):
         cfg.obj_list = ["plate_white", "kiwi"]  # 环境中包含的对象列表
         cfg.sync = True  # 是否同步更新
         cfg.headless = not render  # 根据render参数决定是否显示渲染画面
+        
+        # 设置摄像头ID，用于获取图像观察
+        cfg.obs_rgb_cam_id = [0]  # 使用第一个摄像头
+        cfg.obs_depth_cam_id = []  # 不使用深度图像
 
         # 创建基础任务环境
         if task_base is None:
@@ -40,11 +42,10 @@ class Env(gymnasium.Env):
             dtype=np.float32
         )
 
-        # 观测空间：基于视觉的观察空间
+        # 观测空间：RGB图像 (3, 84, 84)
         self.observation_space = spaces.Box(
-            low=0,
-            high=1,
-            shape=(3, 84, 84),  # RGB图像，调整为84x84大小
+            low=np.zeros((3, 84, 84), dtype=np.float32),
+            high=np.ones((3, 84, 84), dtype=np.float32),
             dtype=np.float32
         )
 
@@ -107,19 +108,18 @@ class Env(gymnasium.Env):
 
     def _get_obs(self):
         # 获取摄像头图像
-        action = np.zeros_like(self.mj_data.ctrl)  # 创建空动作
-        obs_dict = self.task_base.step(action)  # 获取观察字典
+        # 使用task_base中的img_rgb_obs_s字典获取RGB图像
+        rgb_img = self.task_base.img_rgb_obs_s[0]  # 获取第一个摄像头的RGB图像
         
-        # 提取图像数据
-        if 'img' in obs_dict[0]:
-            img = obs_dict[0]['img'][0]  # 获取第一个相机的图像
-            img = img.astype(np.float32) / 255.0  # 归一化到[0,1]范围
-            img = img.transpose(2, 0, 1)  # 转换为(C, H, W)格式
-            img = resize(img, (3, 84, 84), anti_aliasing=True)  # 调整大小为84x84
-            return img
-        else:
-            # 如果没有图像，返回零矩阵
-            return np.zeros((3, 84, 84), dtype=np.float32)
+        # 调整图像大小为84x84
+        import cv2
+        rgb_img = cv2.resize(rgb_img, (84, 84))
+        
+        # 转换为PyTorch期望的格式：(C, H, W)
+        rgb_img = np.transpose(rgb_img, (2, 0, 1))
+        
+        # 将uint8转换为float32并归一化到[0,1]范围
+        return rgb_img.astype(np.float32) / 255.0
 
     def _compute_reward(self):
         # 获取位置信息
@@ -193,3 +193,12 @@ class Env(gymnasium.Env):
         if np.linalg.norm(kiwi_pos - plate_pos) < 0.02:
             return True  # 任务完成，终止环境
         return False
+
+    def render(self):
+        pass  # 使用MMK2TaskBase的渲染功能
+
+    def close(self):
+        """关闭环境并释放资源"""
+        if hasattr(self, 'task_base'):
+            del self.task_base
+            self.task_base = None

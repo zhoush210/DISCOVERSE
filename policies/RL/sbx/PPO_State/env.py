@@ -32,7 +32,7 @@ class Env(gymnasium.Env):
 
         # 动作空间：机械臂关节角度控制
         # 使用actuator_ctrlrange来确定动作空间范围
-        ctrl_range = self.mj_model.actuator_ctrlrange  # 获取控制器范围
+        ctrl_range = self.mj_model.actuator_ctrlrange.astype(np.float32)  # 获取控制器范围并转换为float32
         self.action_space = spaces.Box(  # 定义动作空间
             low=ctrl_range[:, 0],
             high=ctrl_range[:, 1],
@@ -40,10 +40,10 @@ class Env(gymnasium.Env):
         )
 
         # 观测空间：包含机械臂关节位置、速度和目标物体位置
+        obs_shape = (self.mj_model.nq + self.mj_model.nv + 6,)  # 加上目标物体的位置和方向
         self.observation_space = spaces.Box(  # 定义观测空间
-            low=-np.inf,
-            high=np.inf,
-            shape=(self.mj_model.nq + self.mj_model.nv + 6,),  # 加上目标物体的位置和方向
+            low=np.full(obs_shape, -np.inf, dtype=np.float32),
+            high=np.full(obs_shape, np.inf, dtype=np.float32),
             dtype=np.float32
         )
 
@@ -140,36 +140,32 @@ class Env(gymnasium.Env):
         distance_to_kiwi = np.linalg.norm(rgt_arm_pos - kiwi_pos)  # 右臂末端到奇异果的距离
         kiwi_to_plate = np.linalg.norm(kiwi_pos - plate_pos)  # 奇异果到盘子的距离
 
-        # 计算各种奖励
-        # 接近奖励：鼓励机械臂靠近奇异果
-        approach_reward = 0.0
-        if distance_to_kiwi < 0.05:
-            approach_reward = 2.0
-        else:
-            approach_reward = -distance_to_kiwi
+        # 奖励权重
+        w_approach = 1.0  # 接近奖励权重
+        w_place = 2.0    # 放置奖励权重
+        w_step = 0.01    # 步数惩罚权重
+        w_action = 0.1   # 动作幅度惩罚权重
 
-        # 放置奖励：鼓励机械臂将奇异果放置到盘子
-        place_reward = 0.0
-        if kiwi_to_plate < 0.02:  # 成功放置
-            place_reward = 10.0
-        elif kiwi_to_plate < 0.1:  # 比较接近
-            place_reward = 2.0
-        else:
-            place_reward = -kiwi_to_plate
+        # 使用tanh函数将距离标准化到[-1, 1]范围，然后缩放到[0, 2]范围
+        # 接近奖励：鼓励机械臂靠近奇异果
+        approach_reward = (1 - np.tanh(2 * distance_to_kiwi)) * w_approach
+
+        # 放置奖励：鼓励将奇异果放置到盘子上
+        place_reward = (1 - np.tanh(2 * kiwi_to_plate)) * w_place
 
         # 步数惩罚：每一步都有一定的惩罚
-        step_penalty = -0.01 * self.current_step
+        step_penalty = -w_step * self.current_step
 
         # 动作幅度惩罚：惩罚较大的控制信号
         action_magnitude = np.mean(np.abs(self.mj_data.ctrl))
-        action_penalty = -0.1 * action_magnitude
+        action_penalty = -w_action * action_magnitude
 
         # 总奖励
         total_reward = (
-                approach_reward +
-                place_reward +
-                step_penalty +
-                action_penalty
+            approach_reward +
+            place_reward +
+            step_penalty +
+            action_penalty
         )
 
         # 记录详细的奖励信息供日志使用
