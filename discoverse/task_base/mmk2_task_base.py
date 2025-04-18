@@ -4,6 +4,7 @@ import shutil
 import mujoco
 import mediapy
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 from discoverse.mmk2 import MMK2FIK
 from discoverse.utils import get_body_tmat
@@ -69,6 +70,12 @@ class MMK2TaskBase(MMK2Base):
 
         self.lft_arm_target_pose = self.arm_action_init_position[0].copy()
         self.rgt_arm_target_pose = self.arm_action_init_position[1].copy()
+        self.check_forward_done = False
+        self.check_yaw_done = False
+        self.forward_start_pose = np.array([0,0,0])
+        self.forward_target_pose = np.array([0,0,0])
+        self.yaw_target_pose = 0.0
+
         if hasattr(self.config, "io_dim") and self.config.io_dim == 17:
             self.io_dim = 17
         else:
@@ -94,6 +101,13 @@ class MMK2TaskBase(MMK2Base):
             return np.linalg.inv(tmat_mmk2) @ pose
         else:
             return (np.linalg.inv(tmat_mmk2) @ np.append(pose, 1))[:3]
+        
+    def get_base_pose(self):
+        current_pos  = self.obs["base_position"]
+        current_quat = self.obs["base_orientation"]
+        yaw = Rotation.from_quat([current_quat[1], current_quat[2], 
+                                  current_quat[3], current_quat[0]]).as_euler('zyx')[0]
+        return np.array([current_pos[0], current_pos[1], yaw])
 
     def setArmEndTarget(self, target_pose, arm_action, arm, q_ref, a_rot):
         rq = MMK2FIK().get_armjoint_pose_wrt_footprint(target_pose, arm_action, arm, self.tctr_slide[0], q_ref, a_rot)
@@ -127,6 +141,22 @@ class MMK2TaskBase(MMK2Base):
         return self.obs
 
     def checkActionDone(self):
+        if self.check_forward_done:
+            move_direction = np.abs(self.forward_target_pose - self.forward_start_pose)
+            # 找出最大变化的维度索引
+            main_dim = np.argmax(move_direction)
+            # 判断该维度是否到达目标
+            forward_done = abs(self.forward_target_pose[main_dim] - self.obs["base_position"][main_dim]) < 3e-2
+            # print("main_dim=",main_dim,", forward target=",self.forward_target_pose,", base=",self.obs["base_position"]," diff=",abs(self.forward_target_pose-self.obs["base_position"]))
+        else:
+            forward_done = True
+
+        if self.check_yaw_done:
+            yaw_done = abs(self.yaw_target_pose-self.get_base_pose()[2]) < 0.01
+            # print("yaw target=",self.yaw_target_pose,", base=",self.get_base_pose()[2]," diff=",abs(self.yaw_target_pose-self.get_base_pose()[2]))
+        else:
+            yaw_done = True
+
         slide_done = np.allclose(self.tctr_slide, self.sensor_slide_qpos, atol=3e-2) and np.abs(self.sensor_slide_qvel).sum() < 1e-2
         head_done = np.allclose(self.tctr_head, self.sensor_head_qpos, atol=3e-2) and np.abs(self.sensor_head_qvel).sum() < 0.1
 
@@ -158,7 +188,7 @@ class MMK2TaskBase(MMK2Base):
             "right_gripper" : right_gripper_done,
             "delay"         : delay_done,
         }
-        return slide_done and head_done and left_arm_done and left_gripper_done and right_arm_done and right_gripper_done and delay_done
+        return forward_done and yaw_done and slide_done and head_done and left_arm_done and left_gripper_done and right_arm_done and right_gripper_done and delay_done
 
     def printMessage(self):
         super().printMessage()

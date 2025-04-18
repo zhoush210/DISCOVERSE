@@ -20,7 +20,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--task_name", type=str, required=True, help='Name of the task, e.g. plate_coffeecup')
     parser.add_argument("--scheme_json", type=str, required=True, help='json-file name of the strategy, e.g. plate_coffeecup')
-    parser.add_argument("--max_time_s", type=int, default=30, help='run task max time in seconds')
+    parser.add_argument("--max_time_s", type=int, default=300, help='run task max time in seconds')
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--fps", type=int, default=20, help="data collection fps")
@@ -98,8 +98,50 @@ if __name__ == "__main__":
                     object_name = state_data["object_name"]
                     tmat_coffee = get_body_tmat(sim_node.mj_data, object_name)
 
+                    base = state_data["base"]
                     left_arm = state_data["left_arm"]
                     right_arm = state_data["right_arm"]
+
+                    action[0] = 0.0
+                    action[1] = 0.0
+                    sim_node.check_forward_done = False
+                    sim_node.check_yaw_done = False
+
+                    if base["movement"] == "x" or base["movement"] == "y":
+                        target_global_pos = np.array(base["position"])
+                        target_quat = np.array(base["rotation"])
+                        target_yaw = Rotation.from_quat([target_quat[1], target_quat[2],
+                                               target_quat[3], target_quat[0]]).as_euler('zyx')[0]
+                        target_pos_local = sim_node.get_tmat_wrt_mmk2base(target_global_pos)  # 转为机器人本体坐标
+
+                        # 提取目标相对坐标
+                        rel_x = target_pos_local[0]  # 前后方向（前是正）
+                        rel_y = target_pos_local[1]  # 左右方向（左是正）
+
+                        # 设置目标完成标志和记录目标
+                        if base["movement"] == "x":
+                            # 机器人朝向上的位置控制（前进后退）
+                            max_speed_linear = 0.1
+                            kp_linear = 1.0
+                            action[0] = max(min(kp_linear * rel_x, max_speed_linear), -max_speed_linear)
+                            sim_node.check_forward_done = True
+                            sim_node.forward_start_pose = sim_node.obs["base_position"].copy()
+                            random_x = (np.random.random() - 0.5) * 0.1 # 随机位置噪声
+                            random_y = (np.random.random() - 0.5) * 0.1
+                            # print("random_x=",random_x,", random_y=",random_y)
+                            target_global_pos[0] += random_x
+                            target_global_pos[1] += random_y
+                            sim_node.forward_target_pose = target_global_pos
+                        if base["movement"] == "y":
+                            # 旋转控制（向左转为正）
+                            max_speed_angular = 0.1
+                            kp_angular = 5.0
+                            action[1] = max(min(kp_angular * rel_y, max_speed_angular), -max_speed_angular)
+                            sim_node.check_yaw_done = True
+                            random_yaw = (np.random.random() - 0.5) * 0.02 # 随机角度噪声
+                            target_yaw += random_yaw
+                            # print("random_yaw=",random_yaw,",target_yaw=",target_yaw)
+                            sim_node.yaw_target_pose = target_yaw
 
                     if left_arm["movement"] == "move":
                         left_arm_pos = np.array(left_arm["position_object_local"])
@@ -148,7 +190,7 @@ if __name__ == "__main__":
 
         except ValueError as ve:
             # 调试时 Uncomment 下面这行
-            # traceback.print_exc()
+            traceback.print_exc()
             sim_node.reset()
 
 
@@ -159,10 +201,6 @@ if __name__ == "__main__":
             for i in range(2, sim_node.njctrl):
                 action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
             yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
-
-            # 保持底盘始终朝向前方，如果要控制底盘移动，注释掉下面这行
-            action[1] = 0
-
             obs, _, _, _, _ = sim_node.step(action)
         elif sim_node.io_dim == 17:
             for i in range(2, sim_node.njctrl):

@@ -2,10 +2,20 @@ import numpy as np
 
 try:
     import rclpy
+    from rclpy.node import Node
     from sensor_msgs.msg import Joy
-    class JoyTeleopRos2:
+    
+    class JoyTeleopRos2(Node):
         NUM_BUTTON = 12
+        
         def __init__(self):
+            super().__init__('joy_teleop')
+            self.joy_sub = self.create_subscription(
+                Joy,
+                'joy',
+                self.joy_callback,
+                10
+            )
             self.joy_cmd = Joy()
             self.joy_cmd.header.stamp = rclpy.time.Time().to_msg()
             self.joy_cmd.axes = [0., 0., 1., 0., 0., 1., 0., 0.]
@@ -44,6 +54,11 @@ try:
 
         def joy_callback(self, msg: Joy):
             self.joy_cmd = msg
+            if not self.joyCmdRecv and self.NUM_BUTTON != len(msg.buttons):
+                self.NUM_BUTTON = len(msg.buttons)
+                self.raising_sig = np.zeros(self.NUM_BUTTON, np.bool_)
+                self.falling_sig = np.zeros(self.NUM_BUTTON, np.bool_)
+                self.last_buttons = np.zeros(self.NUM_BUTTON, np.bool_)
             self.raising_sig = self.raising_sig | (np.array(msg.buttons) & ~self.last_buttons)
             self.falling_sig = self.falling_sig | (~np.array(msg.buttons) & self.last_buttons)
             self.last_buttons = np.array(msg.buttons)

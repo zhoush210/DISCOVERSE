@@ -60,6 +60,8 @@ class MMK2Base(SimulatorBase):
     def __init__(self, config: MMK2Cfg):
         self.njq = 28
         self.njctrl = 19
+        self.wheel_radius = 0.0838
+        self.wheel_distance = 0.189
 
         super().__init__(config)
 
