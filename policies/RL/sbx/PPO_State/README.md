@@ -1,138 +1,141 @@
-# SBX PPO 强化学习训练框架
+# SBX PPO Reinforcement Learning Training Framework
 
-本目录包含使用 PPO (Proximal Policy Optimization) 算法进行强化学习训练的框架代码。这个框架专为 DISCOVERSE 环境设计，特别是针对机械臂抓取任务。
+This directory contains the framework code for reinforcement learning training using the PPO (Proximal Policy Optimization) algorithm. This framework is designed for the DISCOVERSE environment, especially for robotic arm grasping tasks.
 
-## 安装
-参考https://github.com/araffin/sbx，用的是v0.20.0
+[中文版请见 README_zh.md](README_zh.md)
 
-## 文件结构
+## Installation
+Refer to https://github.com/araffin/sbx, using version v0.20.0
 
-- `env.py`: 环境类定义，包含观察空间、动作空间、奖励计算等
-- `train.py`: 训练脚本，用于创建和训练 PPO 模型
+## File Structure
 
-## 环境配置与自定义
+- `env.py`: Environment class definition, including observation space, action space, reward calculation, etc.
+- `train.py`: Training script for creating and training PPO models
 
-### 导入说明
+## Environment Configuration and Customization
 
-在 `env.py` 中，我们从示例目录导入了 `SimNode` 和 `cfg`：
+### Import Instructions
+
+In `env.py`, we import `SimNode` and `cfg` from the example directory:
 
 ```python
 from discoverse.examples.tasks_mmk2.pick_kiwi import SimNode, cfg
 ```
 
-这里的 `pick_kiwi.py` 是位于 `discoverse/examples/tasks_mmk2/` 目录下的示例文件。您可以根据自己的任务需求，替换为其他任务文件。
+Here, `pick_kiwi.py` is an example file located in the `discoverse/examples/tasks_mmk2/` directory. You can replace it with other task files according to your needs.
 
-### 环境配置
+### Environment Configuration
 
-环境配置主要在 `Env` 类的 `__init__` 方法中设置：
+The environment configuration is mainly set in the `__init__` method of the `Env` class:
 
 ```python
-# 环境配置
-cfg.use_gaussian_renderer = False  # 关闭高斯渲染器
-cfg.init_key = "pick"  # 初始化模式为"抓取"
-cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # 定义白色盘子的模型路径
-cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # 定义奇异果的模型路径
-cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # 定义背景的模型路径
-cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"  # MuJoCo 环境文件路径
-cfg.obj_list = ["plate_white", "kiwi"]  # 环境中包含的对象列表
-cfg.sync = True  # 是否同步更新
-cfg.headless = not render  # 根据render参数决定是否显示渲染画面
+# Environment configuration
+cfg.use_gaussian_renderer = False  # Disable Gaussian renderer
+cfg.init_key = "pick"  # Initialization mode: "pick"
+cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # Path to white plate model
+cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # Path to kiwi model
+cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # Path to background model
+cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"  # MuJoCo environment file path
+cfg.obj_list = ["plate_white", "kiwi"]  # List of objects in the environment
+cfg.sync = True  # Whether to update synchronously
+cfg.headless = not render  # Whether to show rendering based on render parameter
 ```
 
-您可以根据自己的任务需求修改这些配置，例如更改模型路径、对象列表等。
+You can modify these configurations as needed, such as changing model paths or object lists.
 
-### 重点自定义部分
+### Key Customization Parts
 
-#### 1. 观察空间 (Observation Space)
+#### 1. Observation Space
 
-观察空间定义了智能体能够感知到的环境状态。在 `_get_obs` 方法中自定义：
+The observation space defines the environmental states accessible to the agent. Customize in the `_get_obs` method:
 
 ```python
 def _get_obs(self):
-    # 获取机械臂状态
-    qpos = self.mj_data.qpos.copy()  # 关节位置
-    qvel = self.mj_data.qvel.copy()  # 关节速度
+    # Get robot arm state
+    qpos = self.mj_data.qpos.copy()  # Joint positions
+    qvel = self.mj_data.qvel.copy()  # Joint velocities
 
-    # 获取猕猴桃和盘子的位置
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # 获取奇异果的变换矩阵
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # 获取白色盘子的变换矩阵
+    # Get positions of kiwi and plate
+    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # Kiwi transformation matrix
+    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # Plate transformation matrix
 
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # 奇异果的位置
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # 盘子的位置
+    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # Kiwi position
+    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # Plate position
 
-    # 组合观测
+    # Combine observations
     obs = np.concatenate([
         qpos,
         qvel,
         kiwi_pos,
         plate_pos
-    ]).astype(np.float32)  # 将关节状态和目标物体位置组合为观测值
+    ]).astype(np.float32)
 
     return obs
 ```
 
-根据您的任务，您可能需要包含不同的状态信息，例如：
-- 机械臂的关节角度和速度
-- 目标物体的位置和姿态
-- 障碍物的位置
-- 传感器读数等
+Depending on your task, you may need to include different state information, such as:
+- Joint angles and velocities of the robot arm
+- Position and pose of the target object
+- Position of obstacles
+- Sensor readings, etc.
 
-#### 2. 奖励函数 (Reward Function)
+#### 2. Reward Function
 
-奖励函数是强化学习中最关键的部分之一，它定义了任务的目标。在 `_compute_reward` 方法中自定义：
+The reward function is one of the most critical parts of reinforcement learning, defining the task objective. Customize in the `_compute_reward` method:
 
 ```python
 def _compute_reward(self):
-    # 获取位置信息
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # 奇异果的变换矩阵
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # 盘子的变换矩阵
-    tmat_rgt_arm = get_body_tmat(self.mj_data, "rgt_arm_link6")  # 右臂末端效应器的变换矩阵
+    # Get position information
+    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # Kiwi transformation matrix
+    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # Plate transformation matrix
+    tmat_rgt_arm = get_body_tmat(self.mj_data, "rgt_arm_link6")  # Right arm end-effector transformation matrix
 
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # 奇异果的位置
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # 盘子的位置
-    rgt_arm_pos = np.array([tmat_rgt_arm[1, 3], tmat_rgt_arm[0, 3], tmat_rgt_arm[2, 3]])  # 右臂末端的位置
+    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # Kiwi position
+    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # Plate position
+    rgt_arm_pos = np.array([tmat_rgt_arm[1, 3], tmat_rgt_arm[0, 3], tmat_rgt_arm[2, 3]])  # Right arm end position
 
-    # 计算距离
-    distance_to_kiwi = np.linalg.norm(rgt_arm_pos - kiwi_pos)  # 右臂末端到奇异果的距离
-    kiwi_to_plate = np.linalg.norm(kiwi_pos - plate_pos)  # 奇异果到盘子的距离
+    # Calculate distances
+    distance_to_kiwi = np.linalg.norm(rgt_arm_pos - kiwi_pos)  # Distance from arm to kiwi
+    kiwi_to_plate = np.linalg.norm(kiwi_pos - plate_pos)  # Distance from kiwi to plate
 
-    # 计算各种奖励
-    # 接近奖励：鼓励机械臂靠近奇异果
+    # Calculate rewards
+    # Approach reward: encourage arm to approach kiwi
     approach_reward = 0.0
-    if distance_to_kiwi < 0.05:
-        approach_reward = 2.0
+    if distance_to_kiwi < 0.1:
+        approach_reward = 1.0
+    elif distance_to_kiwi < 0.2:
+        approach_reward = 0.5
     else:
         approach_reward = -distance_to_kiwi
 
-    # 放置奖励：鼓励机械臂将奇异果放置到盘子
+    # Placement reward: encourage placing kiwi onto plate
     place_reward = 0.0
-    if kiwi_to_plate < 0.02:  # 成功放置
+    if kiwi_to_plate < 0.02:
         place_reward = 10.0
-    elif kiwi_to_plate < 0.1:  # 比较接近
+    elif kiwi_to_plate < 0.1:
         place_reward = 2.0
     else:
         place_reward = -kiwi_to_plate
 
-    # 步数惩罚：每一步都有一定的惩罚
+    # Step penalty: penalize each step
     step_penalty = -0.01 * self.current_step
 
-    # 动作幅度惩罚：惩罚较大的控制信号
+    # Action magnitude penalty: penalize large control signals
     action_magnitude = np.mean(np.abs(self.mj_data.ctrl))
     action_penalty = -0.1 * action_magnitude
 
-    # 总奖励
+    # Total reward
     total_reward = (
-            approach_reward +
-            place_reward +
-            step_penalty +
-            action_penalty
+        approach_reward +
+        place_reward +
+        step_penalty +
+        action_penalty
     )
 
-    # 记录详细的奖励信息供日志使用
-    self.reward_info = {
-        "rewards/total": total_reward,
-        "rewards/approach": approach_reward,
-        "rewards/place": place_reward,
+    # For logging
+    self.info = {
+        "rewards/approach_reward": approach_reward,
+        "rewards/place_reward": place_reward,
         "rewards/step_penalty": step_penalty,
         "rewards/action_penalty": action_penalty,
         "info/distance_to_kiwi": distance_to_kiwi,
@@ -143,92 +146,142 @@ def _compute_reward(self):
     return total_reward
 ```
 
-设计奖励函数时，请考虑：
-- 稀疏奖励 vs 密集奖励：稀疏奖励只在完成任务时给予，而密集奖励在每一步都提供反馈
-- 奖励分量：将奖励分解为多个组成部分，如接近目标的奖励、完成任务的奖励等
-- 惩罚项：对不希望的行为施加惩罚，如过大的动作、过多的步数等
+When designing reward functions, consider:
+- Sparse vs. dense rewards: Sparse rewards are only given upon task completion, while dense rewards provide feedback at every step
+- Reward shaping: Use intermediate rewards to guide learning
+- Penalties: Penalize undesired behaviors, such as large actions or excessive steps
 
-#### 3. 终止条件 (Termination Condition)
+#### 3. Termination Condition
 
-终止条件定义了何时结束一个回合。在 `_check_termination` 方法中自定义：
+Termination conditions define when an episode ends. Customize in the `_check_termination` method:
 
 ```python
 def _check_termination(self):
-    # 检查是否完成任务
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # 奇异果的变换矩阵
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # 盘子的变换矩阵
+    # Check if task is completed
+    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")
+    tmat_plate = get_body_tmat(self.mj_data, "plate_white")
 
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # 奇异果的位置
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # 盘子的位置
+    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])
+    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])
 
-    # 如果奇异果成功放置在盘子上
+    # If kiwi is successfully placed on the plate
     if np.linalg.norm(kiwi_pos - plate_pos) < 0.02:
-        return True  # 任务完成，终止环境
+        return True  # Task complete
     return False
 ```
 
-## 训练与测试
+## Training and Testing
 
-### 训练模型
+### Training the Model
 
-使用 `train.py` 脚本训练模型：
-
-```bash
-python train.py --render
-```
-
-参数说明：
-- `--render`: 在训练过程中显示渲染画面（可选）
-
-### 测试模型
-
-训练完成后，使用以下命令测试模型：
+Use the `train.py` script to train the model:
 
 ```bash
-python train.py --test --model_path /path/to/your/model.zip
+python train.py --render --total_timesteps 1000000 --batch_size 64
 ```
 
-参数说明：
-- `--test`: 启用测试模式
-- `--model_path`: 指定要加载的模型路径
+### TensorBoard visualization
 
-## 自定义任务的步骤
+During the training process, we use TensorBoard to record and visualize key metrics:
 
-1. **创建任务环境**：
-   - 复制 `env.py` 并根据您的任务需求进行修改
-   - 调整观察空间、奖励函数和终止条件
+1. **Launch TensorBoard**:
+    ```bash
+    tensorboard --logdir data/PPO_State/logs_[timestamp]
+    ```
+    Among them, 'timestamp' is the timestamp at the beginning of training.
 
-2. **配置环境**：
-   - 修改 `cfg` 配置，包括模型路径、对象列表等
-   - 根据需要调整渲染设置
+2. **View training metrics**:
+    -Open in browser http://localhost:6006
+    -Visualize the following key indicators:
+    -Rewards: Total rewards, individual reward components (proximity rewards, placement rewards, etc.)
+    -Loss functions: policy loss, value function loss
+    -Other indicators: action entropy, learning rate, state value estimation
 
-3. **调整训练参数**：
-   - 在 `train.py` 中修改 PPO 算法的超参数
-   - 调整训练步数、批次大小等
+3. **Usage tips**:
+    -Adjust curve display using a smooth slider
+    -Compare the performance of different training runs
+    -Analyze parameter distribution through the HISTOGRAM tab
+    -Track training progress using SCALARS tabs
 
-4. **训练与评估**：
-   - 运行训练脚本并监控训练进度
-   - 定期评估模型性能并保存最佳模型
+#### Training Parameters:
+- `--render`: Show rendering during training (optional)
+- `--seed`: Random seed, default is 42
+- `--total_timesteps`: Total training steps, default is 1000000
+- `--batch_size`: Batch size, default is 64
+- `--n_steps`: Trajectory length per update, default is 2048
+- `--learning_rate`: Learning rate, default is 3e-4
+- `--log_dir`: Log directory, default is a timestamped directory
+- `--model_path`: Pretrained model path for continued training (optional)
+- `--eval_freq`: Evaluation frequency, default is 10000 steps
+- `--log_interval`: Logging interval, default is 10
 
-## 提示与技巧
+#### Features:
 
-1. **奖励设计**：
-   - 奖励函数是强化学习中最关键的部分
-   - 尝试不同的奖励组合，找到最有效的设计
-   - 使用奖励分量来引导智能体学习复杂任务
+1. **Training Progress Bar**: Real-time progress bar during training, showing trained steps and elapsed time.
 
-2. **观察空间**：
-   - 只包含任务相关的信息，避免无关信息干扰学习
-   - 考虑使用相对位置而非绝对位置
+2. **Training Resume**: Supports resuming from previous checkpoints by specifying the `--model_path` parameter:
+   ```bash
+   python train.py --model_path data/PPO/logs_20230101_120000/best_model/best_model.zip
+   ```
 
-3. **超参数调优**：
-   - 学习率、批次大小、更新频率等超参数对训练效果有显著影响
-   - 使用网格搜索或贝叶斯优化来寻找最佳超参数
+3. **Auto-Save**: Automatically saves the best-performing model during training and the final model at the end.
 
-4. **可视化与调试**：
-   - 使用 TensorBoard 等工具可视化训练过程
-   - 记录详细的奖励分量，便于分析和调试
+### Testing the Model
 
-5. **域随机化**：
-   - 在训练中引入随机性，提高模型的泛化能力
-   - 随机化初始状态、物体位置、物理参数等
+Use the `train.py` script to test the trained model:
+
+```bash
+python train.py --test --model_path path/to/model.zip --render
+```
+
+#### Testing Parameters:
+- `--test`: Enable test mode
+- `--model_path`: Model path (required)
+- `--render`: Show rendering during testing (optional)
+- `--episodes`: Number of test episodes, default is 10
+- `--deterministic`: Use deterministic policy for testing (optional)
+- `--seed`: Random seed, default is 42
+
+## Steps to Customize Your Task
+
+1. **Create Task Environment**:
+   - Copy `env.py` and modify it according to your task
+   - Adjust observation space, reward function, and termination conditions
+
+2. **Configure Environment**:
+   - Modify `cfg` configuration, including model paths, object list, etc.
+   - Adjust rendering settings as needed
+
+3. **Adjust Training Parameters**:
+   - Modify PPO hyperparameters in `train.py`
+   - Adjust training steps, batch size, etc.
+
+4. **Train and Evaluate**:
+   - Run the training script and monitor progress
+   - Periodically evaluate model performance and save the best model
+
+## Tips and Tricks
+
+1. **Reward Design**:
+   - The reward function is the most critical part of reinforcement learning
+   - Try different reward combinations to find the most effective design
+   - Use reward components to guide the agent to learn complex tasks
+
+2. **Observation Space**:
+   - Only include task-relevant information to avoid distracting the agent
+   - Consider using relative positions instead of absolute positions
+
+3. **Hyperparameter Tuning**:
+   - Learning rate, batch size, and update frequency significantly affect training
+   - Use grid search or Bayesian optimization to find the best hyperparameters
+
+4. **Visualization and Debugging**:
+   - Use tools like TensorBoard to visualize the training process
+   - Log detailed reward components for analysis and debugging
+
+5. **Domain Randomization**:
+   - Introduce randomness during training to improve model generalization
+   - Randomize initial states, object positions, physical parameters, etc.
+
+---
+[中文版请见 README_zh.md](README_zh.md)
