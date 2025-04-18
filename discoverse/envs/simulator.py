@@ -302,9 +302,6 @@ class SimulatorBase:
                     
                 glfw.make_context_current(self.window)
                 gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-                
-                # gl.glViewport(0, 0, current_width, current_height)              
-                # gl.glRasterPos2i(-1, -1)
 
                 if img_vis is not None:
                     img_vis = img_vis[::-1]

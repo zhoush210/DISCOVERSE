@@ -16,8 +16,8 @@
       <position ctrlrange='-0.5 0.5' kp='1' kv='.1'/>
     </default>
     <default class='head_pitch_joint'>
-      <joint axis='0 0 1' range="-0.16 1.18"/>
-      <position ctrlrange='-0.16 1.18' kp='100' kv='10'/>
+      <joint axis='0 0 -1' range="-1.18 0.16"/>
+      <position ctrlrange='-1.18 0.16' kp='100' kv='10'/>
     </default>
 
     <default class='wheel'>

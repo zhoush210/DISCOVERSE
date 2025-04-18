@@ -10,7 +10,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import TransformStamped
-from sensor_msgs.msg import Image, CameraInfo, JointState, Imu, PointCloud2
+from sensor_msgs.msg import Image, CameraInfo, JointState, Imu, LaserScan
 
 from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
 from discoverse.utils import PIDarray, camera2k, get_site_tmat
@@ -43,7 +43,7 @@ class MMK2ROS2(MMK2Base, Node):
             from mujoco_lidar.lidar_wrapper import MjLidarWrapper
             from mujoco_lidar.scan_gen import create_lidar_single_line
 
-            self.lidar_frame_id = "mmk2_lidar_s2"
+            self.lidar_frame_id = "laser"
             
             self.rays_theta, self.rays_phi = create_lidar_single_line(360, np.pi*2.)
 
@@ -84,7 +84,7 @@ class MMK2ROS2(MMK2Base, Node):
 
         # lidar
         if self.config.lidar_s2_sim:
-            self.lidar_s2_puber = self.create_publisher(PointCloud2, '/slamware_ros_sdk_server_node/scan', 1)
+            self.lidar_s2_puber = self.create_publisher(LaserScan, '/slamware_ros_sdk_server_node/scan', 1)
 
         # image publisher, camera info publisher,  Initialize camera info messages
         if 0 in self.config.obs_rgb_cam_id:
@@ -205,14 +205,30 @@ class MMK2ROS2(MMK2Base, Node):
     def thread_publidartopic(self, freq=12):
         if not self.config.lidar_s2_sim:
             return
-
-        from mujoco_lidar.examples.lidar_vis_ros2 import publish_point_cloud
-        
+                      
         rate = self.create_rate(freq)
         while rclpy.ok() and self.running:
-            stamp = self.get_clock().now().to_msg()
             points = self.lidar_s2.get_lidar_points(self.rays_phi, self.rays_theta, self.mj_data)
-            publish_point_cloud(self.lidar_s2_puber, points, self.lidar_frame_id, stamp)
+            dists = np.linalg.norm(points[:, :2], axis=1)
+            if np.all(dists < 1e-6):
+                range_min = 0.0
+            else:
+                range_min = np.min(dists[dists >= 1e-6])
+            range_max = np.max(dists)
+
+            scan_msg = LaserScan()
+            scan_msg.header.frame_id = self.lidar_frame_id
+            scan_msg.header.stamp = self.get_clock().now().to_msg()
+            scan_msg.angle_min = float(np.pi)
+            scan_msg.angle_max = float(-np.pi * 179. / 180.)
+            scan_msg.angle_increment = float(-2. * np.pi / 360.)
+            scan_msg.time_increment = 0.0
+            scan_msg.range_min = float(range_min)
+            scan_msg.range_max = float(range_max)
+            scan_msg.ranges = dists[::-1].astype(np.float32).tolist()
+            scan_msg.intensities = []
+
+            self.lidar_s2_puber.publish(scan_msg)
             rate.sleep()
 
     def thread_pubros2topic(self, freq=30):

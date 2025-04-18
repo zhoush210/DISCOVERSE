@@ -4,7 +4,7 @@
 
     <site name="base_link" pos='-0.02371 0 0' size='0.001' type='sphere'/>
 
-    <site name="mmk2_lidar_s2" pos='0.09 0 0.215' size='0.001' type='sphere'/>
+    <site name="laser" pos='0.09 0 0.215' size='0.001' type='sphere'/>
 
     <geom mesh="mmk2_agv_0" material="Paint_Matte_Black__1" class="visual"/>
     <geom mesh="mmk2_agv_1" material="Copper_Textured__1_1" class="visual"/>
