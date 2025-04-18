@@ -53,6 +53,7 @@ class SimulatorBase:
         [ 0,  1,  0],
     ])
 
+    use_default_window_size = False
     mouse_pressed = {
         'left': False,
         'right': False,
@@ -114,7 +115,17 @@ class SimulatorBase:
                 glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 2)
                 glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 1)
                 glfw.window_hint(glfw.VISIBLE, True)
-                
+
+                # 如果设置了use_default_window_size，禁用窗口最大化功能
+                if self.use_default_window_size:
+                    # 禁用窗口最大化
+                    glfw.window_hint(glfw.MAXIMIZED, False)
+                    # 确保窗口有装饰（标题栏等）
+                    glfw.window_hint(glfw.DECORATED, True)
+                    # 允许用户手动调整窗口大小
+                    glfw.window_hint(glfw.RESIZABLE, True)
+                    print("已禁用窗口最大化功能，但允许调整窗口大小")
+
                 # 创建窗口
                 self.window = glfw.create_window(
                     self.config.render_set["width"],
@@ -130,6 +141,9 @@ class SimulatorBase:
                 glfw.make_context_current(self.window)
                 glfw.swap_interval(1)
 
+                # 设置窗口最大尺寸
+                glfw.set_window_size_limits(self.window, 320, 240, self.mj_model.vis.global_.offwidth, self.mj_model.vis.global_.offheight)
+
                 # 初始化OpenGL设置
                 gl.glClearColor(0.0, 0.0, 0.0, 1.0)
                 gl.glShadeModel(gl.GL_SMOOTH)
@@ -140,6 +154,10 @@ class SimulatorBase:
                 glfw.set_cursor_pos_callback(self.window, self.on_mouse_move)
                 glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
                 glfw.set_scroll_callback(self.window, self.on_mouse_scroll)
+                
+                # 如果设置了use_default_window_size，添加窗口大小变化回调
+                if self.use_default_window_size:
+                    glfw.set_window_maximize_callback(self.window, self.maximize_callback)
 
                 if sys.platform == "darwin":
                     try:
@@ -170,6 +188,10 @@ class SimulatorBase:
         self.last_render_time = time.time()
         mujoco.mj_resetData(self.mj_model, self.mj_data)
         mujoco.mj_forward(self.mj_model, self.mj_data)
+
+    def maximize_callback(self, window, maximized):
+        if self.use_default_window_size and maximized:
+            glfw.restore_window(window)
 
     def load_mjcf(self):
         if self.mjcf_file.endswith(".xml"):
@@ -210,6 +232,8 @@ class SimulatorBase:
             except Exception as e:
                 screen_width, screen_height = 1920, 1080
                 print(f"screeninfo error: {e}, using default screen size: {screen_width}x{screen_height}")
+                self.use_default_window_size = True
+
             self.mj_model.vis.global_.offwidth = max(self.mj_model.vis.global_.offwidth, screen_width)
             self.mj_model.vis.global_.offheight = max(self.mj_model.vis.global_.offheight, screen_height)
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
