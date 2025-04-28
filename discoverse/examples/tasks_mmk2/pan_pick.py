@@ -7,7 +7,7 @@ import argparse
 import multiprocessing as mp
 
 from discoverse import DISCOVERSE_ROOT_DIR
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase, recoder_mmk2, copypy2
 from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.teleop = None
+    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         try:
             if stm.trigger():
                 if stm.state_idx == 0: # 降高度
-                    sim_node.tctr_head[1] = 0.4
+                    sim_node.tctr_head[1] = -0.4
                     sim_node.tctr_slide[0] = 0.12
                 elif stm.state_idx == 1: # 伸到盘子上1
                     tmat_pan = get_body_tmat(sim_node.mj_data, "pan")
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [0, -0.0551, euler_angles[1]]).as_matrix())
                     sim_node.tctr_rgt_gripper[:] = 0
                 elif stm.state_idx == 7: # 降高度
-                    sim_node.tctr_head[1] = 0.4
+                    sim_node.tctr_head[1] = -0.4
                     sim_node.tctr_slide[0] = 0.12
                 elif stm.state_idx == 8: # 放下盘子1
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")

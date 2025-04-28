@@ -8,12 +8,12 @@ import argparse
 import multiprocessing as mp
 
 import traceback
-from discoverse.airbot_play import AirbotPlayIK #机械臂逆运动学解算
-from discoverse import DISCOVERSE_ROOT_DIR , DISCOVERSE_ASSERT_DIR #引入仿真器路径和模型路径
+from discoverse.robots import AirbotPlayIK #机械臂逆运动学解算
+from discoverse import DISCOVERSE_ROOT_DIR , DISCOVERSE_ASSETS_DIR #引入仿真器路径和模型路径
 
 from discoverse.utils import get_body_tmat , step_func , SimpleStateMachine #获取旋转矩阵，步进，状态机
 
-from discoverse.envs.hand_with_arm_base import HandWithArmCfg #引入手臂基础配置
+from discoverse.robots_env.hand_with_arm_base import HandWithArmCfg #引入手臂基础配置
 from discoverse.task_base.hand_arm_task_base import HandArmTaskBase , recoder_hand_with_arm 
 
 class SimNode(HandArmTaskBase):
@@ -118,9 +118,7 @@ if __name__ == "__main__":
             os.path.join(save_dir, os.path.basename(__file__)),
         )
     
-    arm_ik = AirbotPlayIK(
-            os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf")
-        )
+    arm_ik = AirbotPlayIK()
 
     trmat = R.from_euler("xyz", [0.0, np.pi / 2, 0.0], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))    

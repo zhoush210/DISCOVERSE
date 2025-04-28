@@ -7,7 +7,7 @@ import argparse
 import multiprocessing as mp
 
 from discoverse import DISCOVERSE_ROOT_DIR
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase, recoder_mmk2, copypy2
 from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.teleop = None
+    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
@@ -93,7 +93,7 @@ if __name__ == "__main__":
             if stm.trigger():
                 if stm.state_idx == 0: # 降高度
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")
-                    sim_node.tctr_head[1] = 0.4
+                    sim_node.tctr_head[1] = -0.4
                     sim_node.tctr_slide[0] = 1.22 - 1.08 * tmat_box[2, 3]
                 elif stm.state_idx == 1: # 伸到盒子前
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")
@@ -115,7 +115,7 @@ if __name__ == "__main__":
                     sim_node.tctr_lft_gripper[:] = 0
                 elif stm.state_idx == 3: # 抬升一定高度
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")
-                    sim_node.tctr_head[1] = 0.8
+                    sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 1.22 - 1.08 * tmat_box[2, 3] - 0.08
                 elif stm.state_idx == 4: # 向后取出盒子
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")

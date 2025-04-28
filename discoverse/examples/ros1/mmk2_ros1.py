@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState, Imu
 
-from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Base, MMK2Cfg
 from discoverse.utils import PIDarray
 
 class MMK2ROS1(MMK2Base):

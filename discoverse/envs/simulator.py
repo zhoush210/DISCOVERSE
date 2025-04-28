@@ -12,19 +12,21 @@ import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from discoverse import DISCOVERSE_ASSERT_DIR
+from discoverse import DISCOVERSE_ASSETS_DIR
 from discoverse.utils import BaseConfig
 
-try:
-    from discoverse.gaussian_renderer import GSRenderer
-    from discoverse.gaussian_renderer.util_gau import multiple_quaternion_vector3d, multiple_quaternions
-    DISCOVERSE_GAUSSIAN_RENDERER = True
+if sys.platform == "linux":
+    try:
+        from discoverse.gaussian_renderer import GSRenderer
+        from discoverse.gaussian_renderer.util_gau import multiple_quaternion_vector3d, multiple_quaternions
+        DISCOVERSE_GAUSSIAN_RENDERER = True
 
-except ImportError:
-    traceback.print_exc()
-    print("Warning: gaussian_splatting renderer not found. Please install the required packages to use it.")
+    except ImportError:
+        traceback.print_exc()
+        print("Warning: gaussian_splatting renderer not found. Please install the required packages to use it.")
+        DISCOVERSE_GAUSSIAN_RENDERER = False
+else:
     DISCOVERSE_GAUSSIAN_RENDERER = False
-
 
 def setRenderOptions(options):
     options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
@@ -72,7 +74,7 @@ class SimulatorBase:
         if self.config.mjcf_file_path.startswith("/"):
             self.mjcf_file = self.config.mjcf_file_path
         else:
-            self.mjcf_file = os.path.join(DISCOVERSE_ASSERT_DIR, self.config.mjcf_file_path)
+            self.mjcf_file = os.path.join(DISCOVERSE_ASSETS_DIR, self.config.mjcf_file_path)
         if os.path.exists(self.mjcf_file):
             print("mjcf found: {}".format(self.mjcf_file))
         else:
@@ -243,6 +245,9 @@ class SimulatorBase:
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
 
         self.post_load_mjcf()
+
+    def post_load_mjcf(self):
+        pass
 
     def update_renderer_window_size(self, width, height):
         self.renderer._width = width

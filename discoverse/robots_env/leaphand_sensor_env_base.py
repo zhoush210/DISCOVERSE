@@ -1,7 +1,5 @@
 import mujoco
 import numpy as np
-import sys
-import os
 
 from discoverse.utils.base_config import BaseConfig
 from discoverse.envs import SimulatorBase

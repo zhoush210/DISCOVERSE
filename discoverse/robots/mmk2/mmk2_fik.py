@@ -1,10 +1,8 @@
-import os
 from typing import Union
 
 import numpy as np
 from scipy.spatial.transform import Rotation
-from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play import AirbotPlayIK
+from discoverse.robots import AirbotPlayIK
 
 class MMK2FIK:
     TMat_footprint2chest = np.array([
@@ -71,8 +69,8 @@ class MMK2FIK:
     }
 
     def __init__(self) -> None:
-        print("\033[33m接口即将弃用, 请使用discoverse.mmk2.mmk2_ik\033[0m")
-        self.arm_ik = AirbotPlayIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+        print("\033[33m接口即将弃用, 请使用discoverse.robots.mmk2_ik\033[0m")
+        self.arm_ik = AirbotPlayIK()
     
     def get_3dposition_wrt_arm_base(self, point3d, q):
         """

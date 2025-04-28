@@ -1,9 +1,7 @@
-import mujoco
 import numpy as np
 
 from discoverse.envs import SimulatorBase
 from discoverse.utils.base_config import BaseConfig
-from scipy.spatial.transform import Rotation
 
 class SkyRoverCfg(BaseConfig):
     mjcf_file_path = "mjcf/skyrover_floor.xml"

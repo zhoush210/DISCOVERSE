@@ -7,7 +7,7 @@ import argparse
 import multiprocessing as mp
 
 from discoverse import DISCOVERSE_ROOT_DIR
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase, recoder_mmk2, copypy2
 from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.teleop = None
+    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         try:
             if stm.trigger():
                 if stm.state_idx == 0: # 降高度
-                    sim_node.tctr_head[1] = 0.8
+                    sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.2
                 elif stm.state_idx == 1: # 伸到碗前
                     tmat_bowl = get_body_tmat(sim_node.mj_data, "bowl_yellow")
@@ -162,7 +162,7 @@ if __name__ == "__main__":
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                     sim_node.tctr_rgt_gripper[:] = 1 
                 elif stm.state_idx == 12: # 降高度
-                    sim_node.tctr_head[1] = 0.8
+                    sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.2
                 elif stm.state_idx == 13: # 抓住枣
                     sim_node.tctr_rgt_gripper[:] = 0.0
@@ -174,13 +174,13 @@ if __name__ == "__main__":
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                 elif stm.state_idx == 16: # 降高度
-                    sim_node.tctr_head[1] = 0.8
+                    sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.15
                 elif stm.state_idx == 17: # 放开枣
                     sim_node.tctr_rgt_gripper[:] = 1.0
                     sim_node.delay_cnt = int(0.2/sim_node.delta_t)
                 elif stm.state_idx == 18: # 升高度
-                    sim_node.tctr_head[1] = 0.8
+                    sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.1
                 
                 dif = np.abs(action - sim_node.target_control)

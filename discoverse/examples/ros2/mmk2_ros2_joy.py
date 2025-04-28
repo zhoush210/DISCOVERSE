@@ -5,8 +5,8 @@ from scipy.spatial.transform import Rotation
 import rclpy
 from sensor_msgs.msg import Joy
 
-from discoverse.mmk2 import MMK2FIK
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots import MMK2FIK
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.examples.ros2.mmk2_ros2 import MMK2ROS2
 from discoverse.utils.joy_stick_ros2 import JoyTeleopRos2
 

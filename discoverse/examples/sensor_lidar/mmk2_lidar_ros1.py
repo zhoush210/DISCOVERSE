@@ -6,7 +6,7 @@ import rospy
 import tf2_ros
 from sensor_msgs.msg import PointCloud2
 from visualization_msgs.msg import MarkerArray
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.examples.ros1.mmk2_ros1_joy import MMK2ROS1JoyCtl
 
 from mujoco_lidar.lidar_wrapper import MjLidarWrapper
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     lidar_frame_id = "mmk2_lidar_s2"
 
     # 创建MuJoCo激光雷达传感器对象，关联到当前渲染场景
-    lidar_s2 = MjLidarWrapper(exec_node.mj_model, exec_node.mj_data, site_name="mmk2_lidar_s2")
+    lidar_s2 = MjLidarWrapper(exec_node.mj_model, exec_node.mj_data, site_name="laser")
 
     # Warm Start
     # 使用Taichi库进行光线投射计算，获取激光雷达点云数据

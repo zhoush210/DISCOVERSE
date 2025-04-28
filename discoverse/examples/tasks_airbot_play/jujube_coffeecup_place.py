@@ -6,9 +6,9 @@ import os
 import argparse
 import multiprocessing as mp
 
-from discoverse.airbot_play import AirbotPlayIK
-from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
-from discoverse.envs.airbot_play_base import AirbotPlayCfg
+from discoverse.robots import AirbotPlayIK
+from discoverse import DISCOVERSE_ROOT_DIR
+from discoverse.robots_env.airbot_play_base import AirbotPlayCfg
 from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
 from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
@@ -127,8 +127,7 @@ if __name__ == "__main__":
     sim_node.free_camera.distance = 0.5
     sim_node.mj_model.vis.global_.fovy = 72.02033809218685
     sim_node.cam_id = 0
-    # sim_node.gs_renderer.set_obj_pose("table_cloth", [0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 0.0])
-    arm_ik = AirbotPlayIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
 
     trmat = Rotation.from_euler("xyz", [0, np.pi*0.4, 0], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))

@@ -4,11 +4,9 @@ from scipy.spatial.transform import Rotation
 
 import os
 import json
-import shutil
 import argparse
 import importlib
 import multiprocessing as mp
-import traceback
 
 from discoverse import DISCOVERSE_ROOT_DIR
 from discoverse.task_base import recoder_mmk2

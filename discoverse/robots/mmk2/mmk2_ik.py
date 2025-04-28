@@ -1,21 +1,22 @@
 import os
 
 import numpy as np
-from discoverse import DISCOVERSE_ASSERT_DIR, DISCOVERSE_ROOT_DIR
+from discoverse import DISCOVERSE_ASSETS_DIR, DISCOVERSE_ROOT_DIR
 
-from discoverse.airbot_play.airbot_play_ik import AirbotPlayIK
+
+from discoverse.robots import AirbotPlayIK
 
 class MMK2IK:
     def __init__(self, debug=False) -> None:
         self.debug = debug
-        self.arm_ik = AirbotPlayIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+        self.arm_ik = AirbotPlayIK()
         try:
-            tmats = np.load(os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/mmk2/mmk2_ik_tmats.npz"))
+            tmats = np.load(os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/robots/mmk2/mmk2_ik_tmats.npz"))
         except:
             print("Failed to load mmk2_ik_tmats.npz")
             print("Generating tmats from mjcf")
             tmats = self.generate_tmats()
-            np.savez(os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/mmk2/mmk2_ik_tmats.npz"), **tmats)
+            np.savez(os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/robots/mmk2/mmk2_ik_tmats.npz"), **tmats)
 
         self.TMat_footprint2chest = tmats["footprint2chest"]
         self.TMat_chest2lft_base = tmats["chest2lft_base"]
@@ -25,12 +26,12 @@ class MMK2IK:
         import mujoco
         from discoverse.utils import get_body_tmat, get_site_tmat
         if mjcf_path is None:
-            mjcf_path = os.path.join(DISCOVERSE_ASSERT_DIR, "mjcf", "mmk2_floor.xml")
+            mjcf_path = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "mmk2_floor.xml")
         mj_model = mujoco.MjModel.from_xml_path(mjcf_path)
         mj_data = mujoco.MjData(mj_model)
         mujoco.mj_forward(mj_model, mj_data)
         tmats = {}
-        tmat_footprint = get_site_tmat(mj_data, "mmk2_base")
+        tmat_footprint = get_site_tmat(mj_data, "base_link")
         tmat_chest = get_body_tmat(mj_data, "slide_link")
         tmat_lft_armbase = get_body_tmat(mj_data, "lft_arm_base")
         tmat_rgt_armbase = get_body_tmat(mj_data, "rgt_arm_base")

@@ -1,7 +1,7 @@
 import glfw
 import mujoco
 import numpy as np
-from discoverse.envs.leaphand_sensor_env_base import LeapHandCfg, LeapHandBase 
+from discoverse.robots_env.leaphand_sensor_env_base import LeapHandCfg, LeapHandBase 
 
 action = np.zeros(16)
 obs_lst = []

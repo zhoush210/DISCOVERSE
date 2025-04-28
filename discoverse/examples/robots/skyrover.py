@@ -5,7 +5,7 @@ from discoverse.envs import SimulatorBase
 from discoverse.utils.base_config import BaseConfig
 from scipy.spatial.transform import Rotation
 
-from discoverse.envs.skyrover_base import SkyRoverBase, SkyRoverCfg
+from discoverse.robots_env.skyrover_base import SkyRoverBase, SkyRoverCfg
 
 if __name__ == "__main__":
 
