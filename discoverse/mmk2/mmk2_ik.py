@@ -1,8 +1,6 @@
 import os
-from typing import Union
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 from discoverse import DISCOVERSE_ASSERT_DIR, DISCOVERSE_ROOT_DIR
 
 try:
