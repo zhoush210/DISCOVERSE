@@ -17,3 +17,4 @@ class BaseConfig:
     gs_model_dict  = {}
     use_gaussian_renderer = False
     enable_render = True
+    max_render_depth = 5.0

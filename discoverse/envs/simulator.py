@@ -73,6 +73,8 @@ class SimulatorBase:
 
         if self.config.mjcf_file_path.startswith("/"):
             self.mjcf_file = self.config.mjcf_file_path
+        elif os.path.exists(self.config.mjcf_file_path):
+            self.mjcf_file = self.config.mjcf_file_path
         else:
             self.mjcf_file = os.path.join(DISCOVERSE_ASSETS_DIR, self.config.mjcf_file_path)
         if os.path.exists(self.mjcf_file):
@@ -293,7 +295,7 @@ class SimulatorBase:
                         img_depth = self.getDepthImg(self.cam_id)
                     
                     if img_depth is not None:
-                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=255./self.config.max_render_depth), cv2.COLORMAP_JET)
                     else:
                         img_vis = None
             else:
@@ -302,7 +304,7 @@ class SimulatorBase:
                     img_vis = self.getRgbImg(self.cam_id)
                 else:
                     img_depth = self.getDepthImg(self.cam_id)
-                    img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                    img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=255./self.config.max_render_depth), cv2.COLORMAP_JET)
 
             try:
                 if glfw.window_should_close(self.window):
