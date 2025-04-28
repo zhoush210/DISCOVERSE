@@ -5,9 +5,9 @@ import numpy as np
 
 from scipy.spatial.transform import Rotation
 
-from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play.airbot_play_fik import AirbotPlayFIK
-from discoverse.envs.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
+from discoverse import DISCOVERSE_ASSETS_DIR
+from discoverse.robots import AirbotPlayIK
+from discoverse.robots_env.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
 
 import pyspacemouse #refer the configuration at https://pypi.org/project/pyspacemouse/
 import time
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     cfg.use_gaussian_renderer = False
     exec_node = AirbotPlayBase(cfg)
 
-    arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
     target_position = np.array([0.280, -0., 0.220])
     target_euler = np.array([0., 0., 0.])
     target_action = np.zeros(7)
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             target_position += delta_position * ratio_postion
             target_euler += delta_euler * ratio_euler
             try:
-                target_action[:6] = arm_fik.properIK(target_position, Rotation.from_euler("xyz", target_euler).as_matrix().T, action[:6])
+                target_action[:6] = arm_ik.properIK(target_position, Rotation.from_euler("xyz", target_euler).as_matrix().T, action[:6])
             except:
                 # print(target_position, Rotation.from_euler("xyz", target_euler).as_matrix().T)
                 print("inverse kinematics failed")

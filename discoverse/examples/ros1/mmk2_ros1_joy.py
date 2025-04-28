@@ -4,8 +4,8 @@ from scipy.spatial.transform import Rotation
 
 import rospy
 
-from discoverse.mmk2 import MMK2FIK
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots import MMK2FIK
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.examples.ros1.mmk2_ros1 import MMK2ROS1
 from discoverse.utils.joy_stick_ros1 import JoyTeleopRos1
 
@@ -30,7 +30,6 @@ class MMK2ROS1JoyCtl(MMK2ROS1):
         self.rgt_arm_target_pose = self.arm_action_init_position[self.arm_action]["r"].copy()
         self.rgt_end_euler = np.zeros(3)
 
-        # joy control
         self.teleop = JoyTeleopRos1()
 
     def init_topic_subscriber(self):
@@ -99,7 +98,7 @@ class MMK2ROS1JoyCtl(MMK2ROS1):
             self.rgt_arm_target_pose[2] -= delta_height
 
             self.tctr_head[0] += self.teleop.joy_cmd.axes[3] * 1. / self.render_fps
-            self.tctr_head[1] -= self.teleop.joy_cmd.axes[4] * 1. / self.render_fps
+            self.tctr_head[1] += self.teleop.joy_cmd.axes[4] * 1. / self.render_fps
             self.tctr_head[0] = np.clip(self.tctr_head[0], self.mj_model.joint("head_yaw_joint").range[0], self.mj_model.joint("head_yaw_joint").range[1])
             self.tctr_head[1] = np.clip(self.tctr_head[1], self.mj_model.joint("head_pitch_joint").range[0], self.mj_model.joint("head_pitch_joint").range[1])
 

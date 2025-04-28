@@ -1,13 +1,9 @@
-import os
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 import rospy
 
-from discoverse.envs.tok2_base import TOK2Base, TOK2Cfg
+from discoverse.robots_env.tok2_base import TOK2Base, TOK2Cfg
 from discoverse.utils.joy_stick_ros1 import JoyTeleopRos1
-
-from discoverse import DISCOVERSE_ASSERT_DIR
 
 class TOK2JOY(TOK2Base):
 

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 import rclpy
 
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.examples.ros2.mmk2_ros2_joy import MMK2ROS2JoyCtl
 from discoverse.utils import get_site_tmat, get_body_tmat
 

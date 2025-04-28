@@ -2,7 +2,7 @@ import sys
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
-from discoverse.envs.mmk2_base import MMK2Cfg, MMK2Base
+from discoverse.robots_env.mmk2_base import MMK2Cfg, MMK2Base
 
 class RobotArmSync(MMK2Base):
     target_control = np.zeros(19)

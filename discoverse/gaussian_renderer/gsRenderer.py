@@ -7,7 +7,7 @@ from scipy.spatial.transform import Rotation
 from discoverse.gaussian_renderer import util_gau
 from discoverse.gaussian_renderer.renderer_cuda import CUDARenderer
 
-from discoverse import DISCOVERSE_ASSERT_DIR
+from discoverse import DISCOVERSE_ASSETS_DIR
 
 class GSRenderer:
     def __init__(self, models_dict:dict, render_width=1920, render_height=1080):
@@ -29,7 +29,7 @@ class GSRenderer:
         self.gaussians_size = {}
         idx_sum = 0
 
-        gs_model_dir = Path(os.path.join(DISCOVERSE_ASSERT_DIR, "3dgs"))
+        gs_model_dir = Path(os.path.join(DISCOVERSE_ASSETS_DIR, "3dgs"))
 
         bg_key = "background"
         data_path = Path(os.path.join(gs_model_dir, models_dict[bg_key]))

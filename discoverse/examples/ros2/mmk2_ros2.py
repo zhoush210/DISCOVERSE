@@ -12,7 +12,7 @@ from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Image, CameraInfo, JointState, Imu, LaserScan
 
-from discoverse.envs.mmk2_base import MMK2Base, MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Base, MMK2Cfg
 from discoverse.utils import PIDarray, camera2k, get_site_tmat
 
 class MMK2ROS2(MMK2Base, Node):

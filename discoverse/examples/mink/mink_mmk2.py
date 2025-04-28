@@ -13,8 +13,8 @@ from discoverse.examples.mink.mink_utils import \
     generate_mocap_xml, \
     generate_mocap_sensor_xml
 
-from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.mmk2.mmk2_ik import MMK2IK
+from discoverse import DISCOVERSE_ASSETS_DIR
+from discoverse.robots import MMK2IK
 
 if __name__ == "__main__":  
     """
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     np.set_printoptions(precision=5, suppress=True, linewidth=500)
 
     # 加载MMK2机器人模型的MJCF文件
-    mjcf_path = os.path.join(DISCOVERSE_ASSERT_DIR, "mjcf", "mmk2_floor.xml")
+    mjcf_path = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "mmk2_floor.xml")
     print("mjcf_path : " , mjcf_path)
 
     # 设置渲染帧率
@@ -60,8 +60,8 @@ if __name__ == "__main__":
 
     # 生成左右臂的mocap传感器XML
     sensor_xml = ""
-    sensor_xml += generate_mocap_sensor_xml(lft_mocap_name, ref_name="mmk2_base", ref_type="site")
-    sensor_xml += generate_mocap_sensor_xml(rgt_mocap_name, ref_name="mmk2_base", ref_type="site")
+    sensor_xml += generate_mocap_sensor_xml(lft_mocap_name, ref_name="base_link", ref_type="site")
+    sensor_xml += generate_mocap_sensor_xml(rgt_mocap_name, ref_name="base_link", ref_type="site")
 
     # 将mocap刚体和传感器添加到模型中
     mj_model = add_mocup_body_to_mjcf(mjcf_path, mocap_body_xml, sensor_xml, keep_tmp_xml=True)

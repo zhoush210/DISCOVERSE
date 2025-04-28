@@ -1,10 +1,11 @@
 import numpy as np
-import rospy
-from sensor_msgs.msg import JointState, Image, CameraInfo
-from std_msgs.msg import Bool, Float64
-from discoverse.envs.airbot_play_base import AirbotPlayCfg, AirbotPlayBase
-import cv_bridge
 
+import rospy
+import cv_bridge
+from std_msgs.msg import Bool, Float64
+from sensor_msgs.msg import JointState, Image, CameraInfo
+
+from discoverse.robots_env.airbot_play_base import AirbotPlayCfg, AirbotPlayBase
 
 class AirbotPlayCam(AirbotPlayBase):
     def __init__(self, config: AirbotPlayCfg):
@@ -12,30 +13,14 @@ class AirbotPlayCam(AirbotPlayBase):
 
         self.tar_jq = np.zeros(self.nj)
 
-        self.joint_state_puber = rospy.Publisher(
-            "/airbot_play/joint_states", JointState, queue_size=5
-        )
-        self.gripper_position_puber = rospy.Publisher(
-            "/airbot_play/gripper/position", Float64, queue_size=5
-        )
-        self.arm_joint_cmd_suber = rospy.Subscriber(
-            "/airbot_play/joint_cmd", JointState, self.arm_cmd_cb
-        )
-        self.eef_joint_cmd_suber = rospy.Subscriber(
-            "/airbot_play/end_effector/command", JointState, self.eef_cmd_cb
-        )
-        self.gripper_bool_cmd_suber = rospy.Subscriber(
-            "/airbot_play/gripper/state_cmd", Bool, self.gripper_bool_cmd_cb
-        )
-        self.gripper_float_cmd_suber = rospy.Subscriber(
-            "/airbot_play/gripper/set_position", Float64, self.gripper_float_cmd_cb
-        )
-        self.image_puber = rospy.Publisher(
-            "/camera/color/image_raw", Image, queue_size=5
-        )
-        self.camera_info_puber = rospy.Publisher(
-            "/camera/color/camera_info", CameraInfo, queue_size=5
-        )
+        self.joint_state_puber = rospy.Publisher("/airbot_play/joint_states", JointState, queue_size=5)
+        self.gripper_position_puber = rospy.Publisher("/airbot_play/gripper/position", Float64, queue_size=5)
+        self.arm_joint_cmd_suber = rospy.Subscriber("/airbot_play/joint_cmd", JointState, self.arm_cmd_cb)
+        self.eef_joint_cmd_suber = rospy.Subscriber("/airbot_play/end_effector/command", JointState, self.eef_cmd_cb)
+        self.gripper_bool_cmd_suber = rospy.Subscriber("/airbot_play/gripper/state_cmd", Bool, self.gripper_bool_cmd_cb)
+        self.gripper_float_cmd_suber = rospy.Subscriber("/airbot_play/gripper/set_position", Float64, self.gripper_float_cmd_cb)
+        self.image_puber = rospy.Publisher("/camera/color/image_raw", Image, queue_size=5)
+        self.camera_info_puber = rospy.Publisher("/camera/color/camera_info", CameraInfo, queue_size=5)
 
         self.joint_state = JointState()
         self.joint_state.name = [f"joint{i+1}" for i in range(6)] + ["endleft", "endright"]
@@ -80,6 +65,7 @@ class AirbotPlayCam(AirbotPlayBase):
         if self.obs is None:
             return
         image = self.obs["img"][0]
+        print(image.shape, image.dtype)
         self.image_puber.publish(cv_bridge.CvBridge().cv2_to_imgmsg(image, "rgb8"))
         info = CameraInfo()
         info.header.stamp = rospy.Time.now()

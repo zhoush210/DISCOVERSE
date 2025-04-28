@@ -4,11 +4,9 @@ from scipy.spatial.transform import Rotation
 
 import os
 import json
-import shutil
 import argparse
 import importlib
 import multiprocessing as mp
-import traceback
 
 from discoverse import DISCOVERSE_ROOT_DIR
 from discoverse.task_base import recoder_mmk2
@@ -19,7 +17,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task_name", type=str, required=True, help='Name of the task, e.g. plate_coffeecup')
-    parser.add_argument("--scheme_json", type=str, required=True, help='json-file name of the strategy, e.g. plate_coffeecup')
+    parser.add_argument("--scheme_json", type=str, required=True, help='json-file name of the strategy, e.g. plate_coffeecup.json')
     parser.add_argument("--max_time_s", type=int, default=30, help='run task max time in seconds')
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")

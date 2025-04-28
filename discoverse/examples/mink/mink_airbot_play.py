@@ -13,15 +13,8 @@ from discoverse.examples.mink.mink_utils import \
     generate_mocap_xml, \
     generate_mocap_sensor_xml
 
-from discoverse import DISCOVERSE_ASSERT_DIR
-try:
-    # 尝试导入AirbotPlayFIK类（首选方法）
-    from discoverse.airbot_play.airbot_play_fik import AirbotPlayFIK
-except:
-    # 导入失败时输出错误信息并使用备选方法
-    print("Failed to import AirbotPlayFIK from discoverse.airbot_play.airbot_play_fik")
-    print("Imported AirbotPlayIK_nopin instead")
-    from discoverse.airbot_play.airbot_play_ik_nopin import AirbotPlayIK_nopin as AirbotPlayFIK
+from discoverse import DISCOVERSE_ASSETS_DIR
+from discoverse.robots import AirbotPlayIK
 
 if __name__ == "__main__":  
     """
@@ -48,7 +41,7 @@ if __name__ == "__main__":
     np.set_printoptions(precision=5, suppress=True, linewidth=500)
 
     # 加载Airbot Play机器人模型的MJCF文件
-    mjcf_path = os.path.join(DISCOVERSE_ASSERT_DIR, "mjcf", "airbot_play_floor.xml")
+    mjcf_path = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "airbot_play_floor.xml")
     print("mjcf_path : " , mjcf_path)
 
     # 设置渲染帧率
@@ -63,7 +56,7 @@ if __name__ == "__main__":
     # 生成mocap传感器XML，参考坐标系为机械臂基座
     sensor_xml = generate_mocap_sensor_xml(mocap_name, ref_name="armbasepoint", ref_type="site")
     # 将mocap刚体和传感器添加到模型中
-    mj_model = add_mocup_body_to_mjcf(mjcf_path, mocap_body_xml, sensor_xml, keep_tmp_xml=True)
+    mj_model = add_mocup_body_to_mjcf(mjcf_path, mocap_body_xml, sensor_xml)
     # 计算渲染间隔，确保按照指定帧率渲染
     render_gap = int(1.0 / render_fps / mj_model.opt.timestep)
 
@@ -80,7 +73,7 @@ if __name__ == "__main__":
     armjoint_ctrl_ids = [mj_model.actuator(f"joint{i+1}").id for i in range(6)]
 
     # 创建Airbot Play逆运动学求解器，加载URDF模型
-    arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
     
     try:
         # 启动MuJoCo查看器
@@ -107,7 +100,7 @@ if __name__ == "__main__":
                 q_ref = mj_data.sensordata[armjoint_snesor_ids].copy()
                 try:
                     # 计算逆运动学解，获取关节角度
-                    jq = arm_fik.properIK(t_posi_local, t_rmat_local, q_ref)
+                    jq = arm_ik.properIK(t_posi_local, t_rmat_local, q_ref)
                     # 控制关节执行计算出的角度
                     mj_data.ctrl[armjoint_ctrl_ids] = jq
                     # 设置目标框为绿色（表示IK计算成功）

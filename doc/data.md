@@ -4,8 +4,8 @@
 
 ```python
 cd scripts
-python os_run.py --robot_name <ROBOT_NAME> --task_name <TASK_NAME> --track_num <NUM_TRACK> --nw <NUM_OF_WORKERS>
-e.g. python os_run.py --robot_name airbot_play --task_name kiwi_place --track_num 100 --nw 8
+python tasks_data_gen.py --robot_name <ROBOT_NAME> --task_name <TASK_NAME> --track_num <NUM_TRACK> --nw <NUM_OF_WORKERS>
+e.g. python tasks_data_gen.py --robot_name airbot_play --task_name kiwi_place --track_num 100 --nw 8
 # 表示使用airbot_play机械臂，任务为放置猕猴桃，总共生成100条任务轨迹，使用8个进程来同时生成数据。
 ```
 

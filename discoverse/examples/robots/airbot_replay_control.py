@@ -7,9 +7,9 @@ from airbot_replay import AirbotReplay
 
 from scipy.spatial.transform import Rotation
 
-from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play.airbot_play_fik import AirbotPlayFIK
-from discoverse.envs.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
+from discoverse import DISCOVERSE_ASSETS_DIR
+from discoverse.robots import AirbotPlayIK
+from discoverse.robots_env.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
 
 def step_func(current, target, step):
     if current < target - step:
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     cfg.use_gaussian_renderer = False
     exec_node = AirbotPlayBase(cfg)
 
-    arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
     target_position = np.array([0.295, -0., 0.219])
     target_euler = np.zeros(3)
     target_action = np.zeros(7)

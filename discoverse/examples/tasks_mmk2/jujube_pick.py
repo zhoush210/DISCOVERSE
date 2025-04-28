@@ -14,38 +14,57 @@ from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
-        # 随机 kiwi 位置
-        kiwi_x_bias = (np.random.random()- 0.5) * 0.04
-        kiwi_y_bias = (np.random.random()) * 0.12
-        self.mj_data.qpos[self.njq+7*0+0] += kiwi_x_bias
-        self.mj_data.qpos[self.njq+7*0+1] += kiwi_y_bias
+        # 随机 木盘位置
+        wood_x_bios = (np.random.random()) * 0.02
+        wood_y_bios = (np.random.random() - 1) * 0.05
+        self.mj_data.qpos[self.njq+7*1+0] += wood_x_bios
+        self.mj_data.qpos[self.njq+7*1+1] += wood_y_bios
+        self.mj_data.qpos[self.njq+7*1+2] += 0.01
 
-        # 随机 redbowl 位置
-        bowl_x_bias = (np.random.random()) * 0.02
-        bowl_y_bias = (np.random.random()) * 0.04
-        self.mj_data.qpos[self.njq+7*1+0] += bowl_x_bias
-        self.mj_data.qpos[self.njq+7*1+1] += bowl_y_bias
+        # 随机 枣位置
+        jujube_x_bios = (np.random.random()- 0.5) * 0.04
+        jujube_y_bios = (np.random.random()) * 0.12
+        self.mj_data.qpos[self.njq+7*2+0] += jujube_x_bios
+        self.mj_data.qpos[self.njq+7*2+1] += jujube_y_bios
+
+        # 随机 碗位置
+        bowl_x_bios = (np.random.random()) * 0.02
+        bowl_y_bios = (np.random.random()) * 0.04
+        self.mj_data.qpos[self.njq+7*0+0] += bowl_x_bios
+        self.mj_data.qpos[self.njq+7*0+1] += bowl_y_bios
 
     def check_success(self):
-        v1 = np.array([self.mj_data.qpos[self.njq+7*0+0], self.mj_data.qpos[self.njq+7*0+1]])
-        v2 = np.array([self.mj_data.qpos[self.njq+7*1+0], self.mj_data.qpos[self.njq+7*2+1]])
-        distance = np.linalg.norm(v1 - v2)
-        # print(distance)
-        return distance < 0.03
+        v1 = np.array([self.mj_data.qpos[self.njq+7*2+0], self.mj_data.qpos[self.njq+7*2+1]])
+        v2 = np.array([self.mj_data.qpos[self.njq+7*0+0], self.mj_data.qpos[self.njq+7*0+1]])
+        
+        # 计算差异
+        diff = v1 - v2
+        
+        # 计算平方和
+        squared_diff = np.sum(diff**2)
+        
+        # 取平方根
+        distance = np.sqrt(squared_diff) - 0.0195
+        print(distance)
+        if distance < 1e-2:
+            return True
+
+        return False
     
 cfg = MMK2Cfg()
-cfg.use_gaussian_renderer = True
+cfg.use_gaussian_renderer = False
 cfg.init_key = "pick"
-cfg.gs_model_dict["kiwi"]       = "object/kiwi.ply"
-cfg.gs_model_dict["red_bowl"]   = "object/red_bowl.ply"
-cfg.gs_model_dict["background"] = "scene/s2r2025/point_cloud.ply"
+cfg.gs_model_dict["bowl_yellow"]     = "object/bowl_yellow.ply"
+cfg.gs_model_dict["wood"]            = "object/wood.ply"
+cfg.gs_model_dict["jujube"]          = "object/jujube.ply"
+cfg.gs_model_dict["background"]      = "scene/Lab3/environment.ply"
 
-cfg.mjcf_file_path = "mjcf/tasks_mmk2/kiwi_place.xml"
-cfg.obj_list    = ["kiwi", "red_bowl"]
+cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_jujube.xml"
+cfg.obj_list    = ["bowl_yellow", "wood", "jujube"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
-    "fps"    : 20,
+    "fps"    : 25,
     "width"  : 640,
     "height" : 480
 }
@@ -66,7 +85,7 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_kiwi_place")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_jujube")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

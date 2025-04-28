@@ -4,7 +4,7 @@ import numpy as np
 import time
 from datetime import datetime
 from discoverse import DISCOVERSE_ROOT_DIR
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase
 from env import Env
 from stable_baselines3.common.vec_env import DummyVecEnv

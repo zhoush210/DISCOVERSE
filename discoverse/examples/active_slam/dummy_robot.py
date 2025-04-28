@@ -28,9 +28,6 @@ class DummyRobot(SimulatorBase):
     def get_base_pose(self):
         return self.mj_model.body(self.config.robot_name).pos.copy(), self.mj_model.body(self.config.robot_name).quat.copy()
 
-    def post_load_mjcf(self):
-        pass
-
     def getObservation(self):
         rgb_cam_pose_lst = [self.getCameraPose(id) for id in self.config.obs_rgb_cam_id]
         depth_cam_pose_lst = [self.getCameraPose(id) for id in self.config.obs_depth_cam_id]

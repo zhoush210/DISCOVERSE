@@ -3,13 +3,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 import os
-import shutil
 import argparse
 import multiprocessing as mp
 
-from discoverse.airbot_play import AirbotPlayFIK
-from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
-from discoverse.envs.airbot_play_base import AirbotPlayCfg
+from discoverse.robots import AirbotPlayIK
+from discoverse import DISCOVERSE_ROOT_DIR
+from discoverse.robots_env.airbot_play_base import AirbotPlayCfg
 from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
 from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
@@ -81,7 +80,7 @@ if __name__ == "__main__":
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
 
-    arm_fik = AirbotPlayFIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
 
     trmat_01 = Rotation.from_euler("xyz", [0., 0.8, 0.], degrees=False).as_matrix()
     trmat_2 = Rotation.from_euler("xyz", [0., np.pi/2., 0.], degrees=False).as_matrix()
@@ -109,19 +108,19 @@ if __name__ == "__main__":
                     tmat_laptop = get_site_tmat(sim_node.mj_data, "laptop_cam_site")
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_laptop
                     tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.05, 0.0, 0.1])
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
                     sim_node.target_control[6] = 0.75
                 elif stm.state_idx == 1: # 靠近电脑屏幕
                     tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.05, 0.0, 0.0])
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 2: # 合起屏幕
                     tmat_laptop = get_site_tmat(sim_node.mj_data, "laptop_bottom_site")
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_laptop
                     tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.0, 0.0, 0.03])
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 3: # 抬起夹爪
                     tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.0, 0.0, 0.05])
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)

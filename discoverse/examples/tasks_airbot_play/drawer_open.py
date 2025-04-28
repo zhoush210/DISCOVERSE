@@ -3,13 +3,12 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 import os
-import shutil
 import argparse
 import multiprocessing as mp
 
-from discoverse.airbot_play import AirbotPlayFIK
-from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
-from discoverse.envs.airbot_play_base import AirbotPlayCfg
+from discoverse.robots import AirbotPlayIK
+from discoverse import DISCOVERSE_ROOT_DIR
+from discoverse.robots_env.airbot_play_base import AirbotPlayCfg
 from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
 from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
@@ -64,7 +63,7 @@ if __name__ == "__main__":
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
         
-    arm_fik = AirbotPlayFIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK()
 
     trmat = Rotation.from_euler("xyz", [-np.pi/2., 0., np.pi], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))
@@ -91,13 +90,13 @@ if __name__ == "__main__":
                     tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
                     tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.1 * tmat_handle[:3, 0]
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                     sim_node.target_control[6] = 1
                     move_speed = 1.5
                 elif stm.state_idx == 1: # 伸到把手位置
                     tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                     move_speed = 0.5
                 elif stm.state_idx == 2: # 抓住把手
                     sim_node.target_control[6] = 0
@@ -107,14 +106,14 @@ if __name__ == "__main__":
                     tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
                     tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.2 * tmat_handle[:3, 0]
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 5: # 松开把手
                     sim_node.target_control[6] = 1
                 elif stm.state_idx == 6: # 离开抽屉
                     tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
                     tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.025 * tmat_handle[:3, 0]
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)
