@@ -8,7 +8,7 @@ from sensor_msgs.msg import JointState, Imu
 
 from discoverse.utils import step_func
 from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play import AirbotPlayFIK
+from discoverse.airbot_play import AirbotPlayIK
 from discoverse.envs.airbot_play_base import AirbotPlayCfg, AirbotPlayBase
 from discoverse.utils.joy_stick_ros1 import JoyTeleopRos1
 
@@ -18,7 +18,7 @@ class AirbotPlayJoyCtl(AirbotPlayBase):
         super().__init__(config)
 
         urdf_path = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf")
-        self.arm_fik = AirbotPlayFIK(urdf_path)
+        self.arm_ik = AirbotPlayIK(urdf_path)
     
         self.tar_end_pose = np.array([0.295, -0., 0.219])
         self.tar_end_euler = np.zeros(3)
@@ -66,7 +66,7 @@ class AirbotPlayJoyCtl(AirbotPlayBase):
         if calc_ik:
             rot = Rotation.from_euler('xyz', el).as_matrix()
             try:
-                tarjq = self.arm_fik.properIK(self.tar_end_pose, rot, self.sensor_joint_qpos[:6])
+                tarjq = self.arm_ik.properIK(self.tar_end_pose, rot, self.sensor_joint_qpos[:6])
                 self.tar_end_pose[:] = tmp_arm_target_pose[:]
                 self.tar_end_euler[:] = el[:]
             except ValueError:

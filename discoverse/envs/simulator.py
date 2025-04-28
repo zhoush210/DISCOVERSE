@@ -178,6 +178,10 @@ class SimulatorBase:
                 else:
                     self.screen_scale = 1
 
+                # 注册清理函数
+                import atexit
+                atexit.register(self._cleanup_before_exit)
+
             except Exception as e:
                 print(f"GLFW初始化失败: {e}")
                 if self.glfw_initialized:
@@ -545,28 +549,34 @@ class SimulatorBase:
 
         return camera_position, Rotation.from_matrix(rotation_matrix).as_quat()[[3,0,1,2]]
 
-    def __del__(self):
+    def _cleanup_before_exit(self):
+        """在Python退出前执行的清理函数"""
         try:
-            if hasattr(self, 'window') and self.window is not None:
-                if glfw.get_current_context() is not None:
-                    glfw.destroy_window(self.window)
-                    self.window = None
-            
-            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+            # 如果GLFW上下文有效，先清理Mujoco渲染器
+            if hasattr(self, 'renderer'):
                 try:
-                    if glfw.get_current_context() is not None:
-                        glfw.terminate()
+                    del self.renderer
                 except Exception:
                     pass
+
+            # 然后清理GLFW资源
+            if hasattr(self, 'window') and self.window is not None:
+                try:
+                    glfw.destroy_window(self.window)
+                except Exception:
+                    pass
+                self.window = None
             
-        except Exception as e:
-            print(f"清理资源时出错: {str(e)}")
-        
-        finally:
-            try:
-                super().__del__()
-            except Exception:
-                pass
+            # 最后终止GLFW
+            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+                try:
+                    glfw.terminate()
+                except Exception:
+                    pass
+                self.glfw_initialized = False
+            
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------------------
     # ---------------------------------- Override ----------------------------------

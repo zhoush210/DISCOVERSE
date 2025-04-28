@@ -3,7 +3,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 import os
-import shutil
 import argparse
 import multiprocessing as mp
 

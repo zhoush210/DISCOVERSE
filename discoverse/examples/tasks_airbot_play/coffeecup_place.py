@@ -3,11 +3,10 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 import os
-import shutil
 import argparse
 import multiprocessing as mp
 
-from discoverse.airbot_play import AirbotPlayFIK
+from discoverse.airbot_play import AirbotPlayIK
 from discoverse import DISCOVERSE_ROOT_DIR, DISCOVERSE_ASSERT_DIR
 from discoverse.envs.airbot_play_base import AirbotPlayCfg
 from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
@@ -102,7 +101,7 @@ if __name__ == "__main__":
     sim_node.mj_model.vis.global_.fovy = 72.02033809218685
     sim_node.cam_id = 0
     # sim_node.gs_renderer.set_obj_pose("table_cloth", [0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 0.0])
-    arm_fik = AirbotPlayFIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK(os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
 
     trmat = Rotation.from_euler("xyz", [0, np.pi*0.4, 0], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))
@@ -129,38 +128,38 @@ if __name__ == "__main__":
                     tmat_coffee = get_body_tmat(sim_node.mj_data, "coffeecup_white")
                     tmat_coffee[:3, 3] = tmat_coffee[:3, 3] + 0.1 * tmat_coffee[:3, 1] + 0.1 * tmat_coffee[:3, 2]
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_coffee
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                     sim_node.target_control[6] = 1
                 elif stm.state_idx == 1: # 伸到杯把
                     tmat_coffee = get_body_tmat(sim_node.mj_data, "coffeecup_white")
                     tmat_coffee[:3, 3] = tmat_coffee[:3, 3] + 0.06 * tmat_coffee[:3, 1] + 0.05 * tmat_coffee[:3, 2]
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_coffee
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 2: # 抓住杯把
                     sim_node.target_control[6] = 0
                 elif stm.state_idx == 3: # 抓住杯把
                     sim_node.delay_cnt = int(0.5/sim_node.delta_t)
                 elif stm.state_idx == 4: # 提起来杯子
                     tmat_tgt_local[2,3] += 0.15
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 5: # 把杯子放到盘子上空
                     tmat_plate = get_body_tmat(sim_node.mj_data, "plate_white")
                     tmat_plate[:3,3] = tmat_plate[:3, 3] + np.array([0.06, 0.0, 0.13])
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_plate
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 6: # 把杯子放到盘子上空
                     tmat_plate = get_body_tmat(sim_node.mj_data, "plate_white")
                     tmat_plate[:3,3] = tmat_plate[:3, 3] + np.array([0.06, 0.0, 0.08])
                     tmat_tgt_local = tmat_armbase_2_world @ tmat_plate
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 7: # 降低高度 把杯子放到盘子上
                     tmat_tgt_local[2,3] -= 0.02
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                 elif stm.state_idx == 8: # 松开杯把 放下杯子
                     sim_node.target_control[6] = 1
                 elif stm.state_idx == 9: # 抬升高度
                     tmat_tgt_local[2,3] += 0.05
-                    sim_node.target_control[:6] = arm_fik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)

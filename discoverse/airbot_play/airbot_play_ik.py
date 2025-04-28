@@ -1,6 +1,6 @@
 import numpy as np
 
-class AirbotPlayIK_nopin:
+class AirbotPlayIK:
     bias = np.array([0.0, -2.7549, 2.7549, 1.5708, 0.0, 0.0])
     a1 = 0.1172
     a3 = 0.27009
@@ -114,7 +114,7 @@ class AirbotPlayIK_nopin:
         return ret
 
 if __name__ == "__main__":
-    arm_ik = AirbotPlayIK_nopin()
+    arm_ik = AirbotPlayIK()
 
     trans = np.array([ 0.276, -0., 0.219])
     rot   = np.array([

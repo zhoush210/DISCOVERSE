@@ -14,14 +14,7 @@ from discoverse.examples.mink.mink_utils import \
     generate_mocap_sensor_xml
 
 from discoverse import DISCOVERSE_ASSERT_DIR
-try:
-    # 尝试导入AirbotPlayFIK类（首选方法）
-    from discoverse.airbot_play.airbot_play_fik import AirbotPlayFIK
-except:
-    # 导入失败时输出错误信息并使用备选方法
-    print("Failed to import AirbotPlayFIK from discoverse.airbot_play.airbot_play_fik")
-    print("Imported AirbotPlayIK_nopin instead")
-    from discoverse.airbot_play.airbot_play_ik_nopin import AirbotPlayIK_nopin as AirbotPlayFIK
+from discoverse.airbot_play.airbot_play_ik import AirbotPlayIK as AirbotPlayIK
 
 if __name__ == "__main__":  
     """
@@ -80,7 +73,7 @@ if __name__ == "__main__":
     armjoint_ctrl_ids = [mj_model.actuator(f"joint{i+1}").id for i in range(6)]
 
     # 创建Airbot Play逆运动学求解器，加载URDF模型
-    arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+    arm_ik = AirbotPlayIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
     
     try:
         # 启动MuJoCo查看器
@@ -107,7 +100,7 @@ if __name__ == "__main__":
                 q_ref = mj_data.sensordata[armjoint_snesor_ids].copy()
                 try:
                     # 计算逆运动学解，获取关节角度
-                    jq = arm_fik.properIK(t_posi_local, t_rmat_local, q_ref)
+                    jq = arm_ik.properIK(t_posi_local, t_rmat_local, q_ref)
                     # 控制关节执行计算出的角度
                     mj_data.ctrl[armjoint_ctrl_ids] = jq
                     # 设置目标框为绿色（表示IK计算成功）

@@ -3,17 +3,12 @@ import os
 import numpy as np
 from discoverse import DISCOVERSE_ASSERT_DIR, DISCOVERSE_ROOT_DIR
 
-try:
-    from discoverse.airbot_play.airbot_play_fik import AirbotPlayFIK
-except:
-    print("Failed to import AirbotPlayFIK from discoverse.airbot_play.airbot_play_fik")
-    print("Imported AirbotPlayIK_nopin instead")
-    from discoverse.airbot_play.airbot_play_ik_nopin import AirbotPlayIK_nopin as AirbotPlayFIK
+from discoverse.airbot_play.airbot_play_ik import AirbotPlayIK
 
 class MMK2IK:
     def __init__(self, debug=False) -> None:
         self.debug = debug
-        self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+        self.arm_ik = AirbotPlayIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
         try:
             tmats = np.load(os.path.join(DISCOVERSE_ROOT_DIR, "discoverse/mmk2/mmk2_ik_tmats.npz"))
         except:
@@ -78,7 +73,7 @@ class MMK2IK:
         posi_arm_local = point3d_arm_base[:3, 3]
         rot_arm_local = point3d_arm_base[:3, :3]
         try:
-            jq = self.arm_fik.properIK(posi_arm_local, rot_arm_local, q_ref)
+            jq = self.arm_ik.properIK(posi_arm_local, rot_arm_local, q_ref)
         except ValueError:
             if self.debug:
                 print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

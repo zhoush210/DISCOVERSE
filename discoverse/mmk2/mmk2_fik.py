@@ -4,7 +4,7 @@ from typing import Union
 import numpy as np
 from scipy.spatial.transform import Rotation
 from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play import AirbotPlayFIK
+from discoverse.airbot_play import AirbotPlayIK
 
 class MMK2FIK:
     TMat_footprint2chest = np.array([
@@ -72,7 +72,7 @@ class MMK2FIK:
 
     def __init__(self) -> None:
         print("\033[33m接口即将弃用, 请使用discoverse.mmk2.mmk2_ik\033[0m")
-        self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+        self.arm_ik = AirbotPlayIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
     
     def get_3dposition_wrt_arm_base(self, point3d, q):
         """
@@ -80,7 +80,7 @@ class MMK2FIK:
             q       : joint angles of the arm
         """
         point3d_homogeneous = np.append(point3d, 1)
-        Tmat_armbase2endpoint = self.arm_fik.properFK(q)
+        Tmat_armbase2endpoint = self.arm_ik.properFK(q)
         point3d_arm_base = (Tmat_armbase2endpoint @ MMK2FIK.TMat_endpoint2camera @ point3d_homogeneous)[:3]
         return point3d_arm_base
 
@@ -98,7 +98,7 @@ class MMK2FIK:
         else:
             raise ValueError("Invalid arm")
         point3d_homogeneous = np.append(point3d, 1)
-        Tmat_armbase2endpoint = self.arm_fik.properFK(q)
+        Tmat_armbase2endpoint = self.arm_ik.properFK(q)
         point3d_footprint = (Tmat_footprint2armbase @ Tmat_armbase2endpoint @ MMK2FIK.TMat_endpoint2camera @ point3d_homogeneous)[:3]
         return point3d_footprint
 
@@ -107,7 +107,7 @@ class MMK2FIK:
             rot = MMK2FIK.action_rot[action][arm] @ action_rot
         elif type(action) == np.ndarray:
             rot = action @ action_rot
-        jq = self.arm_fik.properIK(point3d, rot, q_ref)
+        jq = self.arm_ik.properIK(point3d, rot, q_ref)
         return jq
     
     def get_armjoint_pose_wrt_footprint(self, point3d, action:Union[str, np.ndarray], arm:str, slide:float, q_ref=np.zeros(6), action_rot=np.eye(3)):
@@ -149,9 +149,9 @@ if __name__ == "__main__":
     # jq = mmk2_func.get_armjoint_pose_wrt_armbase(retpose, action, arm_sel, np.zeros(6))
     # print(np.array(jq))
 
-    # omi = mmk2_func.arm_fik.properFK(jq)
+    # omi = mmk2_func.arm_ik.properFK(jq)
     # print(omi)
-    # print(mmk2_func.arm_fik.arm_rot_mat)
+    # print(mmk2_func.arm_ik.arm_rot_mat)
 
     # pose_wrt_camera = [0.41024, -0.19778,  1.27201]
     # retpose = mmk2_func.get_3dposition_wrt_footprint(pose_wrt_camera, np.zeros(6), 0, arm_sel)

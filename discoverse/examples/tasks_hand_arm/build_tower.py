@@ -8,7 +8,7 @@ import argparse
 import multiprocessing as mp
 
 import traceback
-from discoverse.airbot_play import AirbotPlayIK_nopin #机械臂逆运动学解算
+from discoverse.airbot_play import AirbotPlayIK #机械臂逆运动学解算
 from discoverse import DISCOVERSE_ROOT_DIR , DISCOVERSE_ASSERT_DIR #引入仿真器路径和模型路径
 
 from discoverse.utils import get_body_tmat , step_func , SimpleStateMachine #获取旋转矩阵，步进，状态机
@@ -118,7 +118,7 @@ if __name__ == "__main__":
             os.path.join(save_dir, os.path.basename(__file__)),
         )
     
-    arm_ik = AirbotPlayIK_nopin(
+    arm_ik = AirbotPlayIK(
             os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf")
         )
 
