@@ -4,16 +4,13 @@ import shutil
 import mujoco
 import mediapy
 import numpy as np
-from scipy.spatial.transform import Rotation
-from discoverse.envs.hand_with_arm_base import HandWithArmBase
+from discoverse.robots_env.hand_with_arm_base import HandWithArmBase
 
 
 def recoder_hand_with_arm(save_path, act_lst, obs_lst, cfg):
     #采集仿真数据并保存
     
     #TODO:在补充好HandWithArmBase中的传感器等数据后，修改这里的数据保存方式
-    
-    
     
     if os.path.exists(save_path):
         shutil.rmtree(save_path)

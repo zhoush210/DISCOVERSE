@@ -1,9 +1,9 @@
 import os
 import numpy as np
 
-from discoverse import DISCOVERSE_ASSERT_DIR
-from discoverse.airbot_play import AirbotPlayFIK
-from discoverse.envs.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
+from discoverse import DISCOVERSE_ASSETS_DIR
+from discoverse.robots import AirbotPlayIK
+from discoverse.robots_env.airbot_play_base import AirbotPlayBase, AirbotPlayCfg
 
 if __name__ == "__main__":
     import rospy
@@ -44,8 +44,7 @@ if __name__ == "__main__":
 
     action = exec_node.init_joint_pose[:exec_node.nj]
 
-    urdf_path = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf")
-    arm_fik = AirbotPlayFIK(urdf_path)
+    arm_ik = AirbotPlayIK()
 
     trans = np.array([ 0.35, -0., 0.3])
     rot   = np.array([
@@ -74,7 +73,7 @@ if __name__ == "__main__":
             cnt = 0
         cnt += 1
 
-        action[:6] = arm_fik.properIK(trans, rot, action[:6])
+        action[:6] = arm_ik.properIK(trans, rot, action[:6])
 
         obs, pri_obs, rew, ter, info = exec_node.step(action)
         joint_msg.header.stamp = rospy.Time.now()

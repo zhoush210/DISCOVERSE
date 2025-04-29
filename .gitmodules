@@ -7,9 +7,6 @@
 [submodule "policies/act"]
 	path = policies/act
 	url = https://github.com/OpenGHz/Imitate-All.git
-[submodule "submodules/diff-surfel-rasterization"]
-	path = submodules/diff-surfel-rasterization
-	url = https://github.com/hbb1/diff-surfel-rasterization.git
 [submodule "submodules/MuJoCo-LiDAR"]
 	path = submodules/MuJoCo-LiDAR
 	url = https://github.com/TATP-233/MuJoCo-LiDAR

@@ -5,10 +5,9 @@ import mujoco
 import mediapy
 import numpy as np
 
-from discoverse import DISCOVERSE_ASSERT_DIR
 from discoverse.utils import get_body_tmat
-from discoverse.airbot_play import AirbotPlayFIK
-from discoverse.envs.tok2_base import TOK2Base, TOK2Cfg
+from discoverse.robots import AirbotPlayIK
+from discoverse.robots_env.tok2_base import TOK2Base, TOK2Cfg
 
 def recoder_tok2(save_path, act_lst, obs_lst, cfg):
     if os.path.exists(save_path):
@@ -67,7 +66,7 @@ class TOK2TaskBase(TOK2Base):
         self.lft_arm_target_pose = self.arm_action_init_position[0].copy()
         self.rgt_arm_target_pose = self.arm_action_init_position[1].copy()
 
-        self.arm_fik = AirbotPlayFIK(urdf = os.path.join(DISCOVERSE_ASSERT_DIR, "urdf/airbot_play_v3_gripper_fixed.urdf"))
+        self.arm_ik = AirbotPlayIK()
 
     def resetState(self):
         super().resetState()
@@ -91,7 +90,7 @@ class TOK2TaskBase(TOK2Base):
             return (np.linalg.inv(tmat_mmk2) @ np.append(pose, 1))[:3]
 
     def setArmEndTarget(self, target_pose, target_rot, arm, q_ref):
-        rq = self.arm_fik.properIK(target_pose, target_rot, q_ref)
+        rq = self.arm_ik.properIK(target_pose, target_rot, q_ref)
         if arm == "l":
             self.tctr_left_arm[:] = rq
             self.set_left_arm_new_target = True

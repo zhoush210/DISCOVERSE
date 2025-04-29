@@ -4,7 +4,7 @@ import mujoco
 import mediapy
 import numpy as np
 
-from discoverse.envs.rm2_car_base import CARCfg, CARBase
+from discoverse.robots_env.rm2_car_base import CARCfg, CARBase
 
 if __name__ == "__main__":
     # import rospy

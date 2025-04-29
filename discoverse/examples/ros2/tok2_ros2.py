@@ -1,16 +1,11 @@
-import os
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
-from sensor_msgs.msg import JointState
 
-from discoverse.envs.tok2_base import TOK2Base, TOK2Cfg
+from discoverse.robots_env.tok2_base import TOK2Base, TOK2Cfg
 from discoverse.utils.joy_stick_ros2 import JoyTeleopRos2
-
-from discoverse import DISCOVERSE_ASSERT_DIR
 
 class TOK2JOY(TOK2Base, Node):
 

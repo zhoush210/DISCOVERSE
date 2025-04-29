@@ -3,7 +3,7 @@ import gymnasium
 import mujoco
 import cv2
 from gymnasium import spaces
-from discoverse.examples.tasks_mmk2.pick_kiwi import SimNode, cfg
+from discoverse.examples.tasks_mmk2.kiwi_pick import SimNode, cfg
 from discoverse.task_base import MMK2TaskBase
 from discoverse.utils import get_body_tmat
 

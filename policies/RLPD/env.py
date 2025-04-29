@@ -2,7 +2,7 @@ import numpy as np
 import gymnasium
 import mujoco
 from gymnasium import spaces
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.utils import get_body_tmat
 
 

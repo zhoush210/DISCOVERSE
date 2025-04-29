@@ -3,12 +3,11 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 import os
-import shutil
 import argparse
 import multiprocessing as mp
 
 from discoverse import DISCOVERSE_ROOT_DIR
-from discoverse.envs.mmk2_base import MMK2Cfg
+from discoverse.robots_env.mmk2_base import MMK2Cfg
 from discoverse.task_base import MMK2TaskBase, recoder_mmk2, copypy2
 from discoverse.utils import get_site_tmat, get_body_tmat, step_func, SimpleStateMachine
 
@@ -64,7 +63,7 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.teleop = None
+    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))

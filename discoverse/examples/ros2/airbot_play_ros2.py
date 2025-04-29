@@ -8,7 +8,7 @@ from cv_bridge import CvBridge
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import Image, JointState
 
-from discoverse.envs.airbot_play_base import AirbotPlayCfg, AirbotPlayBase
+from discoverse.robots_env.airbot_play_base import AirbotPlayCfg, AirbotPlayBase
 
 cfg = AirbotPlayCfg()
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/laptop_close.xml"

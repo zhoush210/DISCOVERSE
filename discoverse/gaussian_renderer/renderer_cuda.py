@@ -7,11 +7,6 @@ import numpy as np
 import torch
 from dataclasses import dataclass
 from diff_gaussian_rasterization import GaussianRasterizer as GausssianRasterizer_3d
-try:
-    from diff_surfel_rasterization import GaussianRasterizer as GausssianRasterizer_2d
-except ImportError:
-    GausssianRasterizer_2d = None
-    # print("diff_surfel_rasterization not found, using GaussianRasterizer_3d")
 
 @dataclass
 class GaussianDataCUDA:
@@ -77,8 +72,6 @@ class CUDARenderer:
         self.need_rerender = True
         self.render_rgb_img = None
         self.render_depth_img = None
-
-        self.surfel_render = False
 
     def update_gaussian_data(self, gaus: util_gau.GaussianData):
         self.need_rerender = True
@@ -170,64 +163,22 @@ class CUDARenderer:
 
         self.need_rerender = False
 
-        if self.surfel_render:
-            rasterizer = GausssianRasterizer_2d(raster_settings=self.raster_settings)
+        rasterizer = GausssianRasterizer_3d(raster_settings=self.raster_settings)
 
-            with torch.no_grad():
-                color_img, radii, allmap = rasterizer(
-                    means3D = self.gaussians.xyz,
-                    means2D = None,
-                    shs = self.gaussians.sh,
-                    colors_precomp = None,
-                    opacities = self.gaussians.opacity,
-                    scales = self.gaussians.scale,
-                    rotations = self.gaussians.rot,
-                    cov3D_precomp = None
-                )
+        with torch.no_grad():
+            color_img, radii, depth_img, _alpha = rasterizer(
+                means3D = self.gaussians.xyz,
+                means2D = None,
+                shs = self.gaussians.sh,
+                colors_precomp = None,
+                opacities = self.gaussians.opacity,
+                scales = self.gaussians.scale,
+                rotations = self.gaussians.rot,
+                cov3D_precomp = None
+            )
 
-                # # additional regularizations
-                # render_alpha = allmap[1:2]
-
-                # # get normal map
-                # # transform normal from view space to world space
-                # render_normal = allmap[2:5]
-                # render_normal = (render_normal.permute(1,2,0) @ (viewpoint_camera.world_view_transform[:3,:3].T)).permute(2,0,1)
-                
-                # # get median depth map
-                render_depth_median = allmap[5:6]
-                render_depth_median = torch.nan_to_num(render_depth_median, 0, 0)
-
-                # # get expected depth map
-                # render_depth_expected = allmap[0:1]
-                # render_depth_expected = (render_depth_expected / render_alpha)
-                # render_depth_expected = torch.nan_to_num(render_depth_expected, 0, 0)
-                
-                # # get depth distortion map
-                # render_dist = allmap[6:7]
-
-                print(f"color_img: {color_img.shape}, {color_img.dtype}, {color_img.max()}, {color_img.min()}, {color_img.mean()}")
-                print(f"depth_img: {render_depth_median.shape}, {render_depth_median.dtype}, {render_depth_median.max()}, {render_depth_median.min()}, {render_depth_median.mean()}")
-                self.render_depth_img = render_depth_median.permute(1, 2, 0).contiguous().cpu().numpy()
-                # self.render_depth_img = render_depth_expected.permute(1, 2, 0).contiguous().cpu().numpy()
-                self.render_rgb_img = (255. * torch.clamp(color_img, 0.0, 1.0)).to(torch.uint8).permute(1, 2, 0).contiguous().cpu().numpy()
-
-        else:
-            rasterizer = GausssianRasterizer_3d(raster_settings=self.raster_settings)
-
-            with torch.no_grad():
-                color_img, radii, depth_img, _alpha = rasterizer(
-                    means3D = self.gaussians.xyz,
-                    means2D = None,
-                    shs = self.gaussians.sh,
-                    colors_precomp = None,
-                    opacities = self.gaussians.opacity,
-                    scales = self.gaussians.scale,
-                    rotations = self.gaussians.rot,
-                    cov3D_precomp = None
-                )
-
-                self.render_depth_img = depth_img.permute(1, 2, 0).contiguous().cpu().numpy()
-                self.render_rgb_img = (255. * torch.clamp(color_img, 0.0, 1.0)).to(torch.uint8).permute(1, 2, 0).contiguous().cpu().numpy()
+            self.render_depth_img = depth_img.permute(1, 2, 0).contiguous().cpu().numpy()
+            self.render_rgb_img = (255. * torch.clamp(color_img, 0.0, 1.0)).to(torch.uint8).permute(1, 2, 0).contiguous().cpu().numpy()
 
         if render_depth:
             return self.render_depth_img

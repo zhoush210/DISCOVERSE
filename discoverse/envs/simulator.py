@@ -12,19 +12,21 @@ import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from discoverse import DISCOVERSE_ASSERT_DIR
+from discoverse import DISCOVERSE_ASSETS_DIR
 from discoverse.utils import BaseConfig
 
-try:
-    from discoverse.gaussian_renderer import GSRenderer
-    from discoverse.gaussian_renderer.util_gau import multiple_quaternion_vector3d, multiple_quaternions
-    DISCOVERSE_GAUSSIAN_RENDERER = True
+if sys.platform == "linux":
+    try:
+        from discoverse.gaussian_renderer import GSRenderer
+        from discoverse.gaussian_renderer.util_gau import multiple_quaternion_vector3d, multiple_quaternions
+        DISCOVERSE_GAUSSIAN_RENDERER = True
 
-except ImportError:
-    traceback.print_exc()
-    print("Warning: gaussian_splatting renderer not found. Please install the required packages to use it.")
+    except ImportError:
+        traceback.print_exc()
+        print("Warning: gaussian_splatting renderer not found. Please install the required packages to use it.")
+        DISCOVERSE_GAUSSIAN_RENDERER = False
+else:
     DISCOVERSE_GAUSSIAN_RENDERER = False
-
 
 def setRenderOptions(options):
     options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
@@ -71,8 +73,10 @@ class SimulatorBase:
 
         if self.config.mjcf_file_path.startswith("/"):
             self.mjcf_file = self.config.mjcf_file_path
+        elif os.path.exists(self.config.mjcf_file_path):
+            self.mjcf_file = self.config.mjcf_file_path
         else:
-            self.mjcf_file = os.path.join(DISCOVERSE_ASSERT_DIR, self.config.mjcf_file_path)
+            self.mjcf_file = os.path.join(DISCOVERSE_ASSETS_DIR, self.config.mjcf_file_path)
         if os.path.exists(self.mjcf_file):
             print("mjcf found: {}".format(self.mjcf_file))
         else:
@@ -178,6 +182,10 @@ class SimulatorBase:
                 else:
                     self.screen_scale = 1
 
+                # 注册清理函数
+                import atexit
+                atexit.register(self._cleanup_before_exit)
+
             except Exception as e:
                 print(f"GLFW初始化失败: {e}")
                 if self.glfw_initialized:
@@ -240,6 +248,9 @@ class SimulatorBase:
 
         self.post_load_mjcf()
 
+    def post_load_mjcf(self):
+        pass
+
     def update_renderer_window_size(self, width, height):
         self.renderer._width = width
         self.renderer._height = height
@@ -284,7 +295,7 @@ class SimulatorBase:
                         img_depth = self.getDepthImg(self.cam_id)
                     
                     if img_depth is not None:
-                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                        img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=255./self.config.max_render_depth), cv2.COLORMAP_JET)
                     else:
                         img_vis = None
             else:
@@ -293,7 +304,7 @@ class SimulatorBase:
                     img_vis = self.getRgbImg(self.cam_id)
                 else:
                     img_depth = self.getDepthImg(self.cam_id)
-                    img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=25.5), cv2.COLORMAP_JET)
+                    img_vis = cv2.applyColorMap(cv2.convertScaleAbs(img_depth, alpha=255./self.config.max_render_depth), cv2.COLORMAP_JET)
 
             try:
                 if glfw.window_should_close(self.window):
@@ -545,28 +556,34 @@ class SimulatorBase:
 
         return camera_position, Rotation.from_matrix(rotation_matrix).as_quat()[[3,0,1,2]]
 
-    def __del__(self):
+    def _cleanup_before_exit(self):
+        """在Python退出前执行的清理函数"""
         try:
-            if hasattr(self, 'window') and self.window is not None:
-                if glfw.get_current_context() is not None:
-                    glfw.destroy_window(self.window)
-                    self.window = None
-            
-            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+            # 如果GLFW上下文有效，先清理Mujoco渲染器
+            if hasattr(self, 'renderer'):
                 try:
-                    if glfw.get_current_context() is not None:
-                        glfw.terminate()
+                    del self.renderer
                 except Exception:
                     pass
+
+            # 然后清理GLFW资源
+            if hasattr(self, 'window') and self.window is not None:
+                try:
+                    glfw.destroy_window(self.window)
+                except Exception:
+                    pass
+                self.window = None
             
-        except Exception as e:
-            print(f"清理资源时出错: {str(e)}")
-        
-        finally:
-            try:
-                super().__del__()
-            except Exception:
-                pass
+            # 最后终止GLFW
+            if hasattr(self, 'glfw_initialized') and self.glfw_initialized:
+                try:
+                    glfw.terminate()
+                except Exception:
+                    pass
+                self.glfw_initialized = False
+            
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------------------
     # ---------------------------------- Override ----------------------------------
