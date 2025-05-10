@@ -37,6 +37,7 @@ cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = True
 cfg.init_key = "pick"
 cfg.gs_model_dict["kiwi"]       = "object/kiwi.ply"
+cfg.gs_model_dict["wood"]       = "object/wood.ply"
 cfg.gs_model_dict["red_bowl"]   = "object/red_bowl.ply"
 cfg.gs_model_dict["background"] = "scene/s2r2025/point_cloud.ply"
 
@@ -59,12 +60,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_kiwi_place")
     if not os.path.exists(save_dir):
@@ -78,7 +81,7 @@ if __name__ == "__main__":
 
     stm = SimpleStateMachine()
     stm.max_state_cnt = 19
-    max_time = 30.0 #s
+    max_time = 18.0 #s
 
     action = np.zeros_like(sim_node.target_control)
     process_list = []
@@ -99,13 +102,13 @@ if __name__ == "__main__":
                     sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.2
                 elif stm.state_idx == 1: # 伸到碗前
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "bowl_yellow")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.1 * tmat_bowl[:3, 1] + 0.1 * tmat_bowl[:3, 2]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到碗壁
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "bowl_yellow")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.046 * tmat_bowl[:3, 1] + 0.05 * tmat_bowl[:3, 2]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
@@ -131,32 +134,33 @@ if __name__ == "__main__":
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                 
                 elif stm.state_idx == 10: # 伸到枣上
-                    tmat_jujube = get_body_tmat(sim_node.mj_data, "jujube")
-                    target_posi = tmat_jujube[:3, 3] + 0.1 * tmat_jujube[:3, 1] + 0.1 * tmat_jujube[:3, 2]
+                    tmat_kiwi = get_body_tmat(sim_node.mj_data, "kiwi")
+                    target_posi = tmat_kiwi[:3, 3] + 0.05 * tmat_kiwi[:3, 0] + 0.15 * tmat_kiwi[:3, 2]
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                     sim_node.tctr_rgt_gripper[:] = 1
                 elif stm.state_idx == 11: # 伸到枣前
-                    tmat_jujube = get_body_tmat(sim_node.mj_data, "jujube")
-                    target_posi = tmat_jujube[:3, 3] + 0.132 * tmat_jujube[:3, 2]
+                    tmat_kiwi = get_body_tmat(sim_node.mj_data, "kiwi")
+                    target_posi = tmat_kiwi[:3, 3] + 0.05 * tmat_kiwi[:3, 0] + 0.12 * tmat_kiwi[:3, 2]
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                     sim_node.tctr_rgt_gripper[:] = 1 
                 elif stm.state_idx == 12: # 降高度
                     sim_node.tctr_head[1] = -0.8
-                    sim_node.tctr_slide[0] = 0.2
+                    sim_node.tctr_slide[0] = 0.17
                 elif stm.state_idx == 13: # 抓住枣
-                    sim_node.tctr_rgt_gripper[:] = 0.0
+                    sim_node.tctr_rgt_gripper[:] = 0.5
+                    sim_node.delay_cnt = int(0.5/sim_node.delta_t)
                 elif stm.state_idx == 14: # 提起枣
                     sim_node.tctr_slide[0] = 0.1
                 elif stm.state_idx == 15: # 移动到碗上空
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "bowl_yellow")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.15 * tmat_bowl[:3, 2]
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                 elif stm.state_idx == 16: # 降高度
                     sim_node.tctr_head[1] = -0.8
-                    sim_node.tctr_slide[0] = 0.15
+                    sim_node.tctr_slide[0] = 0.13
                 elif stm.state_idx == 17: # 放开枣
                     sim_node.tctr_rgt_gripper[:] = 1.0
                     sim_node.delay_cnt = int(0.2/sim_node.delta_t)
@@ -166,7 +170,7 @@ if __name__ == "__main__":
                 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)
-                sim_node.joint_move_ratio[2] *= 0.25
+                sim_node.joint_move_ratio[2] *= 0.5
 
             elif sim_node.mj_data.time > max_time:
                 raise ValueError("Time out")
