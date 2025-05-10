@@ -41,7 +41,7 @@ cfg.obj_list    = ["box"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
-    "fps"    : 25,
+    "fps"    : 20,
     "width"  : 640,
     "height" : 480
 }
@@ -79,7 +79,6 @@ if __name__ == "__main__":
     action = np.zeros_like(sim_node.target_control)
     process_list = []
 
-    pick_lip_arm = "l"
     move_speed = 1.
     obs = sim_node.reset()
     while sim_node.running:
