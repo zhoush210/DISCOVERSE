@@ -36,13 +36,13 @@ class SimNode(MMK2TaskBase):
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = True
 cfg.init_key = "pick"
-cfg.gs_model_dict["kiwi"]       = "object/kiwi.ply"
-cfg.gs_model_dict["wood"]       = "object/wood.ply"
-cfg.gs_model_dict["red_bowl"]   = "object/red_bowl.ply"
-cfg.gs_model_dict["background"] = "scene/s2r2025/point_cloud.ply"
+cfg.gs_model_dict["kiwi"]        = "object/kiwi.ply"
+cfg.gs_model_dict["wood"]        = "object/wood.ply"
+cfg.gs_model_dict["flower_bowl"] = "object/flower_bowl.ply"
+cfg.gs_model_dict["background"]  = "scene/s2r2025/point_cloud.ply"
 
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/kiwi_place.xml"
-cfg.obj_list    = ["kiwi", "red_bowl"]
+cfg.obj_list    = ["kiwi", "flower_bowl"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
@@ -102,13 +102,13 @@ if __name__ == "__main__":
                     sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.2
                 elif stm.state_idx == 1: # 伸到碗前
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "flower_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.1 * tmat_bowl[:3, 1] + 0.1 * tmat_bowl[:3, 2]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到碗壁
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "flower_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.046 * tmat_bowl[:3, 1] + 0.05 * tmat_bowl[:3, 2]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                 elif stm.state_idx == 14: # 提起枣
                     sim_node.tctr_slide[0] = 0.1
                 elif stm.state_idx == 15: # 移动到碗上空
-                    tmat_bowl = get_body_tmat(sim_node.mj_data, "red_bowl")
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "flower_bowl")
                     target_posi = tmat_bowl[:3, 3] + 0.15 * tmat_bowl[:3, 2]
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.rgt_arm_target_pose, sim_node.arm_action, "r", sim_node.sensor_rgt_arm_qpos, Rotation.from_euler('zyx', [ 0., -0.0551, 0.]).as_matrix())

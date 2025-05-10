@@ -41,9 +41,9 @@ class SimNode(MMK2TaskBase):
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
 cfg.init_key = "pick"
-cfg.gs_model_dict["plate_white"]            = "object/plate_white.ply"
+cfg.gs_model_dict["plate_white"]   = "object/plate_white.ply"
 cfg.gs_model_dict["kiwi"]          = "object/kiwi.ply"
-cfg.gs_model_dict["background"]      = "scene/Lab3/environment.ply"
+cfg.gs_model_dict["background"]    = "scene/Lab3/environment.ply"
 
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"
 cfg.obj_list    = ["plate_white", "kiwi"]
