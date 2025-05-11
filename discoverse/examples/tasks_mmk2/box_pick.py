@@ -41,7 +41,7 @@ cfg.obj_list    = ["box"]
 cfg.sync     = False
 cfg.headless = False
 cfg.render_set  = {
-    "fps"    : 25,
+    "fps"    : 20,
     "width"  : 640,
     "height" : 480
 }
@@ -55,12 +55,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_box")
     if not os.path.exists(save_dir):
@@ -79,7 +81,6 @@ if __name__ == "__main__":
     action = np.zeros_like(sim_node.target_control)
     process_list = []
 
-    pick_lip_arm = "l"
     move_speed = 1.
     obs = sim_node.reset()
     while sim_node.running:

@@ -51,12 +51,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_cabinet_door_open")
     if not os.path.exists(save_dir):
@@ -89,7 +91,7 @@ if __name__ == "__main__":
             if stm.trigger():
                 if stm.state_idx == 0: #后退并降高度
                     action[0] = -0.2
-                    sim_node.tctr_head[1] = 0.6
+                    sim_node.tctr_head[1] = -0.6
                     sim_node.tctr_slide[0] = 0.05
                 elif stm.state_idx == 1: # 伸到柜门前
                     action[0] = 0
@@ -100,7 +102,7 @@ if __name__ == "__main__":
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到柜门把手
                     tmat_door = get_site_tmat(sim_node.mj_data, "cabinet_door_handle")
-                    target_posi = tmat_door[:3, 3] + 0.001 * tmat_door[:3, 0]
+                    target_posi = tmat_door[:3, 3] + 0.02 * tmat_door[:3, 0]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [0, -1.5807, -1.5807]).as_matrix())
                 elif stm.state_idx == 3: # 抓住把手
@@ -142,7 +144,8 @@ if __name__ == "__main__":
         for i in range(2, sim_node.njctrl):
             action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
         yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
-        action[1] = -10 * yaw
+        action[0] =  5 * yaw
+        action[1] = -5 * yaw
 
         obs, _, _, _, _ = sim_node.step(action)
         
