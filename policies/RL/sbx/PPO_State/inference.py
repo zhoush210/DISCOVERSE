@@ -75,7 +75,7 @@ def test(model_path, render=True, episodes=10, deterministic=True, seed=42):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PPO强化学习推理脚本")
-    parser.add_argument("--model_path", type=str, required=False, default="data\\PPO_State\\logs_20250514_132028\\final_model.zip", help="模型路径")
+    parser.add_argument("--model_path", type=str, required=True, help="模型路径")
     parser.add_argument("--render", action="store_true", default=True, help="在测试过程中显示渲染画面 (默认: True)")
     parser.add_argument("--episodes", type=int, default=10000, help="测试回合数")
     parser.add_argument("--deterministic", action="store_true", help="使用确定性策略进行测试")
