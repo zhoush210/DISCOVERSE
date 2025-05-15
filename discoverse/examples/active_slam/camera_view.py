@@ -168,6 +168,8 @@ class CamEnv(SimulatorBase):
     key_space_triger = False
     key_s_triger = False
 
+    mouse_in_tk = False
+
     def __init__(self, config: BaseConfig):
         """初始化相机环境
         
@@ -201,9 +203,6 @@ class CamEnv(SimulatorBase):
         # 添加鼠标事件处理
         self.root.bind('<Enter>', self.on_enter_window)
         self.root.bind('<Leave>', self.on_leave_window)
-        
-        # 初始化鼠标状态
-        self.mouse_in_tk = False
 
     def on_closing(self):
         """处理窗口关闭事件"""
