@@ -1,10 +1,9 @@
 import numpy as np
 import gymnasium
-import mujoco
 from gymnasium import spaces
 from discoverse.examples.tasks_mmk2.kiwi_pick import SimNode, cfg
 from discoverse.task_base import MMK2TaskBase
-from discoverse.utils import get_body_tmat
+from discoverse.utils import get_body_tmat, step_func
 
 
 class Env(gymnasium.Env):
@@ -13,7 +12,7 @@ class Env(gymnasium.Env):
 
         # 环境配置
         cfg.use_gaussian_renderer = False  # 关闭高斯渲染器
-        cfg.init_key = "pick"  # 初始化模式为“抓取”
+        cfg.init_key = "pick"  # 初始化模式为"抓取"
         cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # 定义白色盘子的模型路径
         cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # 定义奇异果的模型路径
         cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # 定义背景的模型路径
@@ -24,11 +23,14 @@ class Env(gymnasium.Env):
 
         # 创建基础任务环境
         if task_base is None:
-            self.task_base = MMK2TaskBase(cfg)  # 使用给定配置初始化基础任务环境
+            self.task_base = SimNode(cfg)  # 使用SimNode初始化任务环境
         else:
             self.task_base = task_base
         self.mj_model = self.task_base.mj_model  # 获取MuJoCo模型
         self.mj_data = self.task_base.mj_data  # 获取MuJoCo数据
+        
+        # 设置最大时间限制，与原始代码保持一致
+        self.max_time = 20.0  # 秒
 
         # 动作空间：机械臂关节角度控制
         # 使用actuator_ctrlrange来确定动作空间范围
@@ -59,8 +61,8 @@ class Env(gymnasium.Env):
 
         try:
             # 重置环境
-            self.task_base.reset()  # 重置任务环境
-            self.task_base.domain_randomization()  # 域随机化
+            obs = self.task_base.reset()  # 重置任务环境
+            self.task_base.domain_randomization()  # 使用SimNode的域随机化
 
             observation = self._get_obs()  # 获取初始观测
             info = {}
@@ -86,20 +88,35 @@ class Env(gymnasium.Env):
                 self.action_space.high
             )
 
-            # 直接更新控制信号，不通过task_base
-            self.mj_data.ctrl[:] = clipped_action  # 更新控制器信号
-            mujoco.mj_step(self.mj_model, self.mj_data)  # 模拟物理引擎一步
+            # 检查是否超时
+            if self.mj_data.time > self.max_time:
+                raise ValueError("Time out")
+
+            # 使用task_base的step方法
+            obs, _, _, _, _ = self.task_base.step(clipped_action)
 
             # 获取新的状态
             observation = self._get_obs()  # 获取新的观察值
             reward = self._compute_reward()  # 计算奖励
-            terminated = self._check_termination()  # 检查是否终止
+            
+            # 自定义成功检查逻辑，基于机械臂末端执行器与目标物体的距离
+            tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")
+            tmat_plate_white = get_body_tmat(self.mj_data, "plate_white")
+            distance = np.hypot(tmat_kiwi[0, 3] - tmat_plate_white[0, 3], tmat_kiwi[1, 3] - tmat_plate_white[1, 3])
+            terminated = distance < 0.018  # 如果距离小于阈值，则认为任务成功
+            
             truncated = self.current_step >= self.max_steps  # 检查是否超出最大步数
             info = {}  # 信息字典
 
             # 将奖励信息添加到info中
             info.update(self.reward_info)
             return observation, reward, terminated, truncated, info
+        except ValueError as ve:
+            # 与原始代码保持一致的错误处理
+            # traceback.print_exc()
+            obs = self.task_base.reset()
+            observation = self._get_obs()
+            return observation, 0, True, False, {}
         except Exception as e:
             print(f"执行动作失败: {str(e)}")
             raise e
@@ -181,19 +198,6 @@ class Env(gymnasium.Env):
         }
 
         return total_reward
-
-    def _check_termination(self):
-        # 检查是否完成任务
-        tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # 奇异果的变换矩阵
-        tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # 盘子的变换矩阵
-
-        kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # 奇异果的位置
-        plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # 盘子的位置
-
-        # 如果奇异果成功放置在盘子上
-        if np.linalg.norm(kiwi_pos - plate_pos) < 0.02:
-            return True  # 任务完成，终止环境
-        return False
 
     def render(self):
         pass  # 使用MMK2TaskBase的渲染功能
