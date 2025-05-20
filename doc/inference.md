@@ -59,3 +59,12 @@ python3 policies/dp/infer_real.py --config-path=configs --config-name=block_plac
 - `--config-path`: 配置文件所在路径
 - `--config-name`: 配置文件名
 - 需要注意，真机推理的`config.yaml`相较于`sim`中的`config.yaml`，需要增加`global_camid`和`wrist_camid`，分别指向对应的相机编号
+
+## diffusion_policy
+
+### 推理命令
+
+```bash
+python3 eval.py "$task_name" "$checkpoint" "$gpu_id"
+# for example: bash eval.sh block_place note_1000 0
+```

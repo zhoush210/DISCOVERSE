@@ -44,3 +44,16 @@ python3 policies/dp/raw2zarr.py -dir data -tn <task_name>
 - `-tn`: 任务名，程序将根据任务名从data目录中寻找相同名称的数据集文件夹
 
 转换后的数据存放于`discoverse/data/zarr`文件夹中。
+
+## diffusion policy
+
+将仿真采集的原始数据格式转换为DP算法中用到的zarr格式，命令如下：
+
+```bash
+python3 policies/dp/raw2zarr.py -dir data -tn <task_name> 
+```
+
+- `-dir`: 数据存放的根目录，默认为data
+- `-tn`: 任务名，程序将根据任务名从data目录中寻找相同名称的数据集文件夹
+
+转换后的数据存放于`discoverse/data/zarr`文件夹中。

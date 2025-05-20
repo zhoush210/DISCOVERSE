@@ -93,3 +93,25 @@ python3 policies/train.py dp --config-path=configs --config-name=block_place mod
 ### 训练结果
 
 训练结果保存在`policies/dp/logs`目录下。
+
+## diffusion policy
+
+安装依赖:
+```bash
+cd policies/Diffusion-Policy
+pip install -e .
+cd ../..
+pip install zarr==2.12.0 wandb ipdb gpustat dm_control omegaconf hydra-core==1.2.0 dill==0.3.5.1 einops==0.4.1 diffusers==0.11.1 numba==0.56.4 moviepy imageio av matplotlib termcolor
+```
+### 数据集位置
+```bash
+cd DISCOVERSE
+mv data/zarr/block_place.zarr policies/Diffusion-Policy/data
+```
+
+### 训练命令
+```bash
+cd policies/Diffusion-Policy
+bash train.sh ${task_name} ${seed} ${gpu_id}
+# As example: bash train.sh block_place 0 0
+```
