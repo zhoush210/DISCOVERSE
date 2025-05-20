@@ -65,12 +65,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_plate_coffecup")
     if not os.path.exists(save_dir):

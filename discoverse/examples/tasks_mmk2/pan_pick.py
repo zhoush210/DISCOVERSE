@@ -53,11 +53,9 @@ class SimNode(MMK2TaskBase):
             pass
 
     def check_success(self):
-        
         distance = self.mj_data.qpos[self.njq+7*0+2] - 0.75
-        if distance < 1e-2:
+        if distance < 0.03:
             return True
-
         return False
 
 cfg = MMK2Cfg()
@@ -86,12 +84,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_pick_pan")
     if not os.path.exists(save_dir):
@@ -110,7 +110,6 @@ if __name__ == "__main__":
     action = np.zeros_like(sim_node.target_control)
     process_list = []
 
-    pick_lip_arm = "l"
     move_speed = 1.
     obs = sim_node.reset()
     while sim_node.running:
@@ -203,7 +202,7 @@ if __name__ == "__main__":
                     sim_node.tctr_rgt_gripper[:] = 0
                 elif stm.state_idx == 11: # 放下盘子1
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")
-                    target_posi = tmat_box[:3, 3] + np.array([-0.3, 0.12, 0.005]) # y,x,z
+                    target_posi = tmat_box[:3, 3] + np.array([-0.3, 0.12, 0.035]) # y,x,z
                     # 将旋转矩阵转换为欧拉角 (指定旋转轴顺序为 'zyx')
                     euler_angles = Rotation.from_matrix(tmat_box[:3, :3]).as_euler('zyx', degrees=False)
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
@@ -211,7 +210,7 @@ if __name__ == "__main__":
                     sim_node.tctr_rgt_gripper[:] = 0
                 elif stm.state_idx == 12: # 放下盘子1
                     tmat_box = get_body_tmat(sim_node.mj_data, "box")
-                    target_posi = tmat_box[:3, 3] + np.array([-0.3, 0.12, 0.00]) # y,x,z
+                    target_posi = tmat_box[:3, 3] + np.array([-0.3, 0.12, 0.03]) # y,x,z
                     # 将旋转矩阵转换为欧拉角 (指定旋转轴顺序为 'zyx')
                     euler_angles = Rotation.from_matrix(tmat_box[:3, :3]).as_euler('zyx', degrees=False)
                     sim_node.rgt_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)

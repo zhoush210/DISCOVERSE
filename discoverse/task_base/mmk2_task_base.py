@@ -112,19 +112,6 @@ class MMK2TaskBase(MMK2Base):
         else:
             raise ValueError(f"Wrong action dim{self.io_dim}")
 
-    def getObservation(self):
-        self.obs = {
-            "time" : self.mj_data.time,
-            "jq"   : self.sensor_qpos[self.njctrl-self.io_dim:self.njctrl].tolist(),
-            # "jv"   : self.sensor_qvel.tolist(),
-            # "jf"   : self.sensor_force.tolist(),
-            "base_position"    : self.sensor_base_position.tolist(),
-            "base_orientation" : self.sensor_base_orientation.tolist(),
-            "img"  : self.img_rgb_obs_s,
-            "depth" : self.img_depth_obs_s
-        }
-        return self.obs
-
     def checkActionDone(self):
         slide_done = np.allclose(self.tctr_slide, self.sensor_slide_qpos, atol=3e-2) and np.abs(self.sensor_slide_qvel).sum() < 1e-2
         head_done = np.allclose(self.tctr_head, self.sensor_head_qpos, atol=3e-2) and np.abs(self.sensor_head_qvel).sum() < 0.1

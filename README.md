@@ -53,8 +53,18 @@ The physical engine of `DISCOVERSE` is [mujoco](https://github.com/google-deepmi
     cd submodules/diff-gaussian-rasterization/
     git checkout 8829d14
     ```
-    Modify line 154 of `submodules/diff-gaussian-rasterization/cuda_rasterizer/auxiliary.h`,
+    (1) Modify line 154 of `submodules/diff-gaussian-rasterization/cuda_rasterizer/auxiliary.h`,
     change `(p_view.z <= 0.2f)` to `(p_view.z <= 0.01f)`.
+    (2) Modify line 361 of `submodules/diff-gaussian-rasterization/cuda_rasterizer/forward.cu`,
+    change
+    ```python
+    D += depths[collected_id[j]] * alpha * T;
+    ```
+    to
+    ```python
+    if (depths[collected_id[j]] < 50.0f)
+        D += depths[collected_id[j]] * alpha * T;
+    ```
 
     ```bash
     cd ../..

@@ -5,6 +5,7 @@ from scipy.spatial.transform import Rotation
 import os
 import argparse
 import multiprocessing as mp
+import traceback
 
 from discoverse import DISCOVERSE_ROOT_DIR
 from discoverse.robots_env.mmk2_base import MMK2Cfg
@@ -16,7 +17,7 @@ class SimNode(MMK2TaskBase):
 
     def domain_randomization(self):
         global kiwi_x_bios, kiwi_y_bios, kiwi_a_bios
-        # 随机 木盘位置
+        # 随机木盘位置
         plate_white_x_bios = (np.random.random()) * 0.02
         plate_white_y_bios = (np.random.random() - 1) * 0.05
         self.mj_data.qpos[self.njq+7*0+0] += plate_white_x_bios
@@ -32,18 +33,19 @@ class SimNode(MMK2TaskBase):
         self.mj_data.qpos[self.njq+7*1+6] += kiwi_a_bios
 
     def check_success(self):
-        tmat_kiwi = get_body_tmat(sim_node.mj_data, "kiwi")
-        tmat_plate_white = get_body_tmat(sim_node.mj_data, "plate_white")
+        tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")
+        tmat_plate_white = get_body_tmat(self.mj_data, "plate_white")
         distance= np.hypot(tmat_kiwi[0, 3] - tmat_plate_white[0, 3], tmat_kiwi[1, 3] - tmat_plate_white[1, 3])
-        print(distance)
+        # print(distance)
+        return distance < 0.018
 
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
 cfg.init_key = "pick"
-cfg.gs_model_dict["plate_white"]            = "object/plate_white.ply"
+cfg.gs_model_dict["plate_white"]   = "object/plate_white.ply"
 cfg.gs_model_dict["kiwi"]          = "object/kiwi.ply"
-cfg.gs_model_dict["background"]      = "scene/Lab3/environment.ply"
+cfg.gs_model_dict["background"]    = "scene/Lab3/environment.ply"
 
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"
 cfg.obj_list    = ["plate_white", "kiwi"]
@@ -64,12 +66,14 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/pick_kiwi")
     if not os.path.exists(save_dir):
@@ -83,7 +87,7 @@ if __name__ == "__main__":
 
     stm = SimpleStateMachine()
     stm.max_state_cnt = 9
-    max_time = 30.0 #s
+    max_time = 20.0 #s
 
     action = np.zeros_like(sim_node.target_control)
     process_list = []

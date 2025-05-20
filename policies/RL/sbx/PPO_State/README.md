@@ -1,287 +1,161 @@
-# SBX PPO Reinforcement Learning Training Framework
+# PPO_State: State-Based Proximal Policy Optimization Algorithm
 
-This directory contains the framework code for reinforcement learning training using the PPO (Proximal Policy Optimization) algorithm. This framework is designed for the DISCOVERSE environment, especially for robotic arm grasping tasks.
-
-[中文版请见 README_zh.md](README_zh.md)
+This repository implements a state-based Proximal Policy Optimization (PPO) algorithm for robotic manipulation tasks within the DISCOVERSE environment. The implementation focuses on efficient learning from state observations for precise robotic control.
 
 ## Installation
+
 Refer to https://github.com/araffin/sbx, using version v0.20.0
 
-## File Structure
+## Project Structure
 
-- `env.py`: Environment class definition, including observation space, action space, reward calculation, etc.
-- `train.py`: Training script for creating and training PPO models
+- `env.py`: Environment implementation with state-based observation space, action space, and reward calculation
+- `train.py`: Training script with PPO model configuration and training loop
+- `inference.py`: Inference script for model evaluation and deployment
 
-## Environment Configuration and Customization
+## Environment Architecture
 
-### Import Instructions
+### State Space Configuration
 
-In `env.py`, we import `SimNode` and `cfg` from the example directory:
-
-```python
-from discoverse.examples.tasks_mmk2.pick_kiwi import SimNode, cfg
-```
-
-Here, `pick_kiwi.py` is an example file located in the `discoverse/examples/tasks_mmk2/` directory. You can replace it with other task files according to your needs.
-
-### Environment Configuration
-
-The environment configuration is mainly set in the `__init__` method of the `Env` class:
+The observation space encompasses comprehensive state information:
 
 ```python
-# Environment configuration
-cfg.use_gaussian_renderer = False  # Disable Gaussian renderer
-cfg.init_key = "pick"  # Initialization mode: "pick"
-cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # Path to white plate model
-cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # Path to kiwi model
-cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # Path to background model
-cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"  # MuJoCo environment file path
-cfg.obj_list = ["plate_white", "kiwi"]  # List of objects in the environment
-cfg.sync = True  # Whether to update synchronously
-cfg.headless = not render  # Whether to show rendering based on render parameter
+obs = np.concatenate([
+    qpos,           # Joint positions
+    qvel,           # Joint velocities
+    kiwi_pos,       # Target object position
+    plate_pos       # Goal position
+]).astype(np.float32)
 ```
 
-You can modify these configurations as needed, such as changing model paths or object lists.
+### Action Space
 
-### Key Customization Parts
-
-#### 1. Observation Space
-
-The observation space defines the environmental states accessible to the agent. Customize in the `_get_obs` method:
+The action space is defined by the robot's joint control ranges:
 
 ```python
-def _get_obs(self):
-    # Get robot arm state
-    qpos = self.mj_data.qpos.copy()  # Joint positions
-    qvel = self.mj_data.qvel.copy()  # Joint velocities
-
-    # Get positions of kiwi and plate
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # Kiwi transformation matrix
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # Plate transformation matrix
-
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # Kiwi position
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # Plate position
-
-    # Combine observations
-    obs = np.concatenate([
-        qpos,
-        qvel,
-        kiwi_pos,
-        plate_pos
-    ]).astype(np.float32)
-
-    return obs
+self.action_space = spaces.Box(
+    low=ctrl_range[:, 0],    # Minimum joint angles
+    high=ctrl_range[:, 1],   # Maximum joint angles
+    dtype=np.float32
+)
 ```
 
-Depending on your task, you may need to include different state information, such as:
-- Joint angles and velocities of the robot arm
-- Position and pose of the target object
-- Position of obstacles
-- Sensor readings, etc.
+### Reward Function Design
 
-#### 2. Reward Function
+The reward function incorporates multiple components for effective learning:
 
-The reward function is one of the most critical parts of reinforcement learning, defining the task objective. Customize in the `_compute_reward` method:
-
-```python
-def _compute_reward(self):
-    # Get position information
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")  # Kiwi transformation matrix
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")  # Plate transformation matrix
-    tmat_rgt_arm = get_body_tmat(self.mj_data, "rgt_arm_link6")  # Right arm end-effector transformation matrix
-
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])  # Kiwi position
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])  # Plate position
-    rgt_arm_pos = np.array([tmat_rgt_arm[1, 3], tmat_rgt_arm[0, 3], tmat_rgt_arm[2, 3]])  # Right arm end position
-
-    # Calculate distances
-    distance_to_kiwi = np.linalg.norm(rgt_arm_pos - kiwi_pos)  # Distance from arm to kiwi
-    kiwi_to_plate = np.linalg.norm(kiwi_pos - plate_pos)  # Distance from kiwi to plate
-
-    # Calculate rewards
-    # Approach reward: encourage arm to approach kiwi
-    approach_reward = 0.0
-    if distance_to_kiwi < 0.1:
-        approach_reward = 1.0
-    elif distance_to_kiwi < 0.2:
-        approach_reward = 0.5
-    else:
-        approach_reward = -distance_to_kiwi
-
-    # Placement reward: encourage placing kiwi onto plate
-    place_reward = 0.0
-    if kiwi_to_plate < 0.02:
-        place_reward = 10.0
-    elif kiwi_to_plate < 0.1:
-        place_reward = 2.0
-    else:
-        place_reward = -kiwi_to_plate
-
-    # Step penalty: penalize each step
-    step_penalty = -0.01 * self.current_step
-
-    # Action magnitude penalty: penalize large control signals
-    action_magnitude = np.mean(np.abs(self.mj_data.ctrl))
-    action_penalty = -0.1 * action_magnitude
-
-    # Total reward
-    total_reward = (
-        approach_reward +
-        place_reward +
-        step_penalty +
-        action_penalty
-    )
-
-    # For logging
-    self.info = {
-        "rewards/approach_reward": approach_reward,
-        "rewards/place_reward": place_reward,
-        "rewards/step_penalty": step_penalty,
-        "rewards/action_penalty": action_penalty,
-        "info/distance_to_kiwi": distance_to_kiwi,
-        "info/kiwi_to_plate": kiwi_to_plate,
-        "info/action_magnitude": action_magnitude
-    }
-
-    return total_reward
-```
-
-When designing reward functions, consider:
-- Sparse vs. dense rewards: Sparse rewards are only given upon task completion, while dense rewards provide feedback at every step
-- Reward shaping: Use intermediate rewards to guide learning
-- Penalties: Penalize undesired behaviors, such as large actions or excessive steps
-
-#### 3. Termination Condition
-
-Termination conditions define when an episode ends. Customize in the `_check_termination` method:
-
-```python
-def _check_termination(self):
-    # Check if task is completed
-    tmat_kiwi = get_body_tmat(self.mj_data, "kiwi")
-    tmat_plate = get_body_tmat(self.mj_data, "plate_white")
-
-    kiwi_pos = np.array([tmat_kiwi[1, 3], tmat_kiwi[0, 3], tmat_kiwi[2, 3]])
-    plate_pos = np.array([tmat_plate[1, 3], tmat_plate[0, 3], tmat_plate[2, 3]])
-
-    # If kiwi is successfully placed on the plate
-    if np.linalg.norm(kiwi_pos - plate_pos) < 0.02:
-        return True  # Task complete
-    return False
-```
-
-## Training and Testing
-
-### Training the Model
-
-Use the `train.py` script to train the model:
-
-```bash
-python train.py --render --total_timesteps 1000000 --batch_size 64
-```
-
-### TensorBoard visualization
-
-During the training process, we use TensorBoard to record and visualize key metrics:
-
-1. **Launch TensorBoard**:
-    ```bash
-    tensorboard --logdir data/PPO_State/logs_[timestamp]
-    ```
-    Among them, 'timestamp' is the timestamp at the beginning of training.
-
-2. **View training metrics**:
-    -Open in browser http://localhost:6006
-    -Visualize the following key indicators:
-    -Rewards: Total rewards, individual reward components (proximity rewards, placement rewards, etc.)
-    -Loss functions: policy loss, value function loss
-    -Other indicators: action entropy, learning rate, state value estimation
-
-3. **Usage tips**:
-    -Adjust curve display using a smooth slider
-    -Compare the performance of different training runs
-    -Analyze parameter distribution through the HISTOGRAM tab
-    -Track training progress using SCALARS tabs
-
-#### Training Parameters:
-- `--render`: Show rendering during training (optional)
-- `--seed`: Random seed, default is 42
-- `--total_timesteps`: Total training steps, default is 1000000
-- `--batch_size`: Batch size, default is 64
-- `--n_steps`: Trajectory length per update, default is 2048
-- `--learning_rate`: Learning rate, default is 3e-4
-- `--log_dir`: Log directory, default is a timestamped directory
-- `--model_path`: Pretrained model path for continued training (optional)
-- `--eval_freq`: Evaluation frequency, default is 10000 steps
-- `--log_interval`: Logging interval, default is 10
-
-#### Features:
-
-1. **Training Progress Bar**: Real-time progress bar during training, showing trained steps and elapsed time.
-
-2. **Training Resume**: Supports resuming from previous checkpoints by specifying the `--model_path` parameter:
-   ```bash
-   python train.py --model_path data/PPO/logs_20230101_120000/best_model/best_model.zip
+1. **Approach Reward**: Encourages the end-effector to approach the target object
+   ```python
+   approach_reward = (1 - np.tanh(2 * distance_to_kiwi)) * w_approach
    ```
 
-3. **Auto-Save**: Automatically saves the best-performing model during training and the final model at the end.
+2. **Placement Reward**: Rewards successful object placement
+   ```python
+   place_reward = (1 - np.tanh(2 * kiwi_to_plate)) * w_place
+   ```
 
-### Testing the Model
+3. **Step Penalty**: Encourages efficient task completion
+   ```python
+   step_penalty = -w_step * self.current_step
+   ```
 
-Use the `train.py` script to test the trained model:
+4. **Action Magnitude Penalty**: Promotes smooth control
+   ```python
+   action_penalty = -w_action * action_magnitude
+   ```
+
+## Training Configuration
+
+### Command-line Arguments
 
 ```bash
-python train.py --test --model_path path/to/model.zip --render
+python train.py [
+    --render              # Enable environment rendering
+    --seed INT            # Random seed (default: 42)
+    --total_timesteps INT # Total training steps (default: 1000000)
+    --batch_size INT      # Batch size (default: 64)
+    --n_steps INT         # Steps per update (default: 2048)
+    --learning_rate FLOAT # Learning rate (default: 3e-4)
+    --log_dir STR        # Log directory path
+    --model_path STR     # Pre-trained model path
+    --log_interval INT   # Logging frequency (default: 10)
+]
 ```
 
-#### Testing Parameters:
-- `--test`: Enable test mode
-- `--model_path`: Model path (required)
-- `--render`: Show rendering during testing (optional)
-- `--episodes`: Number of test episodes, default is 10
-- `--deterministic`: Use deterministic policy for testing (optional)
-- `--seed`: Random seed, default is 42
+### PPO Model Parameters
 
-## Steps to Customize Your Task
+```python
+model = PPO(
+    "MlpPolicy",
+    env,
+    n_steps=n_steps,        # Trajectory length per update
+    batch_size=batch_size,  # Training batch size
+    n_epochs=10,           # Update iterations
+    gamma=0.99,            # Discount factor
+    learning_rate=3e-4,    # Learning rate
+    clip_range=0.2,        # PPO clipping parameter
+    ent_coef=0.01,         # Entropy coefficient
+    tensorboard_log=log_dir # TensorBoard logging
+)
+```
 
-1. **Create Task Environment**:
-   - Copy `env.py` and modify it according to your task
-   - Adjust observation space, reward function, and termination conditions
+## Model Evaluation
 
-2. **Configure Environment**:
-   - Modify `cfg` configuration, including model paths, object list, etc.
-   - Adjust rendering settings as needed
+### Inference Configuration
 
-3. **Adjust Training Parameters**:
-   - Modify PPO hyperparameters in `train.py`
-   - Adjust training steps, batch size, etc.
+```bash
+python inference.py [
+    --model_path STR      # Model path (default: "data\\PPO_State\\logs_20250514_132028\\final_model.zip")
+    --render              # Enable rendering (default: True)
+    --episodes INT        # Number of test episodes (default: 10000)
+    --deterministic      # Use deterministic policy
+    --seed INT           # Random seed (default: 42)
+]
+```
 
-4. **Train and Evaluate**:
-   - Run the training script and monitor progress
-   - Periodically evaluate model performance and save the best model
+### Performance Metrics
 
-## Tips and Tricks
+The inference script provides detailed performance metrics:
+- Episode rewards
+- Success rate
+- Average completion time
+- Standard deviation of performance
 
-1. **Reward Design**:
-   - The reward function is the most critical part of reinforcement learning
-   - Try different reward combinations to find the most effective design
-   - Use reward components to guide the agent to learn complex tasks
+## TensorBoard Visualization
 
-2. **Observation Space**:
-   - Only include task-relevant information to avoid distracting the agent
-   - Consider using relative positions instead of absolute positions
+Training progress can be monitored through TensorBoard:
 
-3. **Hyperparameter Tuning**:
-   - Learning rate, batch size, and update frequency significantly affect training
-   - Use grid search or Bayesian optimization to find the best hyperparameters
+```bash
+tensorboard --logdir data/PPO_State/logs_[timestamp]
+```
 
-4. **Visualization and Debugging**:
-   - Use tools like TensorBoard to visualize the training process
-   - Log detailed reward components for analysis and debugging
+Key metrics include:
+- Total rewards
+- Component rewards (approach, placement)
+- Policy loss
+- Value function loss
+- Action entropy
 
-5. **Domain Randomization**:
-   - Introduce randomness during training to improve model generalization
-   - Randomize initial states, object positions, physical parameters, etc.
+## Implementation Details
 
----
-[中文版请见 README_zh.md](README_zh.md)
+### Environment Initialization
+
+```python
+cfg.use_gaussian_renderer = False
+cfg.init_key = "pick"
+cfg.gs_model_dict = {
+    "plate_white": "object/plate_white.ply",
+    "kiwi": "object/kiwi.ply",
+    "background": "scene/tsimf_library_1/point_cloud.ply"
+}
+cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"
+```
+
+### Task Success Criteria
+
+```python
+distance = np.hypot(
+    tmat_kiwi[0, 3] - tmat_plate_white[0, 3],
+    tmat_kiwi[1, 3] - tmat_plate_white[1, 3]
+)
+terminated = distance < 0.018  # Task completion threshold
+```

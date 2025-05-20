@@ -1,126 +1,192 @@
-# PPO_Vision: Vision-Based PPO Algorithm
+# PPO_Vision: Vision-Based Proximal Policy Optimization Algorithm
 
-This project implements a vision-based Proximal Policy Optimization (PPO) reinforcement learning algorithm to control a robotic arm for grasping and placing tasks.
-
-[中文版请见 README_zh.md](README_zh.md)
+This repository implements a vision-based Proximal Policy Optimization (PPO) algorithm for robotic manipulation tasks within the DISCOVERSE environment. The implementation focuses on learning directly from visual observations for robust robotic control.
 
 ## Installation
 
-Refer to https://github.com/araffin/sbx, using version v0.20.0.
+Refer to https://github.com/araffin/sbx, using version v0.20.0
 
-## Algorithm Features
+## Project Structure
 
-Compared with the state-based PPO algorithm (PPO_State), the main differences of PPO_Vision are:
+- `env.py`: Environment implementation with vision-based observation space, action space, and reward calculation
+- `train.py`: Training script with CNN feature extractor and PPO model configuration
+- `inference.py`: Inference script for model evaluation and deployment
 
-1. **Vision Input**: Uses camera images as the observation space instead of directly using joint states and object positions. The image size is 84x84 RGB.
-2. **CNN Feature Extractor**: Uses a Convolutional Neural Network (CNN) to process image input and extract visual features. The network consists of 3 convolutional layers and 1 fully connected layer.
-3. **End-to-End Learning**: End-to-end learning from pixels to actions, no manual feature engineering required.
-4. **Domain Randomization**: Enhances model generalization via domain randomization during environment resets.
+## Environment Architecture
 
-## Environment Setup
+### Vision Space Configuration
 
-The environment is based on DISCOVERSE's MMK2TaskBase. The task is to control a robotic arm to grasp a kiwi and place it on a plate.
-
-### Observation Space
-- Type: RGB image
-- Shape: (3, 84, 84)
-- Data type: uint8 (0-255)
-
-### Action Space
-- Type: Robotic arm joint angle control
-- Dimension: Same as the robot's degrees of freedom
-- Range: Determined by actuator_ctrlrange
-
-### Reward Design
-- Approach reward: Distance from the arm's end-effector to the target object
-- Grasp reward: Successfully grasping the object
-- Place reward: Placing the object at the target location
-- Step penalty: Time penalty per step
-- Action magnitude penalty: Prevents excessive actions
-
-## CNN Feature Extractor
+The observation space utilizes stacked RGB images:
 
 ```python
-class CNNFeatureExtractor(torch.nn.Module):
-    def __init__(self, observation_space):
-        super(CNNFeatureExtractor, self).__init__()
-        # Input is (3, 84, 84) RGB image
+obs_shape = (3, 84, 84, 4)  # (channels, height, width, stack_size)
+self.observation_space = spaces.Box(
+    low=np.zeros(obs_shape, dtype=np.float32),
+    high=np.ones(obs_shape, dtype=np.float32),
+    dtype=np.float32
+)
+```
+
+### Action Space
+
+The action space is defined by the robot's joint control ranges:
+
+```python
+self.action_space = spaces.Box(
+    low=ctrl_range[:, 0],    # Minimum joint angles
+    high=ctrl_range[:, 1],   # Maximum joint angles
+    dtype=np.float32
+)
+```
+
+### CNN Feature Extractor
+
+A custom CNN architecture processes visual observations:
+
+```python
+class CNNFeatureExtractor(BaseFeaturesExtractor):
+    def __init__(self, observation_space, features_dim=256):
+        super().__init__(observation_space, features_dim)
+        n_input_channels = observation_space.shape[0] * observation_space.shape[3]
         self.cnn = torch.nn.Sequential(
-            torch.nn.Conv2d(3, 32, kernel_size=8, stride=4),
+            torch.nn.Conv2d(n_input_channels, 32, kernel_size=8, stride=4),
             torch.nn.ReLU(),
             torch.nn.Conv2d(32, 64, kernel_size=4, stride=2),
             torch.nn.ReLU(),
             torch.nn.Conv2d(64, 64, kernel_size=3, stride=1),
             torch.nn.ReLU(),
+            torch.nn.AdaptiveAvgPool2d((7, 7)),
             torch.nn.Flatten()
         )
-        with torch.no_grad():
-            sample = torch.zeros(1, *observation_space.shape)
-            n_flatten = self.cnn(sample).shape[1]
-        self.linear = torch.nn.Sequential(
-            torch.nn.Linear(n_flatten, 512),
-            torch.nn.ReLU()
-        )
-        self._features_dim = 512
-    def forward(self, observations):
-        return self.linear(self.cnn(observations))
-    @property
-    def features_dim(self):
-        return self._features_dim
 ```
 
-## Usage
+### Reward Function Design
 
-### Training
+The reward function incorporates multiple components for effective learning:
 
-```bash
-python train.py --render --total_timesteps 1000000 --batch_size 64 --learning_rate 3e-4
-```
-
-### Testing
-
-```bash
-python train.py --test --model_path path/to/model.zip --render --episodes 10 --deterministic
-```
-
-### TensorBoard Visualization
-
-During training, TensorBoard is used to log and visualize key metrics:
-
-1. **Start TensorBoard**:
-   ```bash
-   tensorboard --logdir data/PPO_Vision/logs_[timestamp]
+1. **Approach Reward**: Encourages the end-effector to approach the target object
+   ```python
+   if distance_to_kiwi < 0.05:
+       approach_reward = 2.0
+   else:
+       approach_reward = -distance_to_kiwi
    ```
-   `[timestamp]` is the time when training started.
 
-2. **View Training Metrics**:
-   - Open http://localhost:6006 in your browser
-   - Visualize key metrics:
-     - Rewards: total reward, reward components (approach, place, etc.)
-     - Losses: policy loss, value loss
-     - Others: action entropy, learning rate, value estimates
+2. **Placement Reward**: Rewards successful object placement
+   ```python
+   if kiwi_to_plate < 0.02:  # Successful placement
+       place_reward = 10.0
+   elif kiwi_to_plate < 0.1:  # Near placement
+       place_reward = 2.0
+   else:
+       place_reward = -kiwi_to_plate
+   ```
 
-3. **Tips**:
-   - Use the smoothing slider to adjust curve display
-   - Compare performance of different runs
-   - Analyze parameter distributions in the HISTOGRAM tab
-   - Track training progress in the SCALARS tab
+3. **Step Penalty**: Encourages efficient task completion
+   ```python
+   step_penalty = -0.01 * self.current_step
+   ```
 
-### Main Parameters
+4. **Action Magnitude Penalty**: Promotes smooth control
+   ```python
+   action_penalty = -0.1 * action_magnitude
+   ```
 
-- `--render`: Whether to display rendering
-- `--total_timesteps`: Total training steps
-- `--batch_size`: Batch size
-- `--learning_rate`: Learning rate
-- `--model_path`: Model path (for testing or continued training)
-- `--episodes`: Number of test episodes
-- `--deterministic`: Whether to use a deterministic policy for testing
+## Training Configuration
 
-## File Structure
+### Command-line Arguments
 
-- `env.py`: Environment definition, including vision-based observation/action space, reward calculation, etc.
-- `train.py`: Training and testing script for PPO
-- `README.md`: Project documentation
+```bash
+python train.py [
+    --render              # Enable environment rendering
+    --seed INT            # Random seed (default: 42)
+    --total_timesteps INT # Total training steps (default: 1000000)
+    --batch_size INT      # Batch size (default: 64)
+    --n_steps INT         # Steps per update (default: 2048)
+    --learning_rate FLOAT # Learning rate (default: 3e-4)
+    --log_dir STR        # Log directory path
+    --model_path STR     # Pre-trained model path
+    --log_interval INT   # Logging frequency (default: 10)
+]
+```
 
----
-[中文版请见 README_zh.md](README_zh.md)
+### PPO Model Parameters
+
+```python
+model = PPO(
+    "MlpPolicy",
+    env,
+    n_steps=n_steps,        # Trajectory length per update
+    batch_size=batch_size,  # Training batch size
+    n_epochs=10,           # Update iterations
+    gamma=0.99,            # Discount factor
+    learning_rate=3e-4,    # Learning rate
+    clip_range=0.2,        # PPO clipping parameter
+    ent_coef=0.01,         # Entropy coefficient
+    policy_kwargs=policy_kwargs,  # CNN feature extractor
+    tensorboard_log=log_dir # TensorBoard logging
+)
+```
+
+## Model Evaluation
+
+### Inference Configuration
+
+```bash
+python inference.py [
+    --model_path STR      # Model path (default: "data\\PPO_Vision\\logs_20250514_140005\\final_model.zip")
+    --render              # Enable rendering (default: True)
+    --episodes INT        # Number of test episodes (default: 10)
+    --deterministic      # Use deterministic policy
+    --seed INT           # Random seed (default: 42)
+]
+```
+
+### Performance Metrics
+
+The inference script provides detailed performance metrics:
+- Episode rewards
+- Success rate
+- Average completion time
+- Standard deviation of performance
+
+## TensorBoard Visualization
+
+Training progress can be monitored through TensorBoard:
+
+```bash
+tensorboard --logdir data/PPO_Vision/logs_[timestamp]
+```
+
+Key metrics include:
+- Total rewards
+- Component rewards (approach, placement)
+- Policy loss
+- Value function loss
+- Action entropy
+
+## Implementation Details
+
+### Environment Initialization
+
+```python
+cfg.use_gaussian_renderer = False
+cfg.init_key = "pick"
+cfg.gs_model_dict = {
+    "plate_white": "object/plate_white.ply",
+    "kiwi": "object/kiwi.ply",
+    "background": "scene/tsimf_library_1/point_cloud.ply"
+}
+cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_kiwi.xml"
+cfg.obs_rgb_cam_id = [0]  # Use first camera
+```
+
+### Task Success Criteria
+
+```python
+distance = np.hypot(
+    tmat_kiwi[0, 3] - tmat_plate_white[0, 3],
+    tmat_kiwi[1, 3] - tmat_plate_white[1, 3]
+)
+terminated = distance < 0.018  # Task completion threshold
+```

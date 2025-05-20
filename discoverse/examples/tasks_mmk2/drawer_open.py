@@ -52,18 +52,30 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
     data_idx, data_set_size = args.data_idx, args.data_idx + args.data_set_size
     if args.auto:
         cfg.headless = True
         cfg.sync = False
+    cfg.use_gaussian_renderer = args.use_gs
 
     save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mmk2_drawer_open")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
+    ###################################
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_COM] = True
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
+    # sim_node.options.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = True
+    # sim_node.options.frame = mujoco.mjtFrame.mjFRAME_BODY.value
+    ###################################
+
     sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
@@ -89,11 +101,9 @@ if __name__ == "__main__":
         try:
             if stm.trigger():
                 if stm.state_idx == 0: # 靠近桌面并降高度
-                    action[0] = 0.02
                     sim_node.tctr_head[1] = -0.8
                     sim_node.tctr_slide[0] = 0.2
                 elif stm.state_idx == 1: # 伸到抽屉前
-                    action[0] = 0
                     tmat_drawer = get_site_tmat(sim_node.mj_data, "cabinet_drawer_handle")
                     target_posi = tmat_drawer[:3, 3] + 0.12 * tmat_drawer[:3, 0]
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
@@ -101,7 +111,7 @@ if __name__ == "__main__":
                     sim_node.tctr_lft_gripper[:] = 1
                 elif stm.state_idx == 2: # 伸到抽屉把手
                     tmat_drawer = get_site_tmat(sim_node.mj_data, "cabinet_drawer_handle")
-                    target_posi = tmat_drawer[:3, 3] + np.array([0.01,0,0])
+                    target_posi = tmat_drawer[:3, 3] + np.array([-0.01, 0, 0])
                     sim_node.lft_arm_target_pose[:] = sim_node.get_tmat_wrt_mmk2base(target_posi)
                     sim_node.setArmEndTarget(sim_node.lft_arm_target_pose, sim_node.arm_action, "l", sim_node.sensor_lft_arm_qpos, Rotation.from_euler('zyx', [1.5807, 0, 0.6]).as_matrix())
                 elif stm.state_idx == 3: # 抓住把手
@@ -135,8 +145,11 @@ if __name__ == "__main__":
 
         for i in range(2, sim_node.njctrl):
             action[i] = step_func(action[i], sim_node.target_control[i], move_speed * sim_node.joint_move_ratio[i] * sim_node.delta_t)
-        yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
-        action[1] = -10 * yaw
+        # yaw = Rotation.from_quat(np.array(obs["base_orientation"])[[1,2,3,0]]).as_euler("xyz")[2]
+        # xbias = obs["base_position"][0]
+        # print(f"xbias: {xbias:0.4f}")
+        # action[0] =  10 * yaw - 50. * xbias
+        # action[1] = -10 * yaw - 50. * xbias
 
         obs, _, _, _, _ = sim_node.step(action)
         
