@@ -102,7 +102,7 @@ if __name__ == "__main__":
         asset_config += f'    <material name="{asset_name}_texture" texture="{asset_name}_texture"/>\n\n'
         geom_config += f'  <geom material="{asset_name}_texture" mesh="{asset_name}" class="obj_visual"/>\n\n'
 
-    asset_config += '    <mesh name="{}" file="obj/{}/{}.obj"/>\n'.format(asset_name, asset_name, os.path.basename(input_file))
+    asset_config += '    <mesh name="{}" file="obj/{}/{}.obj"/>\n'.format(asset_name, asset_name, os.path.basename(asset_name))
 
     if convex_de:
         print(f"正在对 {asset_name} 进行凸分解...")
@@ -122,8 +122,7 @@ if __name__ == "__main__":
         if texture_name is None:
             pass
     else:
-        if texture_name is None:
-            geom_config += '  <geom type="mesh" rgba="{} {} {} {}" mesh="{}"/>\n'.format(rgba[0], rgba[1], rgba[2], rgba[3], asset_name)
+        geom_config += '  <geom type="mesh" rgba="{} {} {} {}" mesh="{}"/>\n'.format(rgba[0], rgba[1], rgba[2], rgba[3], asset_name)
 
     asset_config += '  </asset>\n</mujocoinclude>\n'
     asset_file_path = os.path.join(mjcf_obj_dir, f"{asset_name}_dependencies.xml")
@@ -179,4 +178,3 @@ if __name__ == "__main__":
         
         print(f"删除临时预览文件: {tmp_world_mjcf}")
         os.remove(tmp_world_mjcf)
-
