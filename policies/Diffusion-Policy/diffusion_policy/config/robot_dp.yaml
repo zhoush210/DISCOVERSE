@@ -10,16 +10,19 @@ shape_meta: &shape_meta
   # acceptable types: rgb, low_dim
   obs:
     image0:
-      shape: [3, 480, 640]
+      shape: [3, 72, 96]
       type: rgb
     image1:
-      shape: [3, 480, 640]
+      shape: [3, 72, 96]
+      type: rgb
+    image2:
+      shape: [3, 72, 96]
       type: rgb
     jq:
-      shape: [7]
+      shape: [19]
       type: low_dim
   action:
-    shape: [7]
+    shape: [19]
 exp_name: "default"
 
 horizon: 12
@@ -51,12 +54,12 @@ policy:
     shape_meta: ${shape_meta}
     rgb_model:
       _target_: diffusion_policy.model.vision.model_getter.get_resnet
-      name: resnet18
+      name: resnet50
       weights: null
     resize_shape: null
     crop_shape: null
     # constant center crop
-    random_crop: True
+    random_crop: False
     use_group_norm: True
     share_rgb_model: False
     imagenet_norm: True
@@ -114,7 +117,7 @@ training:
   # optimization
   lr_scheduler: cosine
   lr_warmup_steps: 500
-  num_epochs: 1000
+  num_epochs: 500
   gradient_accumulate_every: 1
   # EMA destroys performance when used with BatchNorm
   # replace BatchNorm with GroupNorm.
