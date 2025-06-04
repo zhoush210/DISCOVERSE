@@ -10,19 +10,16 @@ shape_meta: &shape_meta
   # acceptable types: rgb, low_dim
   obs:
     image0:
-      shape: [3, 72, 96]
+      shape: [3, 480, 640]
       type: rgb
     image1:
-      shape: [3, 72, 96]
-      type: rgb
-    image2:
-      shape: [3, 72, 96]
+      shape: [3, 480, 640]
       type: rgb
     jq:
-      shape: [19]
+      shape: [7]
       type: low_dim
   action:
-    shape: [19]
+    shape: [7]
 exp_name: "default"
 
 horizon: 12
@@ -54,12 +51,12 @@ policy:
     shape_meta: ${shape_meta}
     rgb_model:
       _target_: diffusion_policy.model.vision.model_getter.get_resnet
-      name: resnet50
+      name: resnet18
       weights: null
     resize_shape: null
     crop_shape: null
     # constant center crop
-    random_crop: False
+    random_crop: True
     use_group_norm: True
     share_rgb_model: False
     imagenet_norm: True
@@ -87,6 +84,18 @@ ema:
   power: 0.75
   min_value: 0.0
   max_value: 0.9999
+
+task:
+  dataset:
+    _target_: diffusion_policy.dataset.airbot_image_dataset.AirbotImageDataset
+    zarr_path: data/useless.zarr
+    horizon: ${horizon}
+    batch_size: ${dataloader.batch_size}
+    pad_before: ${eval:'${n_obs_steps}-1'}
+    pad_after: ${eval:'${n_action_steps}-1'}
+    seed: 42
+    val_ratio: 0.02
+    max_train_episodes: null
 
 dataloader:
   batch_size: 4
