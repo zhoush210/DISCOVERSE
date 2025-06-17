@@ -14,7 +14,7 @@
   <mesh name="right_index_1_part_11" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_11.obj" scale="1 1 1"/>
   <mesh name="right_index_1_part_12" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_12.obj" scale="1 1 1"/>
   <mesh name="right_index_1_part_13" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_13.obj" scale="1 1 1"/>
-  <mesh name="right_index_1_part_14" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_14.obj" scale="1 1 1"/>
+  <mesh name="right_index_1_part_14" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_14.obj" scale="1 1 1" inertia="shell"/>
   <mesh name="right_index_1_part_15" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_15.obj" scale="1 1 1"/>
   <mesh name="right_index_1_part_16" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_16.obj" scale="1 1 1"/>
   <mesh name="right_index_1_part_17" file="../../../../meshes/inspire_hand/right_index_1_convex_dec/part_17.obj" scale="1 1 1"/>
