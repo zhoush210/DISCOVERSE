@@ -190,7 +190,33 @@ Thanks to the open-sourcing of the [lucidsim](https://github.com/lucidsim/lucids
     ```bash
     export MUJOCO_GL=egl
     ```
+3. Window creation failure
+    If you encounter errors:
+    ```bash
+    GLFWError: (65542) b'GLX: No GLXFBConfigs returned'
+    GLFWError: (65545) b'GLX: Failed to find a suitable GLXFBConfig'
+    ```
+    Check EGL vendor:
+    ```bash
+    eglinfo | grep "EGL vendor"
+    ```
+    If output includes:
+    libEGL warning: egl: failed to create dri2 screen
+    It indicates a conflict between Intel and NVIDIA drivers.
+    Check graphic driver prime:
+    ```bash
+    prime-select query
+    ```
+    If output is `on-demand`, switch to `nvidia` mode, then reboot or relogin!
+    ```bash
+    sudo prime-select nvidia
+    ```
 
+# Set the following environment variables to fix:
+    ``` bash
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    ```
 ## 📬 Communication
 
 You are welcome to add the author's contact information. Please add a note when adding.
