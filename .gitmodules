@@ -10,6 +10,6 @@
 [submodule "submodules/MuJoCo-LiDAR"]
 	path = submodules/MuJoCo-LiDAR
 	url = https://github.com/TATP-233/MuJoCo-LiDAR
-[submodule "submodules/XML-Editor"]
-	path = submodules/XML-Editor
-	url = git@github.com:xyys2003/XML-Editor.git
+[submodule "submodule/XML-Editor"]
+	path = submodule/XML-Editor
+	url = https://github.com/xyys2003/XML-Editor
