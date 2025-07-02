@@ -4,8 +4,6 @@
 *build
 *.pyc
 models/3dgs
-models/meshes
-models/textures
 scripts
 data
 *.DS_Store

@@ -4,41 +4,34 @@
   <include file="../mmk2/mmk2_options.xml"/>
   <include file="../mmk2/mmk2_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
   <include file="../object/bowl_dependencies.xml"/>
   <include file="../object/plate_white_dependencies.xml"/>
   <include file="../object/wood_dependencies.xml"/>
   <include file="../object/jujube_dependencies.xml"/>
 
-
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
-
   <worldbody>
-    <body name='mmk2' pos="0 0 1" euler="0 0 0">
+    <body name='mmk2' pos="0 0 0" euler="0 0 0">
       <joint type="free" frictionloss="0.0001" />
       <include file="../mmk2/mmk2.xml"/>
     </body>
 
     <!-- ======= bowl_green ======= -->
     <body name="bowl_yellow" pos="0.92 -1.17 0.8">
+      <joint type="free" frictionloss="0.0002"/>
       <include file="../object/bowl_yellow.xml"/>
     </body>
 
     <!-- ======= wood ======= -->
     <body name="wood" pos="0.72 -1.035 0.8" euler="0 0 0">
+      <joint type="free" frictionloss="0.0002"/>
       <include file="../object/wood.xml"/>
     </body>
 
     <!-- ======= jujube ======= -->
     <body name="jujube" pos="0.54 -1.1 0.8" euler="0 0 1.57">
+      <joint type="free" frictionloss="0.0002"/>
       <include file="../object/jujube.xml"/>
     </body>
 
@@ -142,23 +135,5 @@
   <sensor>
     <include file="../mmk2/mmk2_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="pick" qpos='
-       0.7 -0.5 0  1 0 0 -1 
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0 0 
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0 0 
-       0.9 -1.2 0.8 1 0 0 0 
-       0.65 -1 0.8  1 0 0 0 
-       0.4 -1.5 0.8 1 0 0 1'
-      ctrl = '
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0
-      '
-    />
-  </keyframe>
-
 
 </mujoco>

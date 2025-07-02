@@ -3,19 +3,9 @@
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
-  <include file="../object/usb_camera_dependencies.xml"/>
-  <!-- <include file="object/cuboid_dependencies.xml"/> -->
-  <include file="../object/bridge_dependencies.xml"/>
 
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="5 0.05 0.001" type="mesh"/>
-    </default>
-  </default>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
+  <include file="../object/bridge_dependencies.xml"/>
 
   <worldbody>
 
@@ -25,15 +15,11 @@
     </body>
 
     <!-- ======= EYE SIDE ======= -->
-    <!-- <body name="eye_master" pos="0.354 -0.022 0.785" euler="0 0 -3.1416">
-      <include file="../object/camera_mount.xml"/>
-    </body> -->
-
-    <!-- ======= EYE SIDE ======= -->
     <camera name="eye_side" fovy="72.02" pos="-0.324 -0.4 1.5" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
 
     <!-- ======= bridge1 ======= -->
     <body name="bridge1" pos="-0.03 0.42 0.8" euler="1.5707963 0 0">
+      <joint type="free" frictionloss="0.00001" />
       <include file="../object/bridge.xml"/>
     </body>
 
@@ -43,7 +29,6 @@
         <inertial pos="0 0 0" mass="0.0005" diaginertia="0.00002 0.00002 0.00002" />
         <geom rgba="0.15 0.65 0.63 1" type="mesh" mesh="bridge" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001"/>
     </body>
-
 
     <!-- ======= block1 ======= -->
     <body name="block1_green" pos="0.09 0.405 0.835" euler="1.5707963 0 0">
@@ -102,35 +87,6 @@
       <geom rgba="0.65 0.27 0.64 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001" pos="0 0 0" size="0.0125 0.0125 0.0125" type="box"/>
     </body>
 
-    <!-- ======= block_purple7 ======= -->
-    <!-- <body name="block_purple7" pos="-0.08 0.225 0.815">
-      <joint type="free" frictionloss="0.0001" />
-      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
-      <geom rgba="0.65 0.27 0.64 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001" pos="0 0 0" size="0.0125 0.0125 0.0125" type="box"/>
-    </body> -->
-
-    <!-- ======= block_purple8 ======= -->
-    <!-- <body name="block_purple8" pos="0 0.225 0.815">
-      <joint type="free" frictionloss="0.0001" />
-      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
-      <geom rgba="0.65 0.27 0.64 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001" pos="0 0 0" size="0.0125 0.0125 0.0125" type="box"/>
-    </body> -->
-
-    <!-- ======= block_purple9 ======= -->
-    <!-- <body name="block_purple9" pos="0.08 0.225 0.815">
-      <joint type="free" frictionloss="0.0001" />
-      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
-      <geom rgba="0.65 0.27 0.64 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001" pos="0 0 0" size="0.0125 0.0125 0.0125" type="box"/>
-    </body> -->
-
-    <!-- ======= block_purple10 ======= -->
-    <!-- <body name="block_purple10" pos="0.0 0.165 0.815">
-      <joint type="free" frictionloss="0.0001" />
-      <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
-      <geom rgba="0.65 0.27 0.64 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001" pos="0 0 0" size="0.0125 0.0125 0.0125" type="box"/>
-    </body> -->
-
-
     <!-- ======= TABLE write ======= -->
     <body name="table-a" pos="0 0 0">
       <geom size="0.3 0.6 0.01" pos="0 0 0.79" type="box" rgba="0.8 0.8 0.8 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="5 0.05 0.001"/>
@@ -153,6 +109,5 @@
   <sensor>
     <include file="../airbot_play/airbot_play_sensor.xml"/>
   </sensor>
-
 
 </mujoco>

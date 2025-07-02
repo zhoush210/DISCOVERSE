@@ -4,21 +4,12 @@
   <include file="../mmk2/mmk2_options.xml"/>
   <include file="../mmk2/mmk2_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
   <include file="../object/coffeecup_dependencies.xml"/>
   <include file="../object/plate_white_dependencies.xml"/>
   <include file="../object/wood_dependencies.xml"/>
   <include file="../object/cup_lid_dependencies.xml"/>
-
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
 
   <worldbody>
     <body name='mmk2' pos="0 0 0">
@@ -28,21 +19,25 @@
 
     <!-- ======= coffeecup_white ======= -->
     <body name="coffeecup_white" pos="0.43 0.2 0.76">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/coffeecup_white.xml"/>
     </body>
 
     <!-- ======= plate_white ======= -->
     <body name="plate_white" pos="0.45 0 0.775">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/plate_white.xml"/>
     </body>
 
     <!-- ======= wood ======= -->
     <body name="wood" pos="0.45 0 0.762" euler="0 0 0">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/wood.xml"/>
     </body>
 
     <!-- ======= cup_lid ======= -->
     <body name="cup_lid" pos="0.45 -0.2 0.761" euler="0 0 0">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/cup_lid.xml"/>
     </body>
 
@@ -64,23 +59,5 @@
   <sensor>
     <include file="../mmk2/mmk2_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="pick" qpos='
-       0 0 0  1 0 0 0
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0 0 
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0 0 
-       0.43 0.2 0.76 1 0 0 0 
-       0.45 0 0.775 1 0 0 0 
-       0.45 0 0.762 1 0 0 0 
-       0.45 -0.2 0.761 1 0 0 0'
-      ctrl = '
-       0 0  0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0
-      '
-    />   
-  </keyframe>
 
 </mujoco>

@@ -1,6 +1,5 @@
 <mujocoinclude>
 
-  <joint type="free" frictionloss="0.00005" />
   <inertial pos="0 0 0" mass="0.001" diaginertia="0.00002 0.00002 0.00002" />
   <geom material="wood_texture" mesh="wood" class="obj_visual" />
 

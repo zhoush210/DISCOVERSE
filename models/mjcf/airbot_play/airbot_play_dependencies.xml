@@ -1,7 +1,10 @@
 <mujocoinclude>
   <default>
-    <default class="visual">
+    <default class="obj_visual">
       <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="obj_collision">
+      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="1 0.005 0.0001" type="mesh"/>
     </default>
 
     <default class='arm'>
@@ -49,8 +52,7 @@
   <asset>
     <material name="Paint_Matte_Black" specular="0.5" shininess="0.5" rgba="0.00111266039 0.00111266039 0.00111266039 1.0"/>
     <material name="Paint_Metallic_Cool_Grey" specular="0.5" shininess="0.5" rgba="0.928523183 0.928523183 0.928523123 1.0"/>
-    <texture type="2d" name="____________1_204599_color" file="airbot_play/____________1_204599_color.png"/>
-    <material name="________________Emissive_White__1_2" texture="____________1_204599_color" specular="0.5" shininess="0.5"/>
+    <material name="Gree_Light_Base" specular="0.5" shininess="0.5" rgba="0.6 1 1 1"/>
   </asset>
 
   <asset>

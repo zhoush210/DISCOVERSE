@@ -4,22 +4,13 @@
   <include file="../airbot_play/airbot_play_options.xml"/>
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
-  <include file="../object/coffeecup_dependencies.xml"/>
   <include file="../object/kiwi_dependencies.xml"/>
   <include file="../object/flower_bowl_dependencies.xml"/>
   <include file="../object/table_cloth_dependencies.xml"/>
   <include file="../object/plate_white_dependencies.xml"/>
 
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
 
   <worldbody>
 
@@ -33,16 +24,19 @@
 
     <!-- ======= kiwi ======= -->
     <body name="kiwi" pos="-0.1 1.0 0.705" quat="0.995465 -0.00017601 -0.0951328 -0.000157941">
+      <joint type="free" frictionloss="0.00001" />
       <include file="../object/kiwi.xml"/>
     </body>
 
     <!-- ======= plate_white ======= -->
     <body name="plate_white" pos="-0.1 1.0  0.700894">
+      <joint type="free" frictionloss="0.00005"/>
       <include file="../object/plate_white.xml"/>
     </body>
 
     <!-- ======= flower bowl ======= -->
     <body name="flower_bowl" pos="-0.1 0.8 0.700937">
+      <joint type="free" frictionloss="0.00001" />
       <include file="../object/flower_bowl.xml"/>
     </body>
 
@@ -65,16 +59,5 @@
   <sensor>
     <include file="../airbot_play/airbot_play_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="ready" qpos='
-     -0.055 -0.547 0.905 1.599 -1.398 -1.599  0 0 
-     -0.1 1.000   0.705  0.995465 -0.00017601 -0.0951328 -0.000157941 
-     -0.1 1.000   0.701  1 0 0 0
-     -0.1 0.825   0.701  1 0 0 0
-      0 0'
-      ctrl="-0.055 -0.547 0.905 1.599 -1.398 -1.599  0"
-    />
-  </keyframe>
 
 </mujoco>

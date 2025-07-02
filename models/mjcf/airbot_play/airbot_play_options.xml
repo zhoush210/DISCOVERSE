@@ -1,6 +1,6 @@
 <mujocoinclude>
   <option integrator="RK4" solver="Newton" />
-  <compiler angle="radian" meshdir="../meshes/" texturedir="../textures/"/>
+  <compiler angle="radian" meshdir="../meshes/" texturedir="../meshes/"/>
 
   <contact>
     <exclude body1='arm_base' body2='link2'/>

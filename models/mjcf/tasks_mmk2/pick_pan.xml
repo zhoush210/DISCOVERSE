@@ -4,35 +4,27 @@
   <include file="../mmk2/mmk2_options.xml"/>
   <include file="../mmk2/mmk2_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
-  <include file="../object/box_with_fence_dependencies.xml"/>
+  <include file="../object/box_dependencies.xml"/>
   <include file="../object/jujube_dependencies.xml"/>
 
-
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
-
   <worldbody>
-    <body name='mmk2' pos="0 0 1" euler="0 0 0">
+    <body name='mmk2' pos="0 0 0" euler="0 0 0">
       <joint type="free" frictionloss="0.0001" />
       <include file="../mmk2/mmk2.xml"/>
     </body>
 
     <!-- ======= pan ======= -->
     <body name="pan" pos="0.525 -1.0 0.92" euler="1.57079632679 0 0">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/pan.xml"/>
     </body>
 
     <!-- ======= box ======= -->
     <body name="box" pos="0.5 -1.0 0.75" euler="0 0 0">
-      <include file="../object/box with_fence.xml"/>
+      <joint type="free" frictionloss="0.00005" />
+      <include file="../object/box.xml"/>
     </body>
 
     <!-- 场景 -->
@@ -136,22 +128,5 @@
   <sensor>
     <include file="../mmk2/mmk2_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="pick" qpos='
-       0.4 -0.4 0  1 0 0 -1
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0 0 
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0 0 
-       0.52 -1 0.87 1 0 0 0
-       0.5 -1.0 0.75 1 0 0 0'
-      ctrl = '
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     1.571  2.223  0
-      -0.    -0.166  0.032  0.    -1.571 -2.223  0
-      '
-    />
-  </keyframe>
-
 
 </mujoco>

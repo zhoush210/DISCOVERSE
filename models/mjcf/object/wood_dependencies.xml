@@ -1,27 +1,23 @@
 <mujocoinclude>
 
-
   <asset>
-
-    <texture type="2d" name="wood_texture" file="obj/wood/wood_color.png"/>
+    <texture type="2d" name="wood_texture" file="object/wood/wood_color.png"/>
     <material name="wood_texture" texture="wood_texture" specular="1.0" shininess="0.0"/>
-    <mesh file="obj/wood/wood.obj"/>
+    <mesh file="object/wood/wood.obj"/>
 
-    <mesh name="wood_part_0" file="obj/wood_origin/part_0.obj" scale="1 1 1"/>
-    <mesh name="wood_part_1" file="obj/wood_origin/part_1.obj" scale="1 1 1"/>
-    <mesh name="wood_part_2" file="obj/wood_origin/part_2.obj" scale="1 1 1"/>
-    <mesh name="wood_part_3" file="obj/wood_origin/part_3.obj" scale="1 1 1"/>
-    <mesh name="wood_part_4" file="obj/wood_origin/part_4.obj" scale="1 1 1"/>
-    <mesh name="wood_part_5" file="obj/wood_origin/part_5.obj" scale="1 1 1"/>
-    <mesh name="wood_part_6" file="obj/wood_origin/part_6.obj" scale="1 1 1"/>
-    <mesh name="wood_part_7" file="obj/wood_origin/part_7.obj" scale="1 1 1"/>
-    <mesh name="wood_part_8" file="obj/wood_origin/part_8.obj" scale="1 1 1"/>
-    <mesh name="wood_part_9" file="obj/wood_origin/part_9.obj" scale="1 1 1"/>
-    <mesh name="wood_part_10" file="obj/wood_origin/part_10.obj" scale="1 1 1"/>
-    <mesh name="wood_part_11" file="obj/wood_origin/part_11.obj" scale="1 1 1"/>
-    <mesh name="wood_part_12" file="obj/wood_origin/part_12.obj" scale="1 1 1"/>
+    <mesh name="wood_part_0" file="object/wood/part_0.obj" scale="1 1 1"/>
+    <mesh name="wood_part_1" file="object/wood/part_1.obj" scale="1 1 1"/>
+    <mesh name="wood_part_2" file="object/wood/part_2.obj" scale="1 1 1"/>
+    <mesh name="wood_part_3" file="object/wood/part_3.obj" scale="1 1 1"/>
+    <mesh name="wood_part_4" file="object/wood/part_4.obj" scale="1 1 1"/>
+    <mesh name="wood_part_5" file="object/wood/part_5.obj" scale="1 1 1"/>
+    <mesh name="wood_part_6" file="object/wood/part_6.obj" scale="1 1 1"/>
+    <mesh name="wood_part_7" file="object/wood/part_7.obj" scale="1 1 1"/>
+    <mesh name="wood_part_8" file="object/wood/part_8.obj" scale="1 1 1"/>
+    <mesh name="wood_part_9" file="object/wood/part_9.obj" scale="1 1 1"/>
+    <mesh name="wood_part_10" file="object/wood/part_10.obj" scale="1 1 1"/>
+    <mesh name="wood_part_11" file="object/wood/part_11.obj" scale="1 1 1"/>
+    <mesh name="wood_part_12" file="object/wood/part_12.obj" scale="1 1 1"/>
   </asset>
-
-
 
 </mujocoinclude>

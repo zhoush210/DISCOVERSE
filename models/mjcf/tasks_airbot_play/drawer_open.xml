@@ -3,19 +3,10 @@
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
-  <include file="../object/usb_camera_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
   <include file="../object/table_cloth_dependencies.xml"/>
 
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="6" solimp="2 1 0.01" solref="0.001 10" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
 
   <worldbody>
 
@@ -47,19 +38,5 @@
   <sensor>
     <include file="../airbot_play/airbot_play_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="home" qpos='
-       0 0 0  0 0 0  0 0 
-       0 0'
-      ctrl="0 0 0  0 0 0 0"
-    />
-
-    <key name="ready" qpos='
-       1.713 -1.782  0.932  0.107  1.477 -2.426  0 0 
-       0 0'
-      ctrl="1.713 -1.782  0.932  0.107  1.477 -2.426  0."
-    />
-  </keyframe>
 
 </mujoco>
