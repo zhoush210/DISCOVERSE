@@ -53,8 +53,8 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 ### 🚀 快速开始
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+# 1. 克隆仓库（推荐按需下载submodules，不使用--recursive）
+git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
 
 # 2. 选择安装方式
@@ -63,7 +63,17 @@ pip install -e ".[lidar]"     # 激光雷达仿真
 pip install -e ".[act_full]"  # 模仿学习算法act, 可替换成[dp_full] [rdt_full]
 pip install -e ".[full]"      # 完整功能（不推荐）
 
-# 3. 验证安装
+# 3. 按需下载submodules（根据安装的功能模块）
+python setup_submodules.py        # 自动检测并下载需要的submodules
+# python setup_submodules.py --module lidar act  # 手动指定模块
+# python setup_submodules.py --all  # 下载所有submodules
+
+> 💡 **按需下载的优势**:
+> - ⚡ **下载速度快**: 只下载需要的模块，减少90%下载时间
+> - 💾 **节省空间**: 避免下载不需要的大型依赖（如ComfyUI约2GB）
+> - 🎯 **精准安装**: 根据实际使用的功能模块智能下载
+
+# 4. 验证安装
 python check_installation.py
 ```
 
@@ -191,10 +201,8 @@ brew install git-lfs
 
 git lfs install
 
-# 克隆仓库时自动下载LFS文件
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
 
-# 或在已有仓库中拉取LFS文件
+# 在仓库中拉取LFS文件
 git lfs pull
 ```
 
@@ -228,8 +236,9 @@ models/
 # 百度网盘：https://pan.baidu.com/s/1mLC3Hz-m78Y6qFhurwb8VQ?pwd=xmp9
 
 # 或从源码构建（推荐）
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
+python setup_submodules.py --all  # Docker镜像需要所有submodules
 docker build -t discoverse:latest .
 
 # 使用GPU支持运行
@@ -452,8 +461,13 @@ pip install taichi==1.6.0
 sudo apt-get install python3-pyqt5
 ```
 
-**子模块未初始化**
+**Submodules未初始化**
 ```bash
+# 按需初始化（推荐）
+python setup_submodules.py --list  # 查看状态
+python setup_submodules.py --module lidar act  # 初始化指定模块
+
+# 或传统方式初始化所有submodules
 git submodule update --init --recursive
 ```
 

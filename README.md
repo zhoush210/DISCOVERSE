@@ -57,8 +57,8 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 ### 🚀 Quick Start
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+# 1. Clone repository (recommended: download submodules on-demand, don't use --recursive)
+git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
 
 # 2. Choose installation method
@@ -67,7 +67,17 @@ pip install -e ".[lidar]"     # LiDAR simulation
 pip install -e ".[act_full]"  # Imitation learning with ACT, can replace with [dp_full] [rdt_full]
 pip install -e ".[full]"      # Full features (not recommended)
 
-# 3. Verify installation
+# 3. Download submodules on-demand (based on installed feature modules)
+python setup_submodules.py        # Auto-detect and download required submodules
+# python setup_submodules.py --module lidar act  # Manually specify modules
+# python setup_submodules.py --all  # Download all submodules
+
+> 💡 **Advantages of On-Demand Download**:
+> - ⚡ **Faster download**: Only download needed modules, reduce 90% download time
+> - 💾 **Save space**: Avoid downloading unused large dependencies (e.g., ComfyUI ~2GB)
+> - 🎯 **Precise installation**: Intelligently download based on actual feature modules used
+
+# 4. Verify installation
 python check_installation.py
 ```
 
@@ -198,7 +208,7 @@ brew install git-lfs
 git lfs install
 
 # Clone repository with automatic LFS file download
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+git clone https://github.com/TATP-233/DISCOVERSE.git
 
 # Or pull LFS files in existing repository
 git lfs pull
@@ -234,8 +244,9 @@ The fastest way to get started with DISCOVERSE:
 # Baidu Netdisk: https://pan.baidu.com/s/1mLC3Hz-m78Y6qFhurwb8VQ?pwd=xmp9
 
 # Or build from source (recommended)
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
+python setup_submodules.py --all  # Docker image needs all submodules
 docker build -t discoverse:latest .
 
 # Run with GPU support
@@ -419,6 +430,11 @@ sudo apt-get install python3-pyqt5
 
 **Submodules Not Initialized**
 ```bash
+# On-demand initialization (recommended)
+python setup_submodules.py --list  # Check status
+python setup_submodules.py --module lidar act  # Initialize specific modules
+
+# Or traditional way to initialize all submodules
 git submodule update --init --recursive
 ```
 

@@ -133,6 +133,39 @@ def check_discoverse_modules() -> List[Tuple[str, bool, str]]:
     
     return results
 
+def check_submodules() -> Tuple[int, int, List[str]]:
+    """检查submodules状态"""
+    from pathlib import Path
+    
+    submodule_mapping = {
+        'gaussian-rendering': ['submodules/diff-gaussian-rasterization'],
+        'randomain': ['submodules/ComfyUI'],
+        'act': ['policies/act'],
+        'lidar': ['submodules/MuJoCo-LiDAR'],
+        'rdt': ['submodules/lerobot'],
+        'diffusion-policy': ['submodules/lerobot'],
+        'xml-editor': ['submodules/XML-Editor'],
+    }
+    
+    all_submodules = set()
+    for submodules in submodule_mapping.values():
+        all_submodules.update(submodules)
+    
+    initialized_count = 0
+    missing_for_features = []
+    
+    for submodule in all_submodules:
+        submodule_path = Path(submodule)
+        if submodule_path.exists() and len(list(submodule_path.iterdir())) > 0:
+            initialized_count += 1
+        else:
+            # Find which features need this submodule
+            for feature, feature_subs in submodule_mapping.items():
+                if submodule in feature_subs and feature not in missing_for_features:
+                    missing_for_features.append(feature)
+    
+    return initialized_count, len(all_submodules), missing_for_features
+
 def check_gpu_support() -> Tuple[bool, str]:
     """检查GPU支持"""
     try:
@@ -217,6 +250,22 @@ def main():
     print(f"{'='*50}")
     symbol = "✓" if gpu_available else "○"
     print(f"{symbol} {gpu_info}")
+    
+    # 检查Submodules
+    initialized_count, total_count, missing_features = check_submodules()
+    print(f"\n{'='*50}")
+    print("Submodules状态")
+    print(f"{'='*50}")
+    
+    if initialized_count == total_count:
+        print(f"✓ 所有submodules已初始化 ({initialized_count}/{total_count})")
+    else:
+        print(f"○ 部分submodules未初始化 ({initialized_count}/{total_count})")
+        if missing_features:
+            print(f"📦 缺失功能模块的submodules: {', '.join(missing_features)}")
+            print(f"💡 运行以下命令来按需下载:")
+            print(f"   python setup_submodules.py --module {' '.join(missing_features)}")
+            print(f"   # 或下载全部: python setup_submodules.py --all")
     
     # 生成安装建议
     print(f"\n{'='*50}")
