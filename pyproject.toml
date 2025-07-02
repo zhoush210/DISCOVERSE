@@ -1,0 +1,249 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discoverse"
+version = "1.8.5"
+description = "DISCOVERSE: 一个基于3DGS的高效机器人仿真框架，用于复杂高保真环境中的机器人学习"
+readme = "README_zh.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+keywords = ["robotics", "simulation", "gaussian-splatting", "mujoco", "real2sim"]
+authors = [
+    {name = "Yufei Jia", email = "jyf23@mails.tsinghua.edu.cn"},
+]
+maintainers = [
+    {name = "Yufei Jia", email = "jyf23@mails.tsinghua.edu.cn"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10", 
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Robotics",
+]
+
+# 核心依赖 - 基础仿真功能
+dependencies = [
+    "numpy>=1.20.0",
+    "scipy>=1.7.0", 
+    "opencv-python>=4.6.0",
+    "mujoco>=3.2.0",
+    "pynput>=1.7.0",
+    "psutil>=5.8.0",
+    "matplotlib>=3.5.0",
+    "screeninfo",
+    "mediapy",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# 激光雷达仿真模块 - 包含taichi依赖
+lidar = [
+    "taichi>=1.6.0",
+]
+
+# 3D Gaussian Splatting渲染模块
+gaussian-rendering = [
+    "torch>=2.0.0",
+    "torchvision>=0.14.0", 
+    "plyfile",
+    "PyGlm",
+]
+
+# XML场景编辑器
+xml-editor = [
+    "PyQt5>=5.15.0",
+    "PyOpenGL>=3.1.0",
+    "PyOpenGL_accelerate>=3.1.0",
+]
+
+# ACT策略学习
+act = [
+    "torch>=2.0.0",
+    "torchvision>=0.14.0",
+    "pyquaternion",
+    "pyyaml",
+    "einops>=0.8.0",
+    "packaging",
+    "h5py>=3.10.0",
+    "ipython",
+    "dm_env",
+    "OneEuroFilter",
+    "omegaconf>=2.3.0",
+    "hydra-core>=1.3.2",
+]
+
+# Diffusion Policy策略学习
+diffusion-policy = [
+    "torch>=2.0.0",
+    "torchvision>=0.14.0",
+    "wandb",
+    "numba>=0.59.0",
+    "zarr>=2.17.0",
+    "hydra-core>=1.3.2",
+    "omegaconf>=2.3.0",
+    "einops>=0.8.0",
+    "clip-by-openai",
+]
+
+# RDT (Robotics Diffusion Transformer)策略学习
+rdt = [
+    "torch>=2.0.0",
+    "torchvision>=0.14.0",
+    "packaging>=24.0",
+    "wandb>=0.17.0",
+    "deepspeed>=0.14.2",
+    "accelerate>=0.30.1",
+    "diffusers>=0.27.2",
+    "timm>=1.0.3",
+    "transformers>=4.41.0",
+    "sentencepiece>=0.2.0",
+    "h5py>=3.11.0",
+    "imgaug>=0.4.0",
+    "pytz>=2020.1",
+]
+
+# 数据收集模块
+data-collection = [
+    "termcolor>=2.4.0",
+    "omegaconf>=2.3.0",
+    "hydra-core>=1.3.2",
+    "pynput>=1.7.7",
+    "einops>=0.8.0",
+    "imagecodecs",
+    "pillow>=10.2.0",
+    "h5py>=3.10.0",
+]
+
+# RealSense相机支持
+realsense = [
+    "pyrealsense2>=2.55.0",
+]
+
+# ROS支持
+ros = [
+    "rospkg",
+    "pexpect",
+]
+
+# 数据增强和AI生成模块
+randomain = [
+    "safetensors",
+    "transformers>=4.28.1",
+    "pillow>=10.0.0",
+    "params_proto",
+]
+
+# 可视化和分析工具
+visualization = [
+    "imageio>=2.34.0",
+    "imageio-ffmpeg>=0.4.9",
+]
+
+# 开发和测试工具
+dev = [
+    "pytest>=8.1.0",
+    "pytest-cov>=5.0.0",
+    "pre-commit>=3.7.0",
+    "debugpy>=1.8.1",
+    "cmake>=3.29.0",
+]
+
+# 完整安装 - 包含所有功能模块（除了dev）
+full = [
+    "discoverse[lidar]",
+    "discoverse[gaussian-rendering]", 
+    "discoverse[xml-editor]",
+    "discoverse[act]",
+    "discoverse[diffusion-policy]",
+    "discoverse[rdt]",
+    "discoverse[data-collection]",
+    "discoverse[realsense]",
+    "discoverse[ros]",
+    "discoverse[randomain]",
+    "discoverse[visualization]",
+]
+
+# 机器学习相关依赖组合
+ml = [
+    "discoverse[act]",
+    "discoverse[diffusion-policy]", 
+    "discoverse[rdt]",
+    "discoverse[data-collection]",
+    "discoverse[visualization]",
+]
+
+act_full = [
+    "discoverse[act]",
+    "discoverse[data-collection]",
+    "discoverse[visualization]",    
+]
+
+dp_full = [
+    "discoverse[diffusion-policy]", 
+    "discoverse[data-collection]",
+    "discoverse[visualization]",    
+]
+
+rdt_full = [
+    "discoverse[rdt]",
+    "discoverse[data-collection]",
+    "discoverse[visualization]",    
+]
+
+# 硬件集成相关依赖组合
+hardware = [
+    "discoverse[realsense]",
+    "discoverse[ros]",
+]
+
+[project.urls]
+Homepage = "https://air-discoverse.github.io/"
+Repository = "https://github.com/TATP-233/DISCOVERSE"
+Documentation = "https://air-discoverse.github.io/"
+"Bug Tracker" = "https://github.com/TATP-233/DISCOVERSE/issues"
+
+[project.scripts]
+# 命令行工具入口点
+discoverse-check = "check_installation:main"
+
+[tool.setuptools.packages.find]
+include = ["discoverse*"]
+exclude = ["tests*", "submodules*", "policies*"]
+
+[tool.setuptools.package-data]
+discoverse = ["*.xml", "*.yaml", "*.yml", "*.json"]
+
+# 项目特定的配置
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  submodules
+  | policies
+)/
+'''
+
+[tool.isort] 
+profile = "black"
+skip_gitignore = true
+extend_skip = ["submodules", "policies"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--verbose --tb=short" 

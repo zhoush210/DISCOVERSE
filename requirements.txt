@@ -1,9 +1,0 @@
-numpy
-scipy
-mediapy
-opencv-python
-mujoco
-pynput
-psutil
-screeninfo
-taichi

@@ -16,9 +16,7 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 
 [中文文档](README_zh.md)
 
-## 🌟 Key Features
-
-DISCOVERSE represents a breakthrough in robotic simulation technology, offering unprecedented realism and efficiency for robot learning applications:
+## 🌟 I. Key Features
 
 ### 🎯 **High-Fidelity Real2Sim Generation**
 - **Hierarchical scene reconstruction** for both background environments and interactive objects
@@ -47,7 +45,187 @@ DISCOVERSE represents a breakthrough in robotic simulation technology, offering 
 - **Zero-shot Sim2Real transfer** with state-of-the-art performance
 - **Imitation learning workflows** from demonstration to deployment
 
-## 🐳 Quick Start with Docker
+
+
+## 📦 II. Installation & Quick Start
+
+### Prerequisites
+- **Python 3.8+**
+- **CUDA 11.8+** (for 3DGS rendering)
+- **NVIDIA GPU** with 8GB+ VRAM (recommended)
+
+### 🚀 Quick Start
+
+```bash
+# 1. Clone repository
+git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+cd DISCOVERSE
+
+# 2. Choose installation method
+pip install -e .              # Core only (recommended for quick start)
+pip install -e ".[lidar]"     # LiDAR simulation
+pip install -e ".[act_full]"  # Imitation learning with ACT, can replace with [dp_full] [rdt_full]
+pip install -e ".[full]"      # Full features (not recommended)
+
+# 3. Verify installation
+python check_installation.py
+```
+
+### 🎯 Installation by Use Case
+
+#### Scenario 1: Learning Robot Simulation Basics
+```bash
+pip install -e .  # Core functionality only
+```
+**Includes**: MuJoCo, OpenCV, NumPy and other basic dependencies
+
+#### Scenario 2: LiDAR SLAM Research
+```bash
+pip install -e ".[lidar,visualization]"
+```
+- **Includes**: Taichi GPU acceleration, LiDAR simulation, visualization tools
+- **Function**: High-performance LiDAR simulation with Taichi GPU acceleration
+- **Dependencies**: `taichi>=1.6.0`
+- **Use Cases**: Mobile robot SLAM, LiDAR sensor simulation, point cloud processing
+
+#### Scenario 3: Robotic Arm Imitation Learning
+```bash
+pip install -e ".[act_full]"
+```
+- **Includes**: ACT algorithm, data collection tools, visualization
+- **Function**: Imitation learning, robot skill training, policy optimization
+- **Dependencies**: `torch`, `einops`, `h5py`, `transformers`, `wandb`
+- **Algorithms**: Other algorithms available with [diffusion-policy] and [rdt]
+
+#### Scenario 4: High-Fidelity Visual Simulation
+```bash
+pip install -e ".[gaussian-rendering]"
+```
+- **Includes**: 3D Gaussian Splatting, PyTorch
+- **Function**: Photorealistic 3D scene rendering with real-time lighting
+- **Dependencies**: `torch>=2.0.0`, `torchvision>=0.14.0`, `plyfile`, `PyGlm`
+- **Use Cases**: High-fidelity visual simulation, 3D scene reconstruction, Real2Sim pipeline
+
+#### Scenario 6: Data Processing & Augmentation Toolkit 📊
+```bash
+pip install -e ".[data-collection]"  # Data collection
+pip install -e ".[randomain]"        # Data augmentation and AI generation
+pip install -e ".[visualization]"    # Visualization tools
+```
+- **Function**: Dataset construction, domain randomization
+
+#### Scenario 7: Hardware Integration 🔌
+```bash
+pip install -e ".[realsense]"    # RealSense camera support
+pip install -e ".[ros]"          # ROS integration
+pip install -e ".[hardware]"     # Hardware integration suite
+```
+- **Function**: Real robot control, hardware-in-the-loop simulation, Sim2Real transfer
+
+#### Scenario 8: XML Scene Editor 🖥️
+```bash
+pip install -e ".[xml-editor]"
+```
+- **Function**: Graphical MuJoCo scene editing tool
+- **Dependencies**: `PyQt5>=5.15.0`, `PyOpenGL>=3.1.0`
+- **Use Cases**: Visual scene design, MJCF file editing, 3D model adjustment
+
+#### Scenario 9: Complete Research Environment (not recommended, install based on your needs)
+```bash
+pip install -e ".[full]"
+```
+- **Includes**: All feature modules
+
+
+
+### 🔍 Installation Verification
+
+#### Check Installation Status
+```bash
+python check_installation.py           # Basic check
+python check_installation.py --verbose # Detailed information
+```
+
+#### Sample Output
+```
+🔍 DISCOVERSE Installation Status Check
+============================================================
+Python version: 3.10.16
+
+==================================================
+DISCOVERSE Core Modules
+==================================================
+✓ DISCOVERSE Core ✓ Environment Module ✓ Robot Module ✓ Utils Module
+
+==================================================
+Optional Feature Modules  
+==================================================
+✓ LiDAR Simulation (2/2)
+✓ 3D Gaussian Splatting Rendering (3/3)
+○ XML Scene Editor (1/2)
+✓ Policy Learning (5/5)
+
+💡 To install missing features, use these commands:
+   pip install -e ".[xml-editor]"  # XML Scene Editor
+```
+
+### 📊 Module Feature Overview
+
+| Module | Install Command | Function | Use Cases |
+|--------|-----------------|----------|-----------|
+| **Core** | `pip install -e .` | Core simulation | Learning, basic development |
+| **LiDAR** | `.[lidar]` | High-performance LiDAR simulation | SLAM, navigation research |
+| **Rendering** | `.[gaussian-rendering]` | 3D Gaussian Splatting rendering | Visual simulation, Real2Sim |
+| **GUI** | `.[xml-editor]` | Visual scene editing | Scene design, model debugging |
+| **ACT** | `.[act]` | Imitation learning algorithm | Robot skill learning |
+| **Diffusion Policy** | `.[diffusion-policy]` | Diffusion model policy | Complex policy learning |
+| **RDT** | `.[rdt]` | Large model policy | General robot skills |
+| **Hardware Integration** | `.[hardware]` | RealSense+ROS | Real robot control |
+
+### Download Assets
+
+#### Method 1: Git LFS (Recommended)
+Project model files are managed through Git LFS for version control, ensuring you get the latest versions:
+
+```bash
+# Install Git LFS (if not already installed)
+## Linux
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
+## macos use Homebrew
+brew install git-lfs
+
+git lfs install
+
+# Clone repository with automatic LFS file download
+git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
+
+# Or pull LFS files in existing repository
+git lfs pull
+```
+
+#### Method 2: Manual Download
+If Git LFS download is slow, manually download from:
+- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
+- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
+
+Extract to the `models/` directory:
+```
+models/
+├── meshes/          # Mesh geometries
+├── textures/        # Material textures  
+├── 3dgs/           # Gaussian Splatting models
+│   ├── airbot_play/
+│   ├── mmk2/
+│   ├── objects/
+│   └── scenes/
+├── mjcf/           # MuJoCo scene descriptions
+└── urdf/           # Robot descriptions
+```
+
+> 💡 **Tip**: Using Git LFS ensures you get the latest model files and supports incremental updates.
+
+## 🐳 III. Docker Quick Start
 
 The fastest way to get started with DISCOVERSE:
 
@@ -70,46 +248,10 @@ docker run -it --rm --gpus all \
 
 For detailed Docker setup, see our [Docker deployment guide](doc/docker.md).
 
-## 📦 Installation
 
-### Prerequisites
-- **Python 3.8+**
-- **CUDA 11.8+** (for 3DGS rendering)
-- **NVIDIA GPU** with 8GB+ VRAM (recommended)
+## 📷 IV. High-Fidelity Rendering Setup
 
-### Basic Installation
-```bash
-# Clone repository with submodules
-git clone https://github.com/TATP-233/DISCOVERSE.git --recursive
-cd DISCOVERSE
-
-# Install Python dependencies
-pip install -r requirements.txt
-pip install -e .
-```
-
-### Download Assets
-Download model files from:
-- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
-- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
-
-Extract to the `models/` directory:
-```
-models/
-├── meshes/          # Mesh geometries
-├── textures/        # Material textures  
-├── 3dgs/           # Gaussian Splatting models
-│   ├── airbot_play/
-│   ├── mmk2/
-│   ├── objects/
-│   └── scenes/
-├── mjcf/           # MuJoCo scene descriptions
-└── urdf/           # Robot descriptions
-```
-
-## 📷 Photorealistic Rendering Setup
-
-For high-fidelity 3DGS rendering capabilities:
+For high-fidelity 3DGS rendering functionality, skip this section if you don't need high-fidelity rendering.
 
 ### 1. CUDA Installation
 Install CUDA 11.8+ from [NVIDIA's official site](https://developer.nvidia.com/cuda-toolkit-archive).
@@ -117,7 +259,7 @@ Install CUDA 11.8+ from [NVIDIA's official site](https://developer.nvidia.com/cu
 ### 2. 3DGS Dependencies
 ```bash
 # Install Gaussian Splatting requirements
-pip install -r requirements_gs.txt
+pip install -e ".[gaussian-rendering]"
 
 # Build differential Gaussian rasterization
 cd submodules/diff-gaussian-rasterization/
@@ -141,12 +283,12 @@ View 3DGS models online using [SuperSplat](https://playcanvas.com/supersplat/edi
 
 DISCOVERSE features a comprehensive Real2Sim pipeline for creating digital twins of real environments. For detailed instructions, visit our [Real2Sim repository](https://github.com/GuangyuWang99/DISCOVERSE-Real2Sim).
 
-## 💡 Usage Examples
+## 💡 V. Usage Examples
 
 ### Basic Robot Simulation
 ```bash
 # Launch Airbot Play robotic arm
-python3 discoverse/envs/airbot_play_base.py
+python3 discoverse/robots_env/airbot_play_base.py
 
 # Run manipulation tasks
 python3 discoverse/examples/tasks_airbot_play/block_place.py
@@ -178,8 +320,8 @@ python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 - **'['/'']'** - Switch camera views
 - **'Esc'** - Toggle free camera mode
 - **'p'** - Print robot state information
-- **'g'** - Toggle Gaussian rendering
-- **'d'** - Toggle depth visualization
+- **'Ctrl+g'** - Toggle Gaussian rendering (requires gaussian-splatting installation and set cfg.use_gaussian_renderer = False)
+- **'Ctrl+d'** - Toggle depth visualization
 
 ## 🎓 Learning & Training
 
@@ -260,8 +402,24 @@ We welcome contributions! Please see our contributing guidelines and join our gr
 `diff-gaussian-rasterization` fails to install due to mismatched pytorch and cuda versions: Please install the specified version of pytorch
 
 ```bash
-# Install matching PyTorch version for your CUDA
+# Install matching PyTorch version for your CUDA, manually specify cuda version, e.g. cu118
 pip install torch==2.2.1 torchvision==0.17.1 --index-url https://download.pytorch.org/whl/cu118
+```
+
+**Taichi Installation Failure**
+```bash
+pip install taichi==1.6.0
+```
+
+**PyQt5 Installation Issues**
+```bash
+# Ubuntu/Debian
+sudo apt-get install python3-pyqt5
+```
+
+**Submodules Not Initialized**
+```bash
+git submodule update --init --recursive
 ```
 
 **Missing GLM Headers**
