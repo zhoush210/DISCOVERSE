@@ -40,13 +40,12 @@ class SimNode(AirbotPlayTaskBase):
         return (np.hypot(dist[0], dist[1]) < 0.04)
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = True
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"] = "scene/lab3/point_cloud_down.ply" # "scene/lab3/point_cloud_down.ply"基础上向下移动0.01m
 cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
 cfg.gs_model_dict["mouse"]      = "object/mouse.ply"
 cfg.gs_model_dict["mouse_pad"]      = "object/mouse_pad.ply"
+cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/mouse_push.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "mouse", "mouse_pad"]

@@ -29,13 +29,12 @@ class SimNode(AirbotPlayTaskBase):
         return (abs(tmat_cup[2, 2]) > 0.99) and np.hypot(tmat_jujube[0, 3] - tmat_cup[0, 3], tmat_jujube[1, 3] - tmat_cup[1, 3]) < 0.02
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = False
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"]      = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]        = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]        = "hinge/drawer_2.ply"
 cfg.gs_model_dict["jujube"]          = "object/jujube.ply"
 cfg.gs_model_dict["coffeecup_white"] = "object/teacup.ply"
+cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/jujube_place.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "jujube", "coffeecup_white"]

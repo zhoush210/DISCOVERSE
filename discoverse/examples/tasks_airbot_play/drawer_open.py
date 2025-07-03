@@ -20,11 +20,10 @@ class SimNode(AirbotPlayTaskBase):
         return (self.mj_data.qpos[9] > 0.15)
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = False
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
+cfg.init_qpos[:] = [1.713, -1.782,  0.932,  0.107,  1.477, -2.426,  0.]
 
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/drawer_open.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2"]

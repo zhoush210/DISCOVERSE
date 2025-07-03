@@ -141,7 +141,6 @@ Key metrics include:
 
 ```python
 cfg.use_gaussian_renderer = False
-cfg.init_key = "pick"
 cfg.gs_model_dict = {
     "plate_white": "object/plate_white.ply",
     "kiwi": "object/kiwi.ply",

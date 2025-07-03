@@ -12,7 +12,6 @@ class Env(gymnasium.Env):
 
         # 环境配置
         cfg.use_gaussian_renderer = False  # 关闭高斯渲染器
-        cfg.init_key = "pick"  # 初始化模式为"抓取"
         cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # 定义白色盘子的模型路径
         cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # 定义奇异果的模型路径
         cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # 定义背景的模型路径
@@ -28,7 +27,6 @@ class Env(gymnasium.Env):
         # 创建基础任务环境
         if task_base is None:
             self.task_base = SimNode(cfg)  # 使用SimNode初始化环境，而不是MMK2TaskBase
-            self.task_base.arm_action = cfg.init_key
         else:
             self.task_base = task_base
         self.mj_model = self.task_base.mj_model  # 获取MuJoCo模型

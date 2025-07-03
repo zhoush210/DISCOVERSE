@@ -12,7 +12,6 @@ class Env(gymnasium.Env):
 
         # 环境配置
         cfg.use_gaussian_renderer = False  # 关闭高斯渲染器
-        cfg.init_key = "pick"  # 初始化模式为"抓取"
         cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # 定义白色盘子的模型路径
         cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # 定义奇异果的模型路径
         cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # 定义背景的模型路径

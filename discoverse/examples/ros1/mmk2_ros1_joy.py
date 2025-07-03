@@ -23,8 +23,8 @@ class MMK2ROS1JoyCtl(MMK2ROS1):
 
     def __init__(self, config: MMK2Cfg):
         super().__init__(config)
-        self.arm_action = config.init_key
 
+        self.arm_action = "pick"
         self.lft_arm_target_pose = self.arm_action_init_position[self.arm_action]["l"].copy()
         self.lft_end_euler = np.zeros(3)
         self.rgt_arm_target_pose = self.arm_action_init_position[self.arm_action]["r"].copy()
@@ -125,7 +125,6 @@ if __name__ == "__main__":
 
     cfg = MMK2Cfg()    
     cfg.mjcf_file_path = "mjcf/mmk2_floor.xml"
-    cfg.init_key = "pick"
     cfg.render_set     = {
         "fps"    : 30,
         "width"  : 640,

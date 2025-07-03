@@ -1,4 +1,4 @@
-<mujoco model="plate_coffecup_mmk2">
+<mujoco model="coffeecup_plate_mmk2">
 
   <include file="../scene.xml"/>
   <include file="../mmk2/mmk2_options.xml"/>

@@ -24,12 +24,6 @@ class SimNode(MMK2TaskBase):
 
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
-cfg.init_key = "pick"
-#cfg.gs_model_dict["coffeecup_white"] = "object/teacup.ply"
-#cfg.gs_model_dict["plate_white"]     = "object/plate_white.ply"
-#cfg.gs_model_dict["cup_lid"]         = "object/teacup_lid.ply"
-#cfg.gs_model_dict["wood"]            = "object/wood.ply"
-#cfg.gs_model_dict["background"]      = "scene/tsimf_library_0/point_cloud_for_mmk2.ply"
 
 cfg.mjcf_file_path = "mjcf/tasks_mmk2/cabinet_door_open.xml"
 cfg.obj_list    = ["cabinet_door"]
@@ -65,7 +59,6 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))

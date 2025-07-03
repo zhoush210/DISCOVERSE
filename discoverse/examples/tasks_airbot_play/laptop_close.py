@@ -35,20 +35,19 @@ class SimNode(AirbotPlayTaskBase):
         return (abs(self.mj_data.qpos[8]) < 0.1)
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = True
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
 cfg.gs_model_dict["laptop_1"]   = "hinge/laptop_1.ply"
 cfg.gs_model_dict["laptop_2"]   = "hinge/laptop_2.ply"
+cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/laptop_close.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "laptop_1", "laptop_2"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
-cfg.sync         = False
-cfg.headless     = True
+cfg.sync         = True
+cfg.headless     = False
 cfg.render_set   = {
     "fps"    : 20,
     "width"  : 640,

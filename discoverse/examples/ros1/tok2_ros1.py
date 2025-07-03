@@ -9,7 +9,6 @@ class TOK2JOY(TOK2Base):
 
     target_control = np.zeros(16)
     def __init__(self, config: TOK2Cfg):
-        self.arm_action = config.init_key
         self.tctr_base = self.target_control[:2]
         self.tctr_left_arm = self.target_control[2:8]
         self.tctr_lft_gripper = self.target_control[8:9]

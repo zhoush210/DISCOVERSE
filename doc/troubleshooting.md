@@ -10,6 +10,7 @@ This guide helps you resolve common issues when installing and using DISCOVERSE.
   - [Submodules](#submodules)
 - [Runtime Issues](#runtime-issues)
   - [Graphics and Display](#graphics-and-display)
+  - [Video Recording](#video-recording)
   - [Server Deployment](#server-deployment)
 
 ---
@@ -301,6 +302,83 @@ libGL error: failed to load driver: swrast
    ```
 
 > **Reference**: Similar issues reported in [Gymnasium Issue #755](https://github.com/Farama-Foundation/Gymnasium/issues/755#issuecomment-2825928509)
+
+### Video Recording
+
+#### FFmpeg Video Encoding Errors
+
+**Problem**: Video recording fails during task execution with FFmpeg parameter errors:
+
+```
+BrokenPipeError: [Errno 32] 断开的管道
+
+RuntimeError: Error writing 'data/coffeecup_place/000/cam_0.mp4': Unrecognized option 'qp'.
+Error splitting the argument list: Option not found
+```
+
+**Root Cause**: This error occurs when `mediapy` library attempts to write MP4 video files using FFmpeg with incompatible or unrecognized encoding parameters. The issue typically stems from:
+- Outdated FFmpeg version that doesn't support the 'qp' (quality parameter) option
+- Conflicting FFmpeg installations (system vs conda)
+- Missing codec libraries in FFmpeg build
+
+**Solutions**:
+
+1. **Update FFmpeg to latest version**:
+   ```bash
+   # For conda environments (recommended)
+   conda install -c conda-forge ffmpeg
+   
+   # For system-wide installation (Ubuntu/Debian)
+   sudo apt update
+   sudo apt install ffmpeg
+   
+   # Verify installation
+   ffmpeg -version
+   ```
+
+2. **For conda environment conflicts**:
+   ```bash
+   # Remove existing FFmpeg installations
+   conda remove ffmpeg
+   
+   # Install latest FFmpeg with full codec support
+   conda install -c conda-forge ffmpeg=6.0
+   
+   # Verify codecs are available
+   ffmpeg -codecs | grep h264
+   ```
+
+3. **Alternative: Downgrade mediapy to compatible version**:
+   ```bash
+   pip install mediapy==1.1.0
+   ```
+
+4. **Workaround: Use different video format**:
+   
+   If the issue persists, modify the video recording code to use AVI format instead of MP4:
+   
+   ```python
+   # In airbot_task_base.py or similar files
+   # Change from:
+   # mediapy.write_video(os.path.join(save_path, f"cam_{id}.mp4"), [...])
+   
+   # To:
+   mediapy.write_video(os.path.join(save_path, f"cam_{id}.avi"), [...], codec='mjpeg')
+   ```
+
+5. **For development environments**:
+   ```bash
+   # Install FFmpeg with specific codecs
+   sudo apt install ffmpeg libx264-dev libx265-dev
+   
+   # Or use static FFmpeg build
+   wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+   tar -xf ffmpeg-release-amd64-static.tar.xz
+   sudo cp ffmpeg-*-static/ffmpeg /usr/local/bin/
+   sudo cp ffmpeg-*-static/ffprobe /usr/local/bin/
+   ```
+
+> **Reference**: Similar issue reported in [nerfstudio #1138](https://github.com/nerfstudio-project/nerfstudio/issues/1138)
 
 ### Server Deployment
 

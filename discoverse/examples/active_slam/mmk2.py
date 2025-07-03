@@ -6,7 +6,6 @@ class MMK2SlamCfg(DummyRobotConfig):
     mjcf_file_path = "mjcf/mmk2_floor_fixed.xml"
     timestep       = 0.0025
     decimation     = 4
-    init_key       = "stand"
     rb_link_list   = [
         "agv_link", "slide_link", "head_yaw_link", "head_pitch_link",
         "lft_arm_base", "lft_arm_link1", "lft_arm_link2", 
