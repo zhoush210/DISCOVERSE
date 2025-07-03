@@ -172,12 +172,15 @@ GLFWError: (65545) b'GLX: Failed to find a suitable GLXFBConfig'
 libEGL warning: MESA-LOADER: failed to open virtio_gpu: /usr/lib/dri/virtio_gpu_dri.so: cannot open shared object file
 libEGL warning: MESA-LOADER: failed to open swrast: /usr/lib/dri/swrast_dri.so: cannot open shared object file
 GLFWError: (65542) b'EGL: Failed to initialize EGL: EGL is not or could not be initialized'
+libGL error: failed to load driver: iris
+libGL error: failed to load driver: swrast
 ```
 
 **Root Cause**: Missing or incompatible Mesa drivers, particularly in:
 - Virtual machines (VirtIO GPU driver issues)
 - Docker containers without proper GPU passthrough
 - ARM-based systems with incomplete driver installations
+- Conda environments with conflicting OpenGL libraries
 
 **Solutions**:
 
@@ -191,7 +194,44 @@ GLFWError: (65542) b'EGL: Failed to initialize EGL: EGL is not or could not be i
    sudo apt-get install mesa-vulkan-drivers mesa-va-drivers
    ```
 
-2. **For VirtIO GPU issues**:
+2. **For conda environment conflicts** (similar to GLX issues):
+   
+   **Root Cause**: Conda's OpenGL libraries and libstdc++ versions conflict with system Mesa drivers.
+   
+   **Solution 1** - Fix libstdc++ conflicts (recommended):
+   ```bash
+   # Step 1: Install latest gcc in conda environment
+   conda install libgcc
+   
+   # Step 2: Check for duplicate libstdc++ files
+   sudo find / -wholename "*conda*/**/libstdc++.so*"
+   
+   # Step 3: Remove conflicting libstdc++ files from conda environment
+   # Replace 'your_env_name' with your actual environment name
+   rm $CONDA_PREFIX/lib/libstdc++*
+   
+   # Alternative: Remove specific old versions if you see duplicates
+   # rm $CONDA_PREFIX/lib/libstdc++.so.6.0.21  # Example old version
+   ```
+   
+   > **Warning**: After removing libstdc++ files, you may occasionally see `free(): invalid pointer` messages when Python programs terminate. This is generally harmless but indicates library conflicts.
+   
+   **Solution 2** - Remove conda's conflicting OpenGL packages:
+   ```bash
+   conda remove --force mesa-libgl-cos6-x86_64 mesa-libgl-devel-cos6-x86_64
+   ```
+   
+   **Solution 3** - Force system OpenGL libraries:
+   ```bash
+   export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGL.so.1:/usr/lib/x86_64-linux-gnu/libEGL.so.1
+   ```
+   
+   **Solution 4** - Install compatible Mesa in conda:
+   ```bash
+   conda install -c conda-forge mesa-libgl-devel-cos7-x86_64 mesa-dri-drivers-cos7-x86_64
+   ```
+
+3. **For VirtIO GPU issues**:
    ```bash
    # Install VirtIO GPU drivers
    sudo apt-get install xserver-xorg-video-qxl
@@ -200,11 +240,15 @@ GLFWError: (65542) b'EGL: Failed to initialize EGL: EGL is not or could not be i
    export LIBGL_ALWAYS_SOFTWARE=1
    ```
 
-3. **Configure EGL for headless rendering**:
+4. **Configure EGL for headless rendering**:
    ```bash
    export MUJOCO_GL=egl
    export PYOPENGL_PLATFORM=egl
    ```
+
+> **References**: 
+> - [Ask Ubuntu discussion](https://askubuntu.com/questions/1352158/libgl-error-failed-to-load-drivers-iris-and-swrast-in-ubuntu-20-04)
+> - [StackOverflow libstdc++ solution](https://stackoverflow.com/questions/48453497/anaconda-libstdc-so-6-version-glibcxx-3-4-20-not-found)
 
 #### MuJoCo-Specific Rendering Issues
 
