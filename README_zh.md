@@ -52,29 +52,77 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 
 ### 🚀 快速开始
 
+1. 克隆仓库（推荐按需下载submodules，不使用--recursive）
 ```bash
-# 1. 克隆仓库（推荐按需下载submodules，不使用--recursive）
 git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
+```
 
-# 2. 选择安装方式
+2. 选择安装方式
+```bash
+conda create -n discoverse discoverse python=3.10 # >=3.8即可
+conda activate discoverse
 pip install -e .              # 仅核心功能（适合于快速上手，推荐）
 pip install -e ".[lidar]"     # 激光雷达仿真
 pip install -e ".[act_full]"  # 模仿学习算法act, 可替换成[dp_full] [rdt_full]
 pip install -e ".[full]"      # 完整功能（不推荐）
+```
 
-# 3. 按需下载submodules（根据安装的功能模块）
+3. 按需下载submodules（根据安装的功能模块）
+```bash
 python setup_submodules.py        # 自动检测并下载需要的submodules
 # python setup_submodules.py --module lidar act  # 手动指定模块
 # python setup_submodules.py --all  # 下载所有submodules
-
+```
 > 💡 **按需下载的优势**:
 > - ⚡ **下载速度快**: 只下载需要的模块，减少90%下载时间
 > - 💾 **节省空间**: 避免下载不需要的大型依赖（如ComfyUI约2GB）
 > - 🎯 **精准安装**: 根据实际使用的功能模块智能下载
 
-# 4. 验证安装
+4. 验证安装
+```bash
 python check_installation.py
+```
+
+5. 更新资产
+
+方式1: Git LFS（推荐）
+
+项目的模型文件通过Git LFS进行版本管理，确保获得最新版本：
+
+```bash
+# 安装Git LFS (如果尚未安装)
+## Linux
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
+
+## macos 使用Homebrew Homebrew
+brew install git-lfs
+
+git lfs install
+
+# 在仓库中拉取LFS文件
+git lfs pull
+```
+
+方式2: 手动下载
+
+如果Git LFS下载过慢，可从以下地址手动下载，网盘更新可能有延迟：
+- [百度网盘](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
+- [清华云盘](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
+
+解压到`models/`目录：
+```
+models/
+├── meshes/          # 网格几何
+├── textures/        # 材质纹理  
+├── 3dgs/           # 高斯散射模型
+│   ├── airbot_play/
+│   ├── mmk2/
+│   ├── objects/
+│   └── scenes/
+├── mjcf/           # MuJoCo场景描述
+└── urdf/           # 机器人描述
 ```
 
 ### 🎯 按需求选择安装
@@ -185,47 +233,6 @@ DISCOVERSE 核心模块
 | **扩散策略** | `.[diffusion-policy]` | 扩散模型策略 | 复杂策略学习 |
 | **RDT** | `.[rdt]` | 大模型策略 | 通用机器人技能 |
 | **硬件集成** | `.[hardware]` | RealSense+ROS | 真实机器人控制 |
-
-### 下载资产文件
-
-#### 方式1: Git LFS (推荐)
-项目的模型文件通过Git LFS进行版本管理，确保获得最新版本：
-
-```bash
-# 安装Git LFS (如果尚未安装)
-## Linux
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
-## macos 使用Homebrew Homebrew
-brew install git-lfs
-
-git lfs install
-
-
-# 在仓库中拉取LFS文件
-git lfs pull
-```
-
-#### 方式2: 手动下载
-如果Git LFS下载过慢，可从以下地址手动下载：
-- [百度网盘](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
-- [清华云盘](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
-
-解压到`models/`目录：
-```
-models/
-├── meshes/          # 网格几何
-├── textures/        # 材质纹理  
-├── 3dgs/           # 高斯散射模型
-│   ├── airbot_play/
-│   ├── mmk2/
-│   ├── objects/
-│   └── scenes/
-├── mjcf/           # MuJoCo场景描述
-└── urdf/           # 机器人描述
-```
-
-> 💡 **提示**: 使用Git LFS可以确保获得最新的模型文件，并支持增量更新。
 
 ## 🐳 三. Docker快速开始
 

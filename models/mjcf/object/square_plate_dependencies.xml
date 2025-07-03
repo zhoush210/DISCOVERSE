@@ -1,0 +1,33 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="square_plate_texture" file="object/square_plate/square_plate.png"/>
+    <material name="square_plate_texture" texture="square_plate_texture"/>
+
+    <mesh name="square_plate" file="object/square_plate/square_plate.obj"/>
+    <mesh name="square_plate_part_0" file="object/square_plate/part_0.obj"/>
+    <mesh name="square_plate_part_1" file="object/square_plate/part_1.obj"/>
+    <mesh name="square_plate_part_2" file="object/square_plate/part_2.obj"/>
+    <mesh name="square_plate_part_3" file="object/square_plate/part_3.obj"/>
+    <mesh name="square_plate_part_4" file="object/square_plate/part_4.obj"/>
+    <mesh name="square_plate_part_5" file="object/square_plate/part_5.obj"/>
+    <mesh name="square_plate_part_6" file="object/square_plate/part_6.obj"/>
+    <mesh name="square_plate_part_7" file="object/square_plate/part_7.obj"/>
+    <mesh name="square_plate_part_8" file="object/square_plate/part_8.obj"/>
+    <mesh name="square_plate_part_9" file="object/square_plate/part_9.obj"/>
+    <mesh name="square_plate_part_10" file="object/square_plate/part_10.obj"/>
+    <mesh name="square_plate_part_11" file="object/square_plate/part_11.obj"/>
+    <mesh name="square_plate_part_12" file="object/square_plate/part_12.obj"/>
+    <mesh name="square_plate_part_13" file="object/square_plate/part_13.obj"/>
+    <mesh name="square_plate_part_14" file="object/square_plate/part_14.obj"/>
+    <mesh name="square_plate_part_15" file="object/square_plate/part_15.obj"/>
+    <mesh name="square_plate_part_16" file="object/square_plate/part_16.obj"/>
+    <mesh name="square_plate_part_17" file="object/square_plate/part_17.obj"/>
+    <mesh name="square_plate_part_18" file="object/square_plate/part_18.obj"/>
+    <mesh name="square_plate_part_19" file="object/square_plate/part_19.obj"/>
+    <mesh name="square_plate_part_20" file="object/square_plate/part_20.obj"/>
+    <mesh name="square_plate_part_21" file="object/square_plate/part_21.obj"/>
+    <mesh name="square_plate_part_22" file="object/square_plate/part_22.obj"/>
+    <mesh name="square_plate_part_23" file="object/square_plate/part_23.obj"/>
+    <mesh name="square_plate_part_24" file="object/square_plate/part_24.obj"/>
+  </asset>
+</mujocoinclude>

@@ -36,10 +36,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="将 .obj 或 .stl 网格文件转换为 MuJoCo MJCF 格式的XML文件。")
     parser.add_argument("input_file", type=str, help="输入的网格文件路径 (.obj 或 .stl)，请使用完整路径。")
     parser.add_argument("--rgba", nargs=4, type=float, default=[0.5, 0.5, 0.5, 1], help="网格的 RGBA 颜色，默认为 [0.5, 0.5, 0.5, 1]。")
-    parser.add_argument("--texture", type=str, default=None, help="纹理文件路径 (.png)，请使用完整路径。如果提供，RGBA的透明度将被忽略。")
+    parser.add_argument("--texture", type=str, default=None, help="纹理文件路径 (.png)。如果提供，RGBA的透明度将被忽略。")
     parser.add_argument("--mass", type=float, default=0.001, help="网格的质量，默认为 0.001 kg。")
     parser.add_argument("--diaginertia", nargs=3, type=float, default=[0.00002, 0.00002, 0.00002], help="网格的对角惯性张量，默认为 [2e-5, 2e-5, 2e-5]。")
-    parser.add_argument("--fix_joint", action="store_true", help="是否将物体的基座固定在世界坐标系中（不使用 'free' 关节），默认为 False。")
+    parser.add_argument("--free_joint", action="store_true", help="是否为物体添加free自由度")
     parser.add_argument("-cd", "--convex_decomposition", action="store_true", help="是否将网格分解为多个凸部分以进行更精确的碰撞检测，默认为 False。需要安装 coacd 和 trimesh。")
     parser.add_argument("--verbose", action="store_true", help="是否在转换完成后使用 MuJoCo 查看器可视化生成的模型，默认为 False。")
     args = parser.parse_args()
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     rgba = args.rgba
     mass = args.mass
     diaginertia = args.diaginertia
-    fix_joint = args.fix_joint
+    free_joint = args.free_joint
 
     if input_file.endswith(".obj"):
         asset_name = os.path.basename(input_file).replace(".obj", "")
@@ -68,19 +68,7 @@ if __name__ == "__main__":
     else:
         exit(f"错误: {input_file} 不是有效的文件类型。请使用 .obj 或 .stl 文件。")
 
-    texture_name = None
-    if args.texture is not None and os.path.exists(args.texture):
-        texture_name = os.path.basename(args.texture)
-        texture_dir = os.path.join("obj", asset_name, texture_name)
-        texture_target_path = os.path.join(DISCOVERSE_ASSETS_DIR, "textures", texture_dir)
-        if not os.path.exists(os.path.dirname(texture_target_path)):
-            os.makedirs(os.path.dirname(texture_target_path))
-        shutil.copy(args.texture, texture_target_path)
-        rgba[3] = 0.0
-    else:
-        texture_name = None
-    
-    output_dir = os.path.join(DISCOVERSE_ASSETS_DIR, "meshes", "obj", asset_name)    
+    output_dir = os.path.join(DISCOVERSE_ASSETS_DIR, "meshes", "object", asset_name)
     mjcf_obj_dir = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "object")
     if not os.path.exists(mjcf_obj_dir):
         os.makedirs(mjcf_obj_dir)
@@ -90,10 +78,28 @@ if __name__ == "__main__":
 
     if os.path.dirname(input_file) != output_dir:
         shutil.copy(input_file, output_dir)
+
+    texture_name = None
+    if args.texture is not None and os.path.exists(args.texture):
+        texture_name = os.path.basename(args.texture)
+        texture_dir = os.path.join("object", asset_name, texture_name)
+        texture_target_path = os.path.join(DISCOVERSE_ASSETS_DIR, "meshes", texture_dir)
+        if not os.path.exists(os.path.dirname(texture_target_path)):
+            os.makedirs(os.path.dirname(texture_target_path))
+        if args.texture.startswith("/"):
+            text_path = args.texture
+        else:
+            text_path = os.path.join(os.getcwd(), args.texture)
+        shutil.copy(text_path, os.path.dirname(texture_target_path))
+        print(f"[Debug]: text_path={text_path}, texture_target_path={os.path.dirname(texture_target_path)}")
+        rgba[3] = 0.0
+    else:
+        texture_name = None
+
     asset_config = """<mujocoinclude>\n  <asset>\n"""
 
     geom_config = f"""<mujocoinclude>\n"""
-    if not fix_joint:
+    if free_joint:
         geom_config += f'  <joint type="free"/>\n'
     geom_config += f'  <inertial pos="0 0 0" mass="{mass}" diaginertia="{diaginertia[0]} {diaginertia[1]} {diaginertia[2]}" />\n'
 
@@ -102,7 +108,7 @@ if __name__ == "__main__":
         asset_config += f'    <material name="{asset_name}_texture" texture="{asset_name}_texture"/>\n\n'
         geom_config += f'  <geom material="{asset_name}_texture" mesh="{asset_name}" class="obj_visual"/>\n\n'
 
-    asset_config += '    <mesh name="{}" file="obj/{}/{}.obj"/>\n'.format(asset_name, asset_name, os.path.basename(asset_name))
+    asset_config += '    <mesh name="{}" file="object/{}/{}.obj"/>\n'.format(asset_name, asset_name, os.path.basename(asset_name))
 
     if convex_de:
         print(f"正在对 {asset_name} 进行凸分解...")
@@ -115,7 +121,7 @@ if __name__ == "__main__":
             output_part_file = os.path.join(output_dir, part_filename)
             part_mesh = trimesh.Trimesh(vertices=part[0], faces=part[1])
             part_mesh.export(output_part_file)
-            asset_config += '    <mesh name="{}_part_{}" file="obj/{}/{}"/>\n'.format(asset_name, i, asset_name, part_filename)
+            asset_config += '    <mesh name="{}_part_{}" file="object/{}/{}"/>\n'.format(asset_name, i, asset_name, part_filename)
             geom_config += '  <geom type="mesh" rgba="{} {} {} {}" mesh="{}_part_{}"/>\n'.format(rgba[0], rgba[1], rgba[2], rgba[3], asset_name, i)
         print(f"资源 {asset_name} 已被分解为 {len(parts)} 个凸包部分。")
         
@@ -153,7 +159,7 @@ if __name__ == "__main__":
         tmp_content = ""
         tmp_content += '<mujoco model="temp_preview_env">\n'
         tmp_content += '  <option gravity="0 0 -9.81"/>\n'
-        tmp_content += '  <compiler meshdir="../meshes" texturedir="../textures/"/>\n'
+        tmp_content += '  <compiler meshdir="../meshes" texturedir="../meshes/"/>\n'
         tmp_content +=f'  <include file="object/{asset_name}_dependencies.xml"/>\n'
         tmp_content += '  <default>\n'
         tmp_content += '    <default class="obj_visual">\n'

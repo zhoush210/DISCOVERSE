@@ -4,7 +4,6 @@
 *build
 *.pyc
 models/3dgs
-scripts
 data
 *.DS_Store
 *.mp4

@@ -1,0 +1,42 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="trashbin_texture" file="object/trashbin/trashbin.png"/>
+    <material name="trashbin_texture" texture="trashbin_texture"/>
+
+    <mesh name="trashbin" file="object/trashbin/trashbin.obj"/>
+    <mesh name="trashbin_part_0" file="object/trashbin/part_0.obj"/>
+    <mesh name="trashbin_part_1" file="object/trashbin/part_1.obj"/>
+    <mesh name="trashbin_part_2" file="object/trashbin/part_2.obj"/>
+    <mesh name="trashbin_part_3" file="object/trashbin/part_3.obj"/>
+    <mesh name="trashbin_part_4" file="object/trashbin/part_4.obj"/>
+    <mesh name="trashbin_part_5" file="object/trashbin/part_5.obj"/>
+    <mesh name="trashbin_part_6" file="object/trashbin/part_6.obj"/>
+    <mesh name="trashbin_part_7" file="object/trashbin/part_7.obj"/>
+    <mesh name="trashbin_part_8" file="object/trashbin/part_8.obj"/>
+    <mesh name="trashbin_part_9" file="object/trashbin/part_9.obj"/>
+    <mesh name="trashbin_part_10" file="object/trashbin/part_10.obj"/>
+    <mesh name="trashbin_part_11" file="object/trashbin/part_11.obj"/>
+    <mesh name="trashbin_part_12" file="object/trashbin/part_12.obj"/>
+    <mesh name="trashbin_part_13" file="object/trashbin/part_13.obj"/>
+    <mesh name="trashbin_part_14" file="object/trashbin/part_14.obj"/>
+    <mesh name="trashbin_part_15" file="object/trashbin/part_15.obj"/>
+    <mesh name="trashbin_part_16" file="object/trashbin/part_16.obj"/>
+    <mesh name="trashbin_part_17" file="object/trashbin/part_17.obj"/>
+    <mesh name="trashbin_part_18" file="object/trashbin/part_18.obj"/>
+    <mesh name="trashbin_part_19" file="object/trashbin/part_19.obj"/>
+    <mesh name="trashbin_part_20" file="object/trashbin/part_20.obj"/>
+    <mesh name="trashbin_part_21" file="object/trashbin/part_21.obj"/>
+    <mesh name="trashbin_part_22" file="object/trashbin/part_22.obj"/>
+    <mesh name="trashbin_part_23" file="object/trashbin/part_23.obj"/>
+    <mesh name="trashbin_part_24" file="object/trashbin/part_24.obj"/>
+    <mesh name="trashbin_part_25" file="object/trashbin/part_25.obj"/>
+    <mesh name="trashbin_part_26" file="object/trashbin/part_26.obj"/>
+    <mesh name="trashbin_part_27" file="object/trashbin/part_27.obj"/>
+    <mesh name="trashbin_part_28" file="object/trashbin/part_28.obj"/>
+    <mesh name="trashbin_part_29" file="object/trashbin/part_29.obj"/>
+    <mesh name="trashbin_part_30" file="object/trashbin/part_30.obj"/>
+    <mesh name="trashbin_part_31" file="object/trashbin/part_31.obj"/>
+    <mesh name="trashbin_part_32" file="object/trashbin/part_32.obj"/>
+    <mesh name="trashbin_part_33" file="object/trashbin/part_33.obj"/>
+  </asset>
+</mujocoinclude>

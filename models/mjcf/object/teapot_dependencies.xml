@@ -1,0 +1,42 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="teapot_texture" file="object/teapot/teapot.png"/>
+    <material name="teapot_texture" texture="teapot_texture"/>
+
+    <mesh name="teapot" file="object/teapot/teapot.obj"/>
+    <mesh name="teapot_part_0" file="object/teapot/part_0.obj"/>
+    <mesh name="teapot_part_1" file="object/teapot/part_1.obj"/>
+    <mesh name="teapot_part_2" file="object/teapot/part_2.obj"/>
+    <mesh name="teapot_part_3" file="object/teapot/part_3.obj"/>
+    <mesh name="teapot_part_4" file="object/teapot/part_4.obj"/>
+    <mesh name="teapot_part_5" file="object/teapot/part_5.obj"/>
+    <mesh name="teapot_part_6" file="object/teapot/part_6.obj"/>
+    <mesh name="teapot_part_7" file="object/teapot/part_7.obj"/>
+    <mesh name="teapot_part_8" file="object/teapot/part_8.obj"/>
+    <mesh name="teapot_part_9" file="object/teapot/part_9.obj"/>
+    <mesh name="teapot_part_10" file="object/teapot/part_10.obj"/>
+    <mesh name="teapot_part_11" file="object/teapot/part_11.obj"/>
+    <mesh name="teapot_part_12" file="object/teapot/part_12.obj"/>
+    <mesh name="teapot_part_13" file="object/teapot/part_13.obj"/>
+    <mesh name="teapot_part_14" file="object/teapot/part_14.obj"/>
+    <mesh name="teapot_part_15" file="object/teapot/part_15.obj"/>
+    <mesh name="teapot_part_16" file="object/teapot/part_16.obj"/>
+    <mesh name="teapot_part_17" file="object/teapot/part_17.obj"/>
+    <mesh name="teapot_part_18" file="object/teapot/part_18.obj"/>
+    <mesh name="teapot_part_19" file="object/teapot/part_19.obj"/>
+    <mesh name="teapot_part_20" file="object/teapot/part_20.obj"/>
+    <mesh name="teapot_part_21" file="object/teapot/part_21.obj"/>
+    <mesh name="teapot_part_22" file="object/teapot/part_22.obj"/>
+    <mesh name="teapot_part_23" file="object/teapot/part_23.obj"/>
+    <mesh name="teapot_part_24" file="object/teapot/part_24.obj"/>
+    <mesh name="teapot_part_25" file="object/teapot/part_25.obj"/>
+    <mesh name="teapot_part_26" file="object/teapot/part_26.obj"/>
+    <mesh name="teapot_part_27" file="object/teapot/part_27.obj"/>
+    <mesh name="teapot_part_28" file="object/teapot/part_28.obj"/>
+    <mesh name="teapot_part_29" file="object/teapot/part_29.obj"/>
+    <mesh name="teapot_part_30" file="object/teapot/part_30.obj"/>
+    <mesh name="teapot_part_31" file="object/teapot/part_31.obj"/>
+    <mesh name="teapot_part_32" file="object/teapot/part_32.obj"/>
+    <mesh name="teapot_part_33" file="object/teapot/part_33.obj"/>
+  </asset>
+</mujocoinclude>

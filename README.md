@@ -56,29 +56,79 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 
 ### 🚀 Quick Start
 
+1. Clone repository (recommended: download submodules on-demand, don't use --recursive)
 ```bash
-# 1. Clone repository (recommended: download submodules on-demand, don't use --recursive)
 git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
+```
 
-# 2. Choose installation method
+2. Choose installation method
+```bash
+conda create -n discoverse discoverse python=3.10 # >=3.8 is ok
+conda activate discoverse
+
 pip install -e .              # Core only (recommended for quick start)
 pip install -e ".[lidar]"     # LiDAR simulation
 pip install -e ".[act_full]"  # Imitation learning with ACT, can replace with [dp_full] [rdt_full]
 pip install -e ".[full]"      # Full features (not recommended)
+```
 
-# 3. Download submodules on-demand (based on installed feature modules)
+3. Download submodules on-demand (based on installed feature modules)
+```bash
 python setup_submodules.py        # Auto-detect and download required submodules
 # python setup_submodules.py --module lidar act  # Manually specify modules
 # python setup_submodules.py --all  # Download all submodules
+```
 
 > 💡 **Advantages of On-Demand Download**:
 > - ⚡ **Faster download**: Only download needed modules, reduce 90% download time
 > - 💾 **Save space**: Avoid downloading unused large dependencies (e.g., ComfyUI ~2GB)
 > - 🎯 **Precise installation**: Intelligently download based on actual feature modules used
 
-# 4. Verify installation
+4. Verify installation
+```bash
 python check_installation.py
+```
+
+5. Download Assets
+
+Method 1: Git LFS (Recommended)
+
+Project model files are managed through Git LFS for version control, ensuring you get the latest versions:
+
+```bash
+# Install Git LFS (if not already installed)
+## Linux
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
+
+## macos use Homebrew
+brew install git-lfs
+
+git lfs install
+
+# pull LFS files in existing repository
+git lfs pull
+```
+
+Method 2: Manual Download
+
+If Git LFS download is slow, manually download from:
+- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
+- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
+
+Extract to the `models/` directory:
+```
+models/
+├── meshes/          # Mesh geometries
+├── textures/        # Material textures  
+├── 3dgs/           # Gaussian Splatting models
+│   ├── airbot_play/
+│   ├── mmk2/
+│   ├── objects/
+│   └── scenes/
+├── mjcf/           # MuJoCo scene descriptions
+└── urdf/           # Robot descriptions
 ```
 
 ### 🎯 Installation by Use Case
@@ -192,48 +242,6 @@ Optional Feature Modules
 | **RDT** | `.[rdt]` | Large model policy | General robot skills |
 | **Hardware Integration** | `.[hardware]` | RealSense+ROS | Real robot control |
 
-### Download Assets
-
-#### Method 1: Git LFS (Recommended)
-Project model files are managed through Git LFS for version control, ensuring you get the latest versions:
-
-```bash
-# Install Git LFS (if not already installed)
-## Linux
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
-## macos use Homebrew
-brew install git-lfs
-
-git lfs install
-
-# Clone repository with automatic LFS file download
-git clone https://github.com/TATP-233/DISCOVERSE.git
-
-# Or pull LFS files in existing repository
-git lfs pull
-```
-
-#### Method 2: Manual Download
-If Git LFS download is slow, manually download from:
-- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
-- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
-
-Extract to the `models/` directory:
-```
-models/
-├── meshes/          # Mesh geometries
-├── textures/        # Material textures  
-├── 3dgs/           # Gaussian Splatting models
-│   ├── airbot_play/
-│   ├── mmk2/
-│   ├── objects/
-│   └── scenes/
-├── mjcf/           # MuJoCo scene descriptions
-└── urdf/           # Robot descriptions
-```
-
-> 💡 **Tip**: Using Git LFS ensures you get the latest model files and supports incremental updates.
 
 ## 🐳 III. Docker Quick Start
 

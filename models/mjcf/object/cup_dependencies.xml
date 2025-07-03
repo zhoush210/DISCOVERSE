@@ -1,0 +1,56 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="cup_texture" file="object/cup/cup.png"/>
+    <material name="cup_texture" texture="cup_texture"/>
+
+    <mesh name="cup" file="object/cup/cup.obj"/>
+    <mesh name="cup_part_0" file="object/cup/part_0.obj"/>
+    <mesh name="cup_part_1" file="object/cup/part_1.obj"/>
+    <mesh name="cup_part_2" file="object/cup/part_2.obj"/>
+    <mesh name="cup_part_3" file="object/cup/part_3.obj"/>
+    <mesh name="cup_part_4" file="object/cup/part_4.obj"/>
+    <mesh name="cup_part_5" file="object/cup/part_5.obj"/>
+    <mesh name="cup_part_6" file="object/cup/part_6.obj"/>
+    <mesh name="cup_part_7" file="object/cup/part_7.obj"/>
+    <mesh name="cup_part_8" file="object/cup/part_8.obj"/>
+    <mesh name="cup_part_9" file="object/cup/part_9.obj"/>
+    <mesh name="cup_part_10" file="object/cup/part_10.obj"/>
+    <mesh name="cup_part_11" file="object/cup/part_11.obj"/>
+    <mesh name="cup_part_12" file="object/cup/part_12.obj"/>
+    <mesh name="cup_part_13" file="object/cup/part_13.obj"/>
+    <mesh name="cup_part_14" file="object/cup/part_14.obj"/>
+    <mesh name="cup_part_15" file="object/cup/part_15.obj"/>
+    <mesh name="cup_part_16" file="object/cup/part_16.obj"/>
+    <mesh name="cup_part_17" file="object/cup/part_17.obj"/>
+    <mesh name="cup_part_18" file="object/cup/part_18.obj"/>
+    <mesh name="cup_part_19" file="object/cup/part_19.obj"/>
+    <mesh name="cup_part_20" file="object/cup/part_20.obj"/>
+    <mesh name="cup_part_21" file="object/cup/part_21.obj"/>
+    <mesh name="cup_part_22" file="object/cup/part_22.obj"/>
+    <mesh name="cup_part_23" file="object/cup/part_23.obj"/>
+    <mesh name="cup_part_24" file="object/cup/part_24.obj"/>
+    <mesh name="cup_part_25" file="object/cup/part_25.obj"/>
+    <mesh name="cup_part_26" file="object/cup/part_26.obj"/>
+    <mesh name="cup_part_27" file="object/cup/part_27.obj"/>
+    <mesh name="cup_part_28" file="object/cup/part_28.obj"/>
+    <mesh name="cup_part_29" file="object/cup/part_29.obj"/>
+    <mesh name="cup_part_30" file="object/cup/part_30.obj"/>
+    <mesh name="cup_part_31" file="object/cup/part_31.obj"/>
+    <mesh name="cup_part_32" file="object/cup/part_32.obj"/>
+    <mesh name="cup_part_33" file="object/cup/part_33.obj"/>
+    <mesh name="cup_part_34" file="object/cup/part_34.obj"/>
+    <mesh name="cup_part_35" file="object/cup/part_35.obj"/>
+    <mesh name="cup_part_36" file="object/cup/part_36.obj"/>
+    <mesh name="cup_part_37" file="object/cup/part_37.obj"/>
+    <mesh name="cup_part_38" file="object/cup/part_38.obj"/>
+    <mesh name="cup_part_39" file="object/cup/part_39.obj"/>
+    <mesh name="cup_part_40" file="object/cup/part_40.obj"/>
+    <mesh name="cup_part_41" file="object/cup/part_41.obj"/>
+    <mesh name="cup_part_42" file="object/cup/part_42.obj"/>
+    <mesh name="cup_part_43" file="object/cup/part_43.obj"/>
+    <mesh name="cup_part_44" file="object/cup/part_44.obj"/>
+    <mesh name="cup_part_45" file="object/cup/part_45.obj"/>
+    <mesh name="cup_part_46" file="object/cup/part_46.obj"/>
+    <mesh name="cup_part_47" file="object/cup/part_47.obj"/>
+  </asset>
+</mujocoinclude>

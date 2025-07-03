@@ -1,0 +1,11 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="steak_texture" file="object/steak/steak.png"/>
+    <material name="steak_texture" texture="steak_texture"/>
+
+    <mesh name="steak" file="object/steak/steak.obj"/>
+    <mesh name="steak_part_0" file="object/steak/part_0.obj"/>
+    <mesh name="steak_part_1" file="object/steak/part_1.obj"/>
+    <mesh name="steak_part_2" file="object/steak/part_2.obj"/>
+  </asset>
+</mujocoinclude>
