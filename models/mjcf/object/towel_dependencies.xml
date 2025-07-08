@@ -1,0 +1,35 @@
+<mujocoinclude>
+  <asset>
+    <texture type="2d" name="towel_texture" file="object/towel/towel.png"/>
+    <material name="towel_texture" texture="towel_texture"/>
+
+    <mesh name="towel" file="object/towel/towel.obj"/>
+    <mesh name="towel_part_0" file="object/towel/part_0.obj"/>
+    <mesh name="towel_part_1" file="object/towel/part_1.obj"/>
+    <mesh name="towel_part_2" file="object/towel/part_2.obj"/>
+    <mesh name="towel_part_3" file="object/towel/part_3.obj"/>
+    <mesh name="towel_part_4" file="object/towel/part_4.obj"/>
+    <mesh name="towel_part_5" file="object/towel/part_5.obj"/>
+    <mesh name="towel_part_6" file="object/towel/part_6.obj"/>
+    <mesh name="towel_part_7" file="object/towel/part_7.obj"/>
+    <mesh name="towel_part_8" file="object/towel/part_8.obj"/>
+    <mesh name="towel_part_9" file="object/towel/part_9.obj"/>
+    <mesh name="towel_part_10" file="object/towel/part_10.obj"/>
+    <mesh name="towel_part_11" file="object/towel/part_11.obj"/>
+    <mesh name="towel_part_12" file="object/towel/part_12.obj"/>
+    <mesh name="towel_part_13" file="object/towel/part_13.obj"/>
+    <mesh name="towel_part_14" file="object/towel/part_14.obj"/>
+    <mesh name="towel_part_15" file="object/towel/part_15.obj"/>
+    <mesh name="towel_part_16" file="object/towel/part_16.obj"/>
+    <mesh name="towel_part_17" file="object/towel/part_17.obj"/>
+    <mesh name="towel_part_18" file="object/towel/part_18.obj"/>
+    <mesh name="towel_part_19" file="object/towel/part_19.obj"/>
+    <mesh name="towel_part_20" file="object/towel/part_20.obj"/>
+    <mesh name="towel_part_21" file="object/towel/part_21.obj"/>
+    <mesh name="towel_part_22" file="object/towel/part_22.obj"/>
+    <mesh name="towel_part_23" file="object/towel/part_23.obj"/>
+    <mesh name="towel_part_24" file="object/towel/part_24.obj"/>
+    <mesh name="towel_part_25" file="object/towel/part_25.obj"/>
+    <mesh name="towel_part_26" file="object/towel/part_26.obj"/>
+  </asset>
+</mujocoinclude>

@@ -11,12 +11,12 @@ class AirbotPlayCfg(BaseConfig):
     timestep       = 0.005
     sync           = True
     headless       = False
-    init_key       = "home"
     render_set     = {
         "fps"    : 30,
         "width"  : 1280,
         "height" : 720,
     }
+    init_qpos = np.zeros(7)
     obs_rgb_cam_id  = None
     rb_link_list   = ["arm_base", "link1", "link2", "link3", "link4", "link5", "link6", "right", "left"]
     obj_list       = []
@@ -40,8 +40,12 @@ class AirbotPlayBase(SimulatorBase):
 
     def post_load_mjcf(self):
         try:
-            self.init_joint_pose = self.mj_model.key(self.config.init_key).qpos[:self.nj]
-            self.init_joint_ctrl = self.mj_model.key(self.config.init_key).ctrl[:self.nj]
+            if hasattr(self.config, "init_qpos") and self.config.init_qpos is not None:
+                assert len(self.config.init_qpos) == self.nj, "init_qpos length must match the number of joints"
+                self.init_joint_pose = np.array(self.config.init_qpos) # 这里有关节转换关系
+                self.init_joint_ctrl = self.init_joint_pose.copy()
+            else:
+                raise KeyError("init_qpos not found in config")
         except KeyError as e:
             self.init_joint_pose = np.zeros(self.nj)
             self.init_joint_ctrl = np.zeros(self.nj)

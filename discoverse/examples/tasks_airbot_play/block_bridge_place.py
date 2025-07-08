@@ -69,8 +69,6 @@ class SimNode(AirbotPlayTaskBase):
 
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = False
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"] = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"] = "hinge/drawer_2.ply"

@@ -22,7 +22,6 @@ if __name__ == "__main__":
     cfg = MMK2Cfg()
     cfg.render_set["width"] = 1280
     cfg.render_set["height"] = 720
-    cfg.init_key = "pick"
     cfg.mjcf_file_path = "mjcf/mmk2_lidar.xml"
     cfg.use_gaussian_renderer = False
 

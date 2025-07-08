@@ -4,16 +4,7 @@
   <include file="../mmk2/mmk2_options.xml"/>
   <include file="../mmk2/mmk2_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
-
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
   <worldbody>
     <body name='mmk2' pos="0 0 0">

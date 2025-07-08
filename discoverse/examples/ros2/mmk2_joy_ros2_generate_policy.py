@@ -123,7 +123,6 @@ if __name__ == "__main__":
     # 创建MMK2配置
     cfg = MMK2Cfg()
     
-    cfg.init_key = "pick"
     cfg.use_gaussian_renderer = False
     cfg.obs_rgb_cam_id = None
     cfg.obs_depth_cam_id = None

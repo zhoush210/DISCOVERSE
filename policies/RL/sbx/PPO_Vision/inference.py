@@ -74,7 +74,6 @@ def test(model_path, render=True, episodes=10, deterministic=True, seed=42):
         # 创建测试环境
         cfg = MMK2Cfg()
         cfg.use_gaussian_renderer = False  # 关闭高斯渲染器
-        cfg.init_key = "pick"  # 初始化模式
         cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"  # 定义"白色盘子"模型路径
         cfg.gs_model_dict["kiwi"] = "object/kiwi.ply"  # 定义"奇异果"模型路径
         cfg.gs_model_dict["background"] = "scene/tsimf_library_1/point_cloud.ply"  # 定义背景模型路径

@@ -52,15 +52,14 @@ class SimNode(MMK2TaskBase):
     
 cfg = MMK2Cfg()
 cfg.use_gaussian_renderer = False
-cfg.init_key = "pick"
 cfg.gs_model_dict["bowl_yellow"]     = "object/bowl_yellow.ply"
 cfg.gs_model_dict["wood"]            = "object/wood.ply"
 cfg.gs_model_dict["jujube"]          = "object/jujube.ply"
 cfg.gs_model_dict["background"]      = "scene/Lab3/environment.ply"
 
-cfg.mjcf_file_path = "mjcf/tasks_mmk2/pick_jujube.xml"
+cfg.mjcf_file_path = "mjcf/tasks_mmk2/jujube_pick.xml"
 cfg.obj_list    = ["bowl_yellow", "wood", "jujube"]
-cfg.sync     = False
+cfg.sync     = True
 cfg.headless = False
 cfg.render_set  = {
     "fps"    : 25,
@@ -69,6 +68,12 @@ cfg.render_set  = {
 }
 cfg.obs_rgb_cam_id = [0,1,2]
 cfg.save_mjb_and_task_config = True
+
+cfg.init_state["base_position"] = [0.7, -0.5, 0.0]
+cfg.init_state["base_orientation"] = [0.707, 0.0, 0.0, -0.707]
+cfg.init_state["lft_arm_qpos"] = [0.0, -0.166, 0.032, 0.0, 1.571, 2.223]
+cfg.init_state["rgt_arm_qpos"] = [0.0, -0.166, 0.032, 0.0, -1.571, -2.223]
+
 
 if __name__ == "__main__":
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
@@ -91,7 +96,6 @@ if __name__ == "__main__":
         os.makedirs(save_dir)
 
     sim_node = SimNode(cfg)
-    sim_node.arm_action = cfg.init_key
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))

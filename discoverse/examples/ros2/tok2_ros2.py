@@ -11,7 +11,6 @@ class TOK2JOY(TOK2Base, Node):
 
     target_control = np.zeros(16)
     def __init__(self, config: TOK2Cfg):
-        self.arm_action = config.init_key
         self.tctr_base = self.target_control[:2]
         self.tctr_left_arm = self.target_control[2:8]
         self.tctr_lft_gripper = self.target_control[8:9]
@@ -52,7 +51,6 @@ if __name__ == "__main__":
 
     cfg = TOK2Cfg()
     
-    cfg.init_key = "pick"
     cfg.use_gaussian_renderer = False
     cfg.obs_rgb_cam_id = None
     cfg.obs_depth_cam_id = None

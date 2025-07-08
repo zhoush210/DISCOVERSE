@@ -3,9 +3,6 @@
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
 
   <default>
-    <!-- <default class="visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0" density="0"/>
-    </default> -->
 
     <default class='slide_joint'>
       <joint range='-0.04 0.87' type='slide' axis='0 0 -1' frictionloss="1000" damping="100" actuatorfrcrange="-1600 1000"/>
@@ -57,15 +54,11 @@
     <mesh file="mmk2/slide_link_black.obj"/>
 
     <!-- lift -->
-    <texture type="2d" name="lift_light_color" file="mmk2/lift_light_color.png"/>
-    <material name="material_lift_light_color" texture="lift_light_color" specular="1.0" shininess="0.0"/>
     <mesh file="mmk2/mmk2_lift_link_0.obj"/>
     <mesh file="mmk2/mmk2_lift_link_1.STL"/>
     <mesh file="mmk2/mmk2_lift_link_2.obj"/>
 
     <!-- head -->
-    <texture type="2d" name="Layer_04_204592_color" file="mmk2/head.png"/>
-    <material name="________________Emissive_White__1" texture="Layer_04_204592_color" specular="0.5" shininess="0.5"/>
     <mesh file="mmk2/mmk2_head_0.obj"/>
     <mesh file="mmk2/mmk2_head_1.obj"/>
     <mesh file="mmk2/mmk2_head_2.obj"/>

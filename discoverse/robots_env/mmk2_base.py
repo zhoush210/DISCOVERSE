@@ -10,11 +10,20 @@ class MMK2Cfg(BaseConfig):
     decimation     = 4
     sync           = True
     headless       = False
-    init_key       = "home"
     render_set     = {
         "fps"    : 30,
         "width"  : 1920,
         "height" : 1080 
+    }
+    init_state     = {
+        "base_position"    : [0.0, 0.0, 0.0],
+        "base_orientation" : [1.0, 0.0, 0.0, 0.0],
+        "slide_qpos"       : [0.0],
+        "head_qpos"        : [0.0, 0.0],
+        "lft_arm_qpos"     : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "lft_gripper_qpos" : [0.0],
+        "rgt_arm_qpos"     : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "rgt_gripper_qpos" : [0.0],
     }
     obs_rgb_cam_id   = None
     obs_depth_cam_id = None
@@ -68,8 +77,31 @@ class MMK2Base(SimulatorBase):
 
     def post_load_mjcf(self):
         try:
-            self.init_joint_pose = self.mj_model.key(self.config.init_key).qpos[:self.njq]
-            self.init_joint_ctrl = self.mj_model.key(self.config.init_key).ctrl[:self.njctrl]
+            if hasattr(self.config, "init_state") and self.config.init_state is not None:
+                self.init_joint_pose = np.concatenate([
+                    self.config.init_state["base_position"],
+                    self.config.init_state["base_orientation"],
+                    [0.0, 0.0],
+                    self.config.init_state["slide_qpos"],
+                    self.config.init_state["head_qpos"],
+                    self.config.init_state["lft_arm_qpos"],
+                    self.config.init_state["lft_gripper_qpos"],
+                    [-self.config.init_state["lft_gripper_qpos"][0]],
+                    self.config.init_state["rgt_arm_qpos"],
+                    self.config.init_state["rgt_gripper_qpos"],
+                    [-self.config.init_state["rgt_gripper_qpos"][0]],
+                ])
+                self.init_joint_ctrl = np.concatenate([
+                    [0.0, 0.0],
+                    self.config.init_state["slide_qpos"],
+                    self.config.init_state["head_qpos"],
+                    self.config.init_state["lft_arm_qpos"],
+                    self.config.init_state["lft_gripper_qpos"],
+                    self.config.init_state["rgt_arm_qpos"],
+                    self.config.init_state["rgt_gripper_qpos"],
+                ])
+            else:
+                raise KeyError("init_state not found in config")
         except KeyError as e:
             self.init_joint_pose = np.zeros(self.njq)
             self.init_joint_pose[3:7] = [1.0, 0.0, 0.0, 0.0]

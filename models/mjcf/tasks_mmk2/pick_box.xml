@@ -4,29 +4,19 @@
   <include file="../mmk2/mmk2_options.xml"/>
   <include file="../mmk2/mmk2_dependencies.xml"/>
 
-  <compiler meshdir="../../meshes/" texturedir="../../textures/"/>
+  <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
 
   <include file="../object/box_dependencies.xml"/>
-  <include file="../object/jujube_dependencies.xml"/>
-
-
-  <default>
-    <default class="obj_visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
-    </default>
-    <default class="obj_collision">
-      <geom group="3" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" type="mesh"/>
-    </default>
-  </default>
 
   <worldbody>
-    <body name='mmk2' pos="0 0 1" euler="0 0 2">
+    <body name='mmk2' pos="0 0 0" euler="0 0 0">
       <joint type="free" frictionloss="0.0001" />
       <include file="../mmk2/mmk2.xml"/>
     </body>
 
     <!-- ======= box ======= -->
     <body name="box" pos="1.2 0.25 0.8" euler="0 0 -1.57">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/box.xml"/>
     </body>
 
@@ -130,21 +120,5 @@
   <sensor>
     <include file="../mmk2/mmk2_sensor.xml"/>
   </sensor>
-
-  <keyframe>
-    <key name="pick" qpos='
-       0.35 0.25 0  1 0 0 0
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     0  2.223  0 0 
-      -0.    -0.166  0.032  0.    -0 -2.223  0 0 
-       0.4 -1.5 0.8 1 0 0 1'
-      ctrl = '
-       0 0 0  0 0
-       0.    -0.166  0.032  0.     0  2.223  0
-      -0.    -0.166  0.032  0.    -0 -2.223  0
-      '
-    />
-  </keyframe>
-
 
 </mujoco>

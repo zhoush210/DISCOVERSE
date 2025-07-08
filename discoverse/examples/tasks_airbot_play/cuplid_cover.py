@@ -42,8 +42,6 @@ class SimNode(AirbotPlayTaskBase):
             np.hypot(tmat_lid[0, 3] - tmat_cup[0, 3], tmat_lid[1, 3] - tmat_cup[1, 3]) < 0.02
 
 cfg = AirbotPlayCfg()
-cfg.use_gaussian_renderer = False
-cfg.init_key = "ready"
 cfg.gs_model_dict["background"]      = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]        = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]        = "hinge/drawer_2.ply"
@@ -51,6 +49,7 @@ cfg.gs_model_dict["coffeecup_white"] = "object/teacup.ply"
 cfg.gs_model_dict["plate_white"]     = "object/plate_white.ply"
 cfg.gs_model_dict["wood"]            = "object/wood.ply"
 cfg.gs_model_dict["cup_lid"]         = "object/teacup_lid.ply"
+cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
 cfg.mjcf_file_path = "mjcf/tasks_airbot_play/cuplid_cover.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "coffeecup_white", "plate_white", "wood", "cup_lid"]

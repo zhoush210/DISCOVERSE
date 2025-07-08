@@ -10,7 +10,6 @@ class TOK2Cfg(BaseConfig):
     decimation     = 4
     sync           = True
     headless       = False
-    init_key       = "home"
     render_set     = {
         "fps"    : 30,
         "width"  : 1920,

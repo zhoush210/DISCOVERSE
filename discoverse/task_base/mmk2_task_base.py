@@ -31,6 +31,7 @@ def recoder_mmk2(save_path, act_lst, obs_lst, cfg):
 
 
 class MMK2TaskBase(MMK2Base):
+    arm_action = "pick"
     target_control = np.zeros(19)
     joint_move_ratio = np.zeros(19)
     action_done_dict = {

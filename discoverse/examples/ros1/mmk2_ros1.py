@@ -151,7 +151,6 @@ if __name__ == "__main__":
     np.set_printoptions(precision=3, suppress=True, linewidth=500)
 
     cfg = MMK2Cfg()
-    cfg.init_key = "pick"
     cfg.mjcf_file_path = "mjcf/mmk2_floor.xml"
     cfg.use_gaussian_renderer = False
     cfg.obs_rgb_cam_id = None
