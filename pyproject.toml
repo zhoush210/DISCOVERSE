@@ -38,7 +38,6 @@ dependencies = [
     "scipy>=1.7.0", 
     "opencv-python>=4.6.0",
     "mujoco>=3.2.0",
-    "pynput>=1.7.0",
     "psutil>=5.8.0",
     "matplotlib>=3.5.0",
     "screeninfo",
@@ -50,6 +49,7 @@ dependencies = [
 # 激光雷达仿真模块 - 包含taichi依赖
 lidar = [
     "taichi>=1.6.0",
+    "pynput>=1.7.0",
 ]
 
 # 3D Gaussian Splatting渲染模块
@@ -118,7 +118,6 @@ data-collection = [
     "termcolor>=2.4.0",
     "omegaconf>=2.3.0",
     "hydra-core>=1.3.2",
-    "pynput>=1.7.7",
     "einops>=0.8.0",
     "imagecodecs",
     "pillow>=10.2.0",

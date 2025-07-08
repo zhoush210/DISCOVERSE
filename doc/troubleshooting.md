@@ -19,7 +19,7 @@ This guide helps you resolve common issues when installing and using DISCOVERSE.
 
 ### CUDA and PyTorch
 
-#### CUDA/PyTorch Version Mismatch
+#### 1. CUDA/PyTorch Version Mismatch
 
 **Problem**: `diff-gaussian-rasterization` fails to install with error message about mismatched PyTorch and CUDA versions.
 
@@ -32,7 +32,7 @@ pip install torch==2.2.1 torchvision==0.17.1 --index-url https://download.pytorc
 
 > **Tip**: Check your CUDA version with `nvcc --version` or `nvidia-smi`
 
-#### Missing GLM Headers
+#### 2. Missing GLM Headers
 
 **Problem**: Compilation error with missing `glm/glm.hpp` header file.
 
@@ -53,7 +53,7 @@ pip install submodules/diff-gaussian-rasterization
 
 ### Dependencies
 
-#### Taichi Installation Failure
+#### 1. Taichi Installation Failure
 
 **Problem**: Taichi fails to install or import properly.
 
@@ -63,7 +63,7 @@ pip install submodules/diff-gaussian-rasterization
 pip install taichi==1.6.0
 ```
 
-#### PyQt5 Installation Issues
+#### 2. PyQt5 Installation Issues
 
 **Problem**: PyQt5 installation fails or GUI components don't work.
 
@@ -80,7 +80,7 @@ pip install PyQt5>=5.15.0
 
 ### Submodules
 
-#### Submodules Not Initialized
+#### 1. Submodules Not Initialized
 
 **Problem**: Missing submodule content or import errors from submodules.
 
@@ -104,7 +104,7 @@ git submodule update --init --recursive
 
 Graphics rendering issues in DISCOVERSE typically fall into three categories, each with different root causes and solutions.
 
-#### GLX Configuration Errors
+#### 1. GLX Configuration Errors
 
 **Problem**: GLFW/OpenGL initialization fails with GLX errors:
 
@@ -122,20 +122,27 @@ GLFWError: (65545) b'GLX: Failed to find a suitable GLXFBConfig'
 
 1. **For systems with NVIDIA GPU**: Check and configure graphics driver mode (dual GPU systems):
    ```bash
+   # Check EGL vendor:
+   eglinfo | grep "EGL vendor"
+   
+   # If output includes:
+   libEGL warning: egl: failed to create dri2 screen
+   It indicates a conflict between Intel and NVIDIA drivers.
+   
    # Check current driver mode
    prime-select query
    
-   # If output is 'on-demand', switch to NVIDIA mode
+   # If output is `on-demand`, switch to `nvidia` mode, then reboot or relogin!
    sudo prime-select nvidia
-
+   
    # Force NVIDIA usage
    export __NV_PRIME_RENDER_OFFLOAD=1
    export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
+   
    # Reboot system after switching
    sudo reboot
    ```
-
+   
 2. **For systems without NVIDIA GPU** (conda environments):
    
    **Root Cause**: Low version of libstdc++ in conda environment causing GLX compatibility issues.
@@ -157,15 +164,18 @@ GLFWError: (65545) b'GLX: Failed to find a suitable GLXFBConfig'
    ```
 
 5. **For X11 display issues**:
+   
    ```bash
    # Ensure X11 forwarding (if using SSH)
    ssh -X username@hostname
    
    # Check DISPLAY variable
    echo $DISPLAY
+   
+   # TODO
    ```
 
-#### EGL Initialization Errors
+#### 2. EGL Initialization Errors
 
 **Problem**: EGL backend fails to initialize, especially in virtual/containerized environments:
 
@@ -251,7 +261,7 @@ libGL error: failed to load driver: swrast
 > - [Ask Ubuntu discussion](https://askubuntu.com/questions/1352158/libgl-error-failed-to-load-drivers-iris-and-swrast-in-ubuntu-20-04)
 > - [StackOverflow libstdc++ solution](https://stackoverflow.com/questions/48453497/anaconda-libstdc-so-6-version-glibcxx-3-4-20-not-found)
 
-#### MuJoCo-Specific Rendering Issues
+#### 3. MuJoCo-Specific Rendering Issues
 
 **Problem**: MuJoCo environments fail to render properly despite working graphics drivers.
 
@@ -305,7 +315,7 @@ libGL error: failed to load driver: swrast
 
 ### Video Recording
 
-#### FFmpeg Video Encoding Errors
+#### 1. FFmpeg Video Encoding Errors
 
 **Problem**: Video recording fails during task execution with FFmpeg parameter errors:
 
@@ -382,7 +392,7 @@ Error splitting the argument list: Option not found
 
 ### Server Deployment
 
-#### Headless Server Setup
+#### 1. Headless Server Setup
 
 **Problem**: Running DISCOVERSE on a server without display.
 

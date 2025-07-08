@@ -54,7 +54,6 @@ def check_core_dependencies() -> List[Tuple[str, bool, str]]:
         ("scipy", "SciPy"), 
         ("cv2", "OpenCV"),
         ("mujoco", "MuJoCo"),
-        ("pynput", "PyNput"),
         ("psutil", "PSUtil"),
         ("screeninfo", "ScreenInfo"),
         ("mediapy", "MediaPy"),
@@ -74,6 +73,7 @@ def check_optional_dependencies() -> dict:
         "激光雷达仿真": [
             ("taichi", "Taichi"),
             ("matplotlib", "Matplotlib"),
+            ("pynput", "PyNput"),
         ],
         "3D高斯散射渲染": [
             ("torch", "PyTorch"),
