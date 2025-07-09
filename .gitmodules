@@ -16,3 +16,6 @@
 [submodule "submodules/XML-Editor"]
 	path = submodules/XML-Editor
 	url = https://github.com/xyys2003/XML-Editor.git
+[submodule "submodules/urdf2mjcf"]
+	path = submodules/urdf2mjcf
+	url = https://github.com/TATP-233/urdf2mjcf
