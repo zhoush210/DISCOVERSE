@@ -5,7 +5,6 @@ from scipy.spatial.transform import Rotation
 import os
 import argparse
 import multiprocessing as mp
-import traceback
 
 from discoverse.robots import AirbotPlayIK
 from discoverse import DISCOVERSE_ROOT_DIR
@@ -16,16 +15,15 @@ from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy
 class SimNode(AirbotPlayTaskBase):
     def __init__(self, config: AirbotPlayCfg):
         super().__init__(config)
-        self.mouse_pad_ori_pos = self.mj_model.body("mouse_pad").pos.copy()
+        self.laptop_ori_pos = self.mj_model.body("lp1").pos.copy()
         self.camera_0_pose = (self.mj_model.camera("eye_side").pos.copy(), self.mj_model.camera("eye_side").quat.copy())
 
     def domain_randomization(self):
-        # 随机 鼠标垫位置
-        self.mj_model.body("mouse_pad").pos[:2] = self.mouse_pad_ori_pos[:2] + 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
+        # 随机 笔记本位置
+        self.mj_model.body("lp1").pos[:2] = self.laptop_ori_pos[:2] + 2.*(np.random.random(2) - 0.5) * 0.1
 
-        # 随机 鼠标位置
-        self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.03
-        self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.02
+        # 随机 笔记本角度
+        self.set_joint_position("laptop_joint", np.random.random() * np.pi/4)
 
         # 随机 eye side 视角
         # camera = self.mj_model.camera("eye_side")
@@ -34,21 +32,18 @@ class SimNode(AirbotPlayTaskBase):
         # camera.quat[:] = Rotation.from_euler("xyz", euler, degrees=False).as_quat()[[3,0,1,2]]
 
     def check_success(self):
-        tmat_mouse = get_body_tmat(self.mj_data, "mouse")
-        tmat_mouse_pad = get_body_tmat(self.mj_data, "mouse_pad")
-        dist = tmat_mouse[:3,3] - tmat_mouse_pad[:3,3]
-        return (np.hypot(dist[0], dist[1]) < 0.04)
+        return (abs(self.mj_data.qpos[8]) < 0.1)
 
 cfg = AirbotPlayCfg()
-cfg.gs_model_dict["background"] = "scene/lab3/point_cloud_down.ply" # "scene/lab3/point_cloud_down.ply"基础上向下移动0.01m
+cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
-cfg.gs_model_dict["mouse"]      = "object/mouse.ply"
-cfg.gs_model_dict["mouse_pad"]      = "object/mouse_pad.ply"
+cfg.gs_model_dict["laptop_1"]   = "hinge/laptop_1.ply"
+cfg.gs_model_dict["laptop_2"]   = "hinge/laptop_2.ply"
 cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
-cfg.mjcf_file_path = "mjcf/tasks_airbot_play/mouse_push.xml"
-cfg.obj_list     = ["drawer_1", "drawer_2", "mouse", "mouse_pad"]
+cfg.mjcf_file_path = "mjcf/tasks_airbot_play/close_laptop.xml"
+cfg.obj_list     = ["drawer_1", "drawer_2", "laptop_1", "laptop_2"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
 cfg.sync         = True
@@ -76,8 +71,8 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
     cfg.use_gaussian_renderer = args.use_gs
-
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/mouse_push")
+    
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data", os.path.splitext(os.path.basename(__file__))[0])
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -88,12 +83,12 @@ if __name__ == "__main__":
 
     arm_ik = AirbotPlayIK()
 
-    trmat_05 = Rotation.from_euler("xyz", [0., 1.4, 0.], degrees=False).as_matrix()
-    trmat_5 = Rotation.from_euler("xyz", [0., 1.3, 0.], degrees=False).as_matrix()
+    trmat_01 = Rotation.from_euler("xyz", [0., 0.8, 0.], degrees=False).as_matrix()
+    trmat_2 = Rotation.from_euler("xyz", [0., np.pi/2., 0.], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))
 
     stm = SimpleStateMachine()
-    stm.max_state_cnt = 8
+    stm.max_state_cnt = 4
     max_time = 15.0 #s
 
     action = np.zeros(7)
@@ -110,35 +105,23 @@ if __name__ == "__main__":
 
         try:
             if stm.trigger():
-                if stm.state_idx == 0: # 伸到鼠标后上方
-                    tmat_mouse = get_body_tmat(sim_node.mj_data, "mouse")
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_mouse
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([-0.065, 0.0, 0.07])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                    sim_node.target_control[6] = 0.5
-                elif stm.state_idx == 1: # 靠近鼠标
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.02, 0.0, -0.035])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 2: # 往前推鼠标
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.03, 0.0, 0.0])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 3: # 往前推鼠标
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.03, 0.0, 0.0])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 4: # 往前推鼠标
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.03, 0.0, 0.0])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 5: # 往前推鼠标
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.03, 0.0, 0.0])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_05, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 6: # 往前推鼠标
-                    tmat_mouse_pad = get_body_tmat(sim_node.mj_data, "mouse_pad")
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_mouse_pad
-                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([-0.03, 0.0, 0.035])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_5, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 7: # 抬起夹爪
+                if stm.state_idx == 0: # 伸到电脑屏幕上方
+                    tmat_laptop = get_site_tmat(sim_node.mj_data, "laptop_cam_site")
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_laptop
+                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.05, 0.0, 0.1])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[6] = 0.75
+                elif stm.state_idx == 1: # 靠近电脑屏幕
+                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.05, 0.0, 0.0])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_01, sim_node.mj_data.qpos[:6])
+                elif stm.state_idx == 2: # 合起屏幕
+                    tmat_laptop = get_site_tmat(sim_node.mj_data, "laptop_bottom_site")
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_laptop
+                    tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.0, 0.0, 0.03])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
+                elif stm.state_idx == 3: # 抬起夹爪
                     tmat_tgt_local[:3, 3] = tmat_tgt_local[:3, 3] + np.array([0.0, 0.0, 0.05])
-                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_5, sim_node.mj_data.qpos[:6])
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat_2, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)
                 sim_node.joint_move_ratio = dif / (np.max(dif) + 1e-6)
@@ -153,7 +136,7 @@ if __name__ == "__main__":
                 stm.next()
 
         except ValueError as ve:
-            traceback.print_exc()
+            # traceback.print_exc()
             sim_node.reset()
             act_lst, obs_lst = [], []
 

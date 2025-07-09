@@ -9,24 +9,42 @@ import multiprocessing as mp
 from discoverse.robots import AirbotPlayIK
 from discoverse import DISCOVERSE_ROOT_DIR
 from discoverse.robots_env.airbot_play_base import AirbotPlayCfg
-from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStateMachine
+from discoverse.utils import get_body_tmat, step_func, SimpleStateMachine
 from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
+import traceback
 class SimNode(AirbotPlayTaskBase):
     def domain_randomization(self):
-        pass
+        random_bias_xy = np.zeros(2)
+        random_bias_xy[0] = 2.*(np.random.random() - 0.5) * 0.08
+        random_bias_xy[1] = 2.*(np.random.random() - 0.5) * 0.03
+
+        # 随机 猕猴桃位置
+        self.object_pose("kiwi")[:2] += random_bias_xy[:2]
+
+        # 随机 碟子位置
+        self.object_pose("plate_white")[:2] += random_bias_xy[:2]
+
+        # 随机 碗位置
+        self.object_pose("flower_bowl")[0] += 2.*(np.random.random() - 0.5) * 0.05
+        self.object_pose("flower_bowl")[1] += 2.*(np.random.random() - 0.5) * 0.03
 
     def check_success(self):
-        return (self.mj_data.qpos[9] > 0.15)
+        tmat_jujube = get_body_tmat(self.mj_data, "kiwi")
+        tmat_bowl = get_body_tmat(self.mj_data, "flower_bowl")
+        return (abs(tmat_bowl[2, 2]) > 0.99) and np.hypot(tmat_jujube[0, 3] - tmat_bowl[0, 3], tmat_jujube[1, 3] - tmat_bowl[1, 3]) < 0.02
 
 cfg = AirbotPlayCfg()
-cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
-cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
-cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
-cfg.init_qpos[:] = [1.713, -1.782,  0.932,  0.107,  1.477, -2.426,  0.]
+cfg.gs_model_dict["background"]  = "scene/lab3/point_cloud.ply"
+cfg.gs_model_dict["drawer_1"]    = "hinge/drawer_1.ply"
+cfg.gs_model_dict["drawer_2"]    = "hinge/drawer_2.ply"
+cfg.gs_model_dict["kiwi"]        = "object/kiwi.ply"
+cfg.gs_model_dict["plate_white"] = "object/plate_white.ply"
+cfg.gs_model_dict["flower_bowl"] = "object/flower_bowl.ply"
+cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
-cfg.mjcf_file_path = "mjcf/tasks_airbot_play/drawer_open.xml"
-cfg.obj_list     = ["drawer_1", "drawer_2"]
+cfg.mjcf_file_path = "mjcf/tasks_airbot_play/place_kiwi_fruit.xml"
+cfg.obj_list     = ["drawer_1", "drawer_2", "kiwi", "plate_white", "flower_bowl"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
 cfg.sync         = True
@@ -46,6 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_idx", type=int, default=0, help="data index")
     parser.add_argument("--data_set_size", type=int, default=1, help="data set size")
     parser.add_argument("--auto", action="store_true", help="auto run")
+    parser.add_argument("--save_segment", action="store_true", help="save segment videos")
     parser.add_argument('--use_gs', action='store_true', help='Use gaussian splatting renderer')
     args = parser.parse_args()
 
@@ -54,26 +73,32 @@ if __name__ == "__main__":
         cfg.headless = True
         cfg.sync = False
     cfg.use_gaussian_renderer = args.use_gs
-
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/drawer_open")
+    
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data", os.path.splitext(os.path.basename(__file__))[0])
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+
+    if args.save_segment:
+        cfg.obs_depth_cam_id = list(set(cfg.obs_rgb_cam_id + ([] if cfg.obs_depth_cam_id is None else cfg.obs_depth_cam_id)))
+        from discoverse.randomain.utils import SampleforDR
+        samples = SampleforDR(objs=cfg.obj_list[2:], robot_parts=cfg.rb_link_list, cam_ids=cfg.obs_rgb_cam_id, save_dir=os.path.join(save_dir, "segment"), fps=cfg.render_set["fps"])
 
     sim_node = SimNode(cfg)
     if hasattr(cfg, "save_mjb_and_task_config") and cfg.save_mjb_and_task_config and data_idx == 0:
         mujoco.mj_saveModel(sim_node.mj_model, os.path.join(save_dir, os.path.basename(cfg.mjcf_file_path).replace(".xml", ".mjb")))
         copypy2(os.path.abspath(__file__), os.path.join(save_dir, os.path.basename(__file__)))
-        
+
     arm_ik = AirbotPlayIK()
 
-    trmat = Rotation.from_euler("xyz", [-np.pi/2., 0., np.pi], degrees=False).as_matrix()
+    trmat = Rotation.from_euler("xyz", [0., 1.4, 0.], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))
 
     stm = SimpleStateMachine()
-    stm.max_state_cnt = 7
+    stm.max_state_cnt = 9
     max_time = 15.0 #s
 
     action = np.zeros(7)
+    act_lst, obs_lst = [], []
     process_list = []
 
     move_speed = 0.75
@@ -84,36 +109,41 @@ if __name__ == "__main__":
             stm.reset()
             action[:] = sim_node.target_control[:]
             act_lst, obs_lst = [], []
+            if args.save_segment:
+                samples.reset()
 
         try:
-            if stm.trigger(): 
-                if stm.state_idx == 0: # 伸到柜子前
-                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
-                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.1 * tmat_handle[:3, 0]
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
+            if stm.trigger():
+                if stm.state_idx == 0: # 伸到猕猴桃上方
+                    tmat_kiwi = get_body_tmat(sim_node.mj_data, "kiwi")
+                    tmat_kiwi[:3, 3] = tmat_kiwi[:3, 3] + 0.1 * tmat_kiwi[:3, 2]
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_kiwi
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
                     sim_node.target_control[6] = 1
-                    move_speed = 1.5
-                elif stm.state_idx == 1: # 伸到把手位置
-                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
+                elif stm.state_idx == 1: # 伸到猕猴桃
+                    tmat_kiwi = get_body_tmat(sim_node.mj_data, "kiwi")
+                    tmat_kiwi[:3, 3] = tmat_kiwi[:3, 3] + 0.027 * tmat_kiwi[:3, 2]
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_kiwi
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
-                    move_speed = 0.5
-                elif stm.state_idx == 2: # 抓住把手
-                    sim_node.target_control[6] = 0
-                elif stm.state_idx == 3: # 抓稳把手 sleep 0.5s
-                    sim_node.delay_cnt = int(0.5/sim_node.delta_t)
-                elif stm.state_idx == 4: # 拉开抽屉
-                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
-                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.2 * tmat_handle[:3, 0]
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
+                elif stm.state_idx == 2: # 抓住猕猴桃
+                    sim_node.target_control[6] = 0.5
+                elif stm.state_idx == 3: # 抓稳猕猴桃
+                    sim_node.delay_cnt = int(0.35/sim_node.delta_t)
+                elif stm.state_idx == 4: # 提起来猕猴桃
+                    tmat_tgt_local[2,3] += 0.15
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 5: # 松开把手
+                elif stm.state_idx == 5: # 把猕猴桃放到碗上空
+                    tmat_bowl = get_body_tmat(sim_node.mj_data, "flower_bowl")
+                    tmat_bowl[:3,3] = tmat_bowl[:3, 3] + np.array([0.0, 0.0, 0.13])
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_bowl
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                elif stm.state_idx == 6: # 降低高度 把猕猴桃放到碗上
+                    tmat_tgt_local[2,3] -= 0.05
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                elif stm.state_idx == 7: # 松开猕猴桃
                     sim_node.target_control[6] = 1
-                elif stm.state_idx == 6: # 离开抽屉
-                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
-                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.025 * tmat_handle[:3, 0]
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
+                elif stm.state_idx == 8: # 抬升高度
+                    tmat_tgt_local[2,3] += 0.05
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)
@@ -129,7 +159,7 @@ if __name__ == "__main__":
                 stm.next()
 
         except ValueError as ve:
-            # traceback.print_exc()
+            traceback.print_exc()
             sim_node.reset()
 
         for i in range(sim_node.nj-1):
@@ -141,6 +171,8 @@ if __name__ == "__main__":
         if len(obs_lst) < sim_node.mj_data.time * cfg.render_set["fps"]:
             act_lst.append(action.tolist().copy())
             obs_lst.append(obs)
+            if args.save_segment:
+                samples.sampling(sim_node)
 
         if stm.state_idx >= stm.max_state_cnt:
             if sim_node.check_success():
@@ -148,6 +180,10 @@ if __name__ == "__main__":
                 process = mp.Process(target=recoder_airbot_play, args=(save_path, act_lst, obs_lst, cfg))
                 process.start()
                 process_list.append(process)
+                if args.save_segment:
+                    seg_process = mp.Process(target=samples.save)
+                    seg_process.start()
+                    process_list.append(seg_process)
 
                 data_idx += 1
                 print("\r{:4}/{:4} ".format(data_idx, data_set_size), end="")
