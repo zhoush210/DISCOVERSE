@@ -26,6 +26,7 @@ MODULE_SUBMODULES = {
     'lidar': ['submodules/MuJoCo-LiDAR'],
     'rdt': ['submodules/lerobot'],
     'diffusion-policy': ['submodules/lerobot'],
+    'urdf2mjcf' : ['submodules/urdf2mjcf'],
     'xml-editor': ['submodules/XML-Editor'],
 }
 
@@ -36,6 +37,7 @@ ALL_SUBMODULES = [
     'policies/act',
     'submodules/MuJoCo-LiDAR',
     'submodules/lerobot',
+    'submodules/urdf2mjcf',
     'submodules/XML-Editor'
 ]
 
