@@ -14,6 +14,15 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 
 </div>
 
+
+<!-- echo "# Robot-SIm" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/HEADQIANG/Robot-SIm.git
+git push -u origin main -->
+
 ## 🌟 核心特性
 
 DISCOVERSE代表了机器人仿真技术的突破，为机器人学习应用提供了前所未有的真实感和效率：
