@@ -38,6 +38,7 @@
                 <inertial pos="-0.0047053 7.3857e-05 -0.12293" mass="0.53855" diaginertia="5e-05 5e-05 3.85e-05"/>
                 <joint name="joint6" class="joint6"/>
                 <geom type="mesh" rgba="0.1 0.1 0.1 1" mesh="link6"/>
+                <geom type="mesh" rgba="0.1 0.1 0.1 1" mesh="camera_stand"/>
                 <site name="endpoint" pos='0 0 0' euler="0 -1.5708 0" size='0.001' type='sphere'/>
                 <body name="right" pos="0 0 0">
                   <inertial pos="-0.048742 0.0096369 0.00044322" quat="0.757393 0.0415116 0.0313705 0.650883" mass="0.0626" diaginertia="2.79281e-05 1.90181e-05 1.21737e-05"/>

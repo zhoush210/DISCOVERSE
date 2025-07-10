@@ -1,12 +1,16 @@
-<mujoco model="block_place">
+<mujoco model="pick_jujube">
 
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
 
   <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
+
+  <include file="../object/coffeecup_dependencies.xml"/>
+  <include file="../object/plate_white_dependencies.xml"/>
+  <include file="../object/jujube_dependencies.xml"/>
   <include file="../object/table_cloth_dependencies.xml"/>
-  <include file="../object/bowl_dependencies.xml"/>
+
 
   <worldbody>
 
@@ -18,20 +22,14 @@
     <!-- ======= EYE SIDE ======= -->
     <camera name="eye_side" fovy="72.02" pos="-0.324 0.697 1.02" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
 
-    <!-- ======= block ======= -->
-    <body name="block_green" pos="0 0.85 0.7145">
-      <joint type="free" frictionloss="0.00001"/>
-      <inertial pos="0 0 0" mass="0.001" diaginertia="1e-7 1e-7 1e-7" />
-      <geom rgba="0.21 0.36 0.21 1" condim="4" solimp="2 1 0.01" solref="0.01 1" friction="1 0.005 0.0001" pos="0 0 0" size="0.0145 0.0145 0.0145" type="box"/>
-    </body>
-
-    <!-- ======= bowl ======= -->
-    <body name="bowl_pink" pos="0 1.03 0.6988">
-      <joint type="free" frictionloss="0.00001"/>
-      <include file="../object/bowl_pink.xml"/>
+    <!-- ======= jujube ======= -->
+    <body name="jujube" pos="0 0.92 0.69928" euler="0 0 1.5708">
+      <joint type="free" frictionloss="0.00005" />
+      <include file="../object/jujube.xml"/>
     </body>
 
     <body name="cabinet" pos="0.915 0.58 0.01">
+      <joint type="free" frictionloss="0.00005" />
       <include file="../object/cabinet.xml"/>
     </body>
 

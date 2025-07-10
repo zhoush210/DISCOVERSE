@@ -43,6 +43,7 @@ class SimulatorBase:
     obs = None
     img_rgb_obs_s = {}
     img_depth_obs_s = {}
+    free_body_qpos_ids = {}
 
     cam_id = -1  # -1表示自由视角
     last_cam_id = -1
@@ -201,6 +202,20 @@ class SimulatorBase:
         if self.use_default_window_size and maximized:
             glfw.restore_window(window)
 
+    def object_pose(self, body_name):
+        """获取物体的位姿（位置xyz和朝向wxyz）"""
+        try:
+            qid = self.mj_model.jnt_qposadr[self.free_body_qpos_ids[body_name]]
+            return self.mj_data.qpos[qid:qid+7][...]
+        except KeyError:
+            raise KeyError(f"Body name '{body_name}' not found in free_body_qpos_ids. Available bodies: {list(self.free_body_qpos_ids.keys())}")
+    
+    def get_joint_position(self, joint_name):
+        return self.mj_data.qpos[self.mj_model.joint(joint_name).qposadr]
+    
+    def set_joint_position(self, joint_name, value):
+        self.mj_data.qpos[self.mj_model.joint(joint_name).qposadr] = value
+
     def load_mjcf(self):
         if self.mjcf_file.endswith(".xml"):
             self.mj_model = mujoco.MjModel.from_xml_path(self.mjcf_file)
@@ -245,6 +260,12 @@ class SimulatorBase:
             self.mj_model.vis.global_.offwidth = max(self.mj_model.vis.global_.offwidth, screen_width)
             self.mj_model.vis.global_.offheight = max(self.mj_model.vis.global_.offheight, screen_height)
             self.renderer = mujoco.Renderer(self.mj_model, self.config.render_set["height"], self.config.render_set["width"])
+
+        for i in range(self.mj_model.nbody):
+            if len(self.mj_model.body(i).name) and self.mj_model.body(i).dofnum == 6:
+                jq_id = np.where(self.mj_model.jnt_bodyid == self.mj_model.body(i).id)[0]
+                if jq_id.size:
+                    self.free_body_qpos_ids[self.mj_model.body(i).name] = int(jq_id[0])
 
         self.post_load_mjcf()
 

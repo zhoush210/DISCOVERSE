@@ -22,30 +22,19 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 - **Hierarchical scene reconstruction** for both background environments and interactive objects
 - **Advanced laser-scanning integration** with LiDAR sensors for precise geometry capture
 - **AI-powered 3D generation** using state-of-the-art generative models
-- **Physically-based relighting** for photorealistic appearance matching
-- **Mesh-Gaussian transfer** technology for seamless asset integration
-
-### ⚡ **Exceptional Performance & Efficiency**
-- **650 FPS rendering** for 5 cameras with RGB-D output (3× faster than ORBIT/Isaac Lab)
-- **Massively parallel simulation** with GPU acceleration
-- **Real-time 3D Gaussian Splatting** rendering engine
-- **MuJoCo physics integration** for accurate contact dynamics
-- **Optimized CUDA kernels** for maximum throughput
+- **Comprehensive randomization** including generative-based domain adaptation
 
 ### 🔧 **Universal Compatibility & Flexibility**
 - **Multi-format asset support**: 3DGS (.ply), Mesh (.obj/.stl), MJCF (.xml)
 - **Diverse robot platforms**: Robotic arms, mobile manipulators, quadcopters, humanoids
 - **Multiple sensor modalities**: RGB, Depth, LiDAR, IMU, tactile sensors
 - **ROS2 integration** with seamless real-world deployment
-- **Comprehensive randomization** including generative-based domain adaptation
 
 ### 🎓 **End-to-End Learning Pipeline**
 - **Automated data collection** with 100× efficiency improvement over real-world
 - **Multiple learning algorithms**: ACT, Diffusion Policy, RDT, and more
 - **Zero-shot Sim2Real transfer** with state-of-the-art performance
 - **Imitation learning workflows** from demonstration to deployment
-
-
 
 ## 📦 II. Installation & Quick Start
 
@@ -54,7 +43,7 @@ https://github.com/user-attachments/assets/78893813-d3fd-48a1-8bb4-5b0d87bf900f
 - **CUDA 11.8+** (for 3DGS rendering)
 - **NVIDIA GPU** with 8GB+ VRAM (recommended)
 
-### 🚀 Quick Start
+### Quick Start
 
 1. Clone repository (recommended: download submodules on-demand, don't use --recursive)
 ```bash
@@ -64,7 +53,7 @@ cd DISCOVERSE
 
 2. Choose installation method
 ```bash
-conda create -n discoverse discoverse python=3.10 # >=3.8 is ok
+conda create -n discoverse python=3.10 # >=3.8 is ok
 conda activate discoverse
 
 pip install -e .              # Core only (recommended for quick start)
@@ -75,26 +64,19 @@ pip install -e ".[full]"      # Full features (not recommended)
 
 3. Download submodules on-demand (based on installed feature modules)
 ```bash
-python setup_submodules.py        # Auto-detect and download required submodules
-# python setup_submodules.py --module lidar act  # Manually specify modules
-# python setup_submodules.py --all  # Download all submodules
+python scripts/setup_submodules.py        # Auto-detect and download required submodules
+# python scripts/setup_submodules.py --module lidar act  # Manually specify modules
+# python scripts/setup_submodules.py --all  # Download all submodules
 ```
-
-> 💡 **Advantages of On-Demand Download**:
-> - ⚡ **Faster download**: Only download needed modules, reduce 90% download time
-> - 💾 **Save space**: Avoid downloading unused large dependencies (e.g., ComfyUI ~2GB)
-> - 🎯 **Precise installation**: Intelligently download based on actual feature modules used
 
 4. Verify installation
 ```bash
-python check_installation.py
+python scripts/check_installation.py
 ```
 
-5. Download Assets
+5. Update Assets
 
-Method 1: Git LFS (Recommended)
-
-Project model files are managed through Git LFS for version control, ensuring you get the latest versions:
+Project model files are managed through `Git LFS` for version control, ensuring you get the latest versions:
 
 ```bash
 # Install Git LFS (if not already installed)
@@ -102,36 +84,16 @@ Project model files are managed through Git LFS for version control, ensuring yo
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 sudo apt-get install git-lfs
 
-## macos use Homebrew
+## macOS using Homebrew
 brew install git-lfs
 
 git lfs install
 
-# pull LFS files in existing repository
+# Pull LFS files in the repository
 git lfs pull
 ```
 
-Method 2: Manual Download
-
-If Git LFS download is slow, manually download from:
-- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
-- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
-
-Extract to the `models/` directory:
-```
-models/
-├── meshes/          # Mesh geometries
-├── textures/        # Material textures  
-├── 3dgs/           # Gaussian Splatting models
-│   ├── airbot_play/
-│   ├── mmk2/
-│   ├── objects/
-│   └── scenes/
-├── mjcf/           # MuJoCo scene descriptions
-└── urdf/           # Robot descriptions
-```
-
-### 🎯 Installation by Use Case
+### Installation by Use Case
 
 #### Scenario 1: Learning Robot Simulation Basics
 ```bash
@@ -166,7 +128,7 @@ pip install -e ".[gaussian-rendering]"
 - **Dependencies**: `torch>=2.0.0`, `torchvision>=0.14.0`, `plyfile`, `PyGlm`
 - **Use Cases**: High-fidelity visual simulation, 3D scene reconstruction, Real2Sim pipeline
 
-#### Scenario 6: Data Processing & Augmentation Toolkit 📊
+#### Scenario 5: Data Processing & Augmentation Toolkit
 ```bash
 pip install -e ".[data-collection]"  # Data collection
 pip install -e ".[randomain]"        # Data augmentation and AI generation
@@ -174,7 +136,7 @@ pip install -e ".[visualization]"    # Visualization tools
 ```
 - **Function**: Dataset construction, domain randomization
 
-#### Scenario 7: Hardware Integration 🔌
+#### Scenario 6: Hardware Integration
 ```bash
 pip install -e ".[realsense]"    # RealSense camera support
 pip install -e ".[ros]"          # ROS integration
@@ -182,7 +144,7 @@ pip install -e ".[hardware]"     # Hardware integration suite
 ```
 - **Function**: Real robot control, hardware-in-the-loop simulation, Sim2Real transfer
 
-#### Scenario 8: XML Scene Editor 🖥️
+#### Scenario 7: XML Scene Editor
 ```bash
 pip install -e ".[xml-editor]"
 ```
@@ -190,43 +152,19 @@ pip install -e ".[xml-editor]"
 - **Dependencies**: `PyQt5>=5.15.0`, `PyOpenGL>=3.1.0`
 - **Use Cases**: Visual scene design, MJCF file editing, 3D model adjustment
 
-#### Scenario 9: Complete Research Environment (not recommended, install based on your needs)
+#### Scenario 8: Complete Research Environment (not recommended, install based on your needs)
 ```bash
 pip install -e ".[full]"
 ```
 - **Includes**: All feature modules
 
-
-
 ### 🔍 Installation Verification
 
-#### Check Installation Status
+Check installation status
+
 ```bash
-python check_installation.py           # Basic check
-python check_installation.py --verbose # Detailed information
-```
-
-#### Sample Output
-```
-🔍 DISCOVERSE Installation Status Check
-============================================================
-Python version: 3.10.16
-
-==================================================
-DISCOVERSE Core Modules
-==================================================
-✓ DISCOVERSE Core ✓ Environment Module ✓ Robot Module ✓ Utils Module
-
-==================================================
-Optional Feature Modules  
-==================================================
-✓ LiDAR Simulation (2/2)
-✓ 3D Gaussian Splatting Rendering (3/3)
-○ XML Scene Editor (1/2)
-✓ Policy Learning (5/5)
-
-💡 To install missing features, use these commands:
-   pip install -e ".[xml-editor]"  # XML Scene Editor
+python scripts/check_installation.py           # Basic check
+python scripts/check_installation.py --verbose # Detailed information
 ```
 
 ### 📊 Module Feature Overview
@@ -242,7 +180,6 @@ Optional Feature Modules
 | **RDT** | `.[rdt]` | Large model policy | General robot skills |
 | **Hardware Integration** | `.[hardware]` | RealSense+ROS | Real robot control |
 
-
 ## 🐳 III. Docker Quick Start
 
 The fastest way to get started with DISCOVERSE:
@@ -254,7 +191,7 @@ The fastest way to get started with DISCOVERSE:
 # Or build from source (recommended)
 git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
-python setup_submodules.py --all  # Docker image needs all submodules
+python scripts/setup_submodules.py --all  # Docker image needs all submodules
 docker build -t discoverse:latest .
 
 # Run with GPU support
@@ -267,24 +204,22 @@ docker run -it --rm --gpus all \
 
 For detailed Docker setup, see our [Docker deployment guide](doc/docker.md).
 
-
 ## 📷 IV. High-Fidelity Rendering Setup
 
 For high-fidelity 3DGS rendering functionality, skip this section if you don't need high-fidelity rendering.
 
 ### 1. CUDA Installation
-Install CUDA 11.8+ from [NVIDIA's official site](https://developer.nvidia.com/cuda-toolkit-archive).
+Install CUDA 11.8+ from [NVIDIA's official site](https://developer.nvidia.com/cuda-toolkit-archive), choose the corresponding CUDA version based on your graphics card driver.
 
 ### 2. 3DGS Dependencies
 ```bash
 # Install Gaussian Splatting requirements
 pip install -e ".[gaussian-rendering]"
 
-# Build differential Gaussian rasterization
+# Build diff-gaussian-rasterization
 cd submodules/diff-gaussian-rasterization/
-git checkout 8829d14
 
-# Apply required patches
+# Apply patches
 sed -i 's/(p_view.z <= 0.2f)/(p_view.z <= 0.01f)/' cuda_rasterizer/auxiliary.h
 sed -i '361s/D += depths\[collected_id\[j\]\] \* alpha \* T;/if (depths[collected_id[j]] < 50.0f)\n        D += depths[collected_id[j]] * alpha * T;/' cuda_rasterizer/forward.cu
 
@@ -293,8 +228,30 @@ cd ../..
 pip install submodules/diff-gaussian-rasterization
 ```
 
-### 3. Model Visualization
-View 3DGS models online using [SuperSplat](https://playcanvas.com/supersplat/editor) - simply drag and drop `.ply` files.
+### 3. Download 3DGS Models
+
+- [Baidu Netdisk](https://pan.baidu.com/s/1y4NdHDU7alCEmjC1ebtR8Q?pwd=bkca) 
+- [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/0b92cdaeb58e414d85cc/)
+
+.ply model files are large, choose only the models you need.
+
+Place in the `models/3dgs` directory as follows:
+```
+models/
+├── meshes/          # Mesh geometries
+├── textures/        # Material textures  
+├── 3dgs/           # Gaussian Splatting models
+│   ├── airbot_play/
+│   ├── mmk2/
+│   ├── objects/
+│   ├── scenes/
+│   └── ......
+├── mjcf/           # MuJoCo scene descriptions
+└── urdf/           # Robot descriptions
+```
+
+### 4. Model Visualization
+View and edit 3DGS models online using [SuperSplat](https://playcanvas.com/supersplat/editor) - simply drag and drop `.ply` files.
 
 ## 🔨 Real2Sim Pipeline
 
@@ -306,31 +263,23 @@ DISCOVERSE features a comprehensive Real2Sim pipeline for creating digital twins
 
 ### Basic Robot Simulation
 ```bash
-# Launch Airbot Play robotic arm
-python3 discoverse/robots_env/airbot_play_base.py
+# Launch Airbot Play / MMK2
+python discoverse/robots_env/airbot_play_base.py
+python discoverse/robots_env/mmk2_base.py
 
-# Run manipulation tasks
-python3 discoverse/examples/tasks_airbot_play/block_place.py
-python3 discoverse/examples/tasks_airbot_play/coffeecup_place.py
-python3 discoverse/examples/tasks_airbot_play/cuplid_cover.py
-python3 discoverse/examples/tasks_airbot_play/drawer_open.py
+# Run manipulation tasks (automated data generation)
+python discoverse/examples/tasks_airbot_play/place_coffeecup.py
+python discoverse/examples/tasks_mmk2/kiwi_pick.py
+
+# Tactile hand leaphand
+python discoverse/examples/robots/leap_hand_env.py
+
+# Inverse kinematics
+python discoverse/examples/mocap_ik/mocap_ik_airbot_play.py # optional [--mjcf mjcf/tasks_airbot_play/stack_block.xml]
+python discoverse/examples/mocap_ik/mocap_ik_mmk2.py # optional [--mjcf mjcf/tasks_mmk2/pan_pick.xml]
 ```
 
 https://github.com/user-attachments/assets/6d80119a-31e1-4ddf-9af5-ee28e949ea81
-
-### Advanced Applications
-
-#### Active SLAM
-```bash
-python3 discoverse/examples/active_slam/dummy_robot.py
-```
-<img src="./assets/active_slam.jpg" alt="Active SLAM" style="zoom: 33%;" />
-
-#### Multi-Agent Coordination
-```bash
-python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
-```
-<img src="./assets/skyrover.png" alt="Multi-agent collaboration" style="zoom: 50%;" />
 
 ### Interactive Controls
 - **'h'** - Show help menu
@@ -342,9 +291,26 @@ python3 discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
 - **'Ctrl+g'** - Toggle Gaussian rendering (requires gaussian-splatting installation and set cfg.use_gaussian_renderer = False)
 - **'Ctrl+d'** - Toggle depth visualization
 
-## 🎓 Learning & Training
+### More Applications
 
-### Imitation Learning Quickstart
+#### Active SLAM
+
+Requires 3DGS dependencies installation and downloading corresponding .ply models, refer to `IV. High-Fidelity Rendering Setup`
+
+```bash
+python discoverse/examples/active_slam/dummy_robot.py
+```
+<img src="./assets/active_slam.jpg" alt="Active SLAM" style="zoom: 33%;" />
+
+#### Multi-Agent Coordination
+```bash
+python discoverse/examples/skyrover_on_rm2car/skyrover_and_rm2car.py
+```
+<img src="./assets/skyrover.png" alt="Multi-agent collaboration" style="zoom: 50%;" />
+
+## 🎓 VI. Learning & Training
+
+### Imitation Learning Quick Start
 
 DISCOVERSE provides complete workflows for data collection, training, and inference:
 
@@ -371,9 +337,9 @@ DISCOVERSE incorporates state-of-the-art randomization techniques including:
 - **Physics parameter randomization** for robust policies
 - **Lighting and material variations** for photorealistic adaptation
 
-See our [randomization guide](doc/Randomain.md) for implementation details.
+See our [randomization guide](doc/automated_data_generation.md) for implementation details.
 
-## 🏆 Performance Benchmarks
+## 🏆 VII. Performance Benchmarks
 
 DISCOVERSE demonstrates superior Sim2Real transfer performance:
 
@@ -387,7 +353,7 @@ DISCOVERSE demonstrates superior Sim2Real transfer performance:
 
 *Zero-shot Sim2Real success rates using ACT policy*
 
-## ⏩ Recent Updates
+## ⏩ VIII. Recent Updates
 
 - **2025.01.13**: 🎉 DISCOVERSE open source release
 - **2025.01.16**: 🐳 Docker support added
@@ -395,7 +361,7 @@ DISCOVERSE demonstrates superior Sim2Real transfer performance:
 - **2025.02.17**: 📈 Diffusion Policy baseline integration
 - **2025.02.19**: 📡 Point cloud sensor support added
 
-## 🤝 Community & Support
+## 🤝 IX. Community & Support
 
 ### Getting Help
 - 📖 **Documentation**: Comprehensive guides in `/doc` directory
@@ -411,15 +377,15 @@ We welcome contributions! Please see our contributing guidelines and join our gr
 *Join our WeChat community for updates and discussions*
 </div>
 
-## ❔ Troubleshooting
+## ❔ X. Troubleshooting
 
 For installation and runtime issues, please refer to our comprehensive **[Troubleshooting Guide](doc/troubleshooting.md)**.
 
-## ⚖️ License
+## ⚖️ XI. License
 
 DISCOVERSE is released under the [MIT License](LICENSE). See the license file for details.
 
-## 📜 Citation
+## 📜 XII. Citation
 
 If you find DISCOVERSE helpful in your research, please consider citing our work:
 

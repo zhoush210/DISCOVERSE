@@ -1,4 +1,4 @@
-<mujoco model="jujube_place">
+<mujoco model="place_jujube">
 
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>

@@ -1,4 +1,4 @@
-<mujoco model="cuplid_cover">
+<mujoco model="cover_cup">
 
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>

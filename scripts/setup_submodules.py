@@ -6,10 +6,10 @@ This script intelligently initializes only the submodules needed for your instal
 Run this after installing optional dependencies to download required submodules.
 
 Usage:
-    python setup_submodules.py                    # Auto-detect and setup required submodules
-    python setup_submodules.py --module lidar     # Setup specific module submodules
-    python setup_submodules.py --all              # Setup all submodules
-    python setup_submodules.py --list             # List all available submodules
+    python scripts/setup_submodules.py                    # Auto-detect and setup required submodules
+    python scripts/setup_submodules.py --module lidar     # Setup specific module submodules
+    python scripts/setup_submodules.py --all              # Setup all submodules
+    python scripts/setup_submodules.py --list             # List all available submodules
 """
 
 import subprocess
@@ -26,6 +26,7 @@ MODULE_SUBMODULES = {
     'lidar': ['submodules/MuJoCo-LiDAR'],
     'rdt': ['submodules/lerobot'],
     'diffusion-policy': ['submodules/lerobot'],
+    'urdf2mjcf' : ['submodules/urdf2mjcf'],
     'xml-editor': ['submodules/XML-Editor'],
 }
 
@@ -36,6 +37,7 @@ ALL_SUBMODULES = [
     'policies/act',
     'submodules/MuJoCo-LiDAR',
     'submodules/lerobot',
+    'submodules/urdf2mjcf',
     'submodules/XML-Editor'
 ]
 
@@ -164,6 +166,7 @@ def list_submodules():
     print(f"\n📊 Status: {sum(1 for s in ALL_SUBMODULES if is_submodule_initialized(s))}/{len(ALL_SUBMODULES)} submodules initialized")
 
 def main():
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
     parser = argparse.ArgumentParser(description="DISCOVERSE Submodules Setup")
     parser.add_argument('--module', action='append', help='Setup submodules for specific module(s)')
     parser.add_argument('--all', action='store_true', help='Setup all submodules')
@@ -196,7 +199,7 @@ def main():
         else:
             print("ℹ️  No modules detected automatically.")
             print("   Use --list to see available options or --all to setup everything.")
-            print("   Example: python setup_submodules.py --module lidar gaussian-rendering")
+            print("   Example: python scripts/setup_submodules.py --module lidar gaussian-rendering")
 
 if __name__ == "__main__":
     main() 

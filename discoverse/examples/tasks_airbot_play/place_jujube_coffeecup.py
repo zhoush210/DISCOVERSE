@@ -22,54 +22,41 @@ class SimNode(AirbotPlayTaskBase):
     def domain_randomization(self):
         if self.random_level == 0: #200
             # 随机 枣子位置
-            self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.025
+            self.object_pose("jujube")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
             # 随机 杯子位置
-            self.mj_data.qpos[self.nj+7+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+7+1+1] += 2.*(np.random.random() - 0.5) * 0.025
+            self.object_pose("coffeecup_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
 
         elif self.random_level == 1: #400
             # 随机 枣子位置
-            self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.025
+            self.object_pose("jujube")[:2] += 2.*(np.random.random() - 0.5) * np.array([0.05, 0.025])
             # 随机 杯子位置
-            self.mj_data.qpos[self.nj+7+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+7+1+1] += 2.*(np.random.random() - 0.5) * 0.025
+            self.object_pose("coffeecup_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
             # 随机 盘子位置
-            self.mj_data.qpos[self.nj+7*2+1+0] += 2.*(np.random.random() - 0.5) * 0.0625
-            self.mj_data.qpos[self.nj+7*2+1+1] += 2.*(np.random.random() - 0.5) * 0.02
+            self.object_pose("plate_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.0625, 0.02])
 
         elif self.random_level == 2: #800
             # 随机 枣子位置
-            self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.025
+            self.object_pose("jujube")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
             # 随机 杯子位置
-            self.mj_data.qpos[self.nj+7+1+0] += 2.*(np.random.random() - 0.5) * 0.05
-            self.mj_data.qpos[self.nj+7+1+1] += 2.*(np.random.random() - 0.5) * 0.025
-
+            self.object_pose("coffeecup_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.05, 0.025])
             wood_base_bias = 2.*(np.random.random(2) - 0.5) * 0.035
             # 随机 盘子位置
-            self.mj_data.qpos[self.nj+7*2+1+0] += 2.*(np.random.random() - 0.5) * 0.0625 + wood_base_bias[0]
-            self.mj_data.qpos[self.nj+7*2+1+1] += 2.*(np.random.random() - 0.5) * 0.02   + wood_base_bias[1]
+            self.object_pose("plate_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.0625, 0.02]) + wood_base_bias[:2]
             # 随机 木板位置
-            self.mj_data.qpos[self.nj+7*3+1+0] += wood_base_bias[0]
-            self.mj_data.qpos[self.nj+7*3+1+1] += 2.*(np.random.random() - 0.5) * 0.02 + wood_base_bias[1]
+            self.object_pose("wood")[0] += wood_base_bias[0]
+            self.object_pose("wood")[1] += 2.*(np.random.random() - 0.5) * 0.02 + wood_base_bias[1]
 
         elif self.random_level == 3: #1000
             # 随机 枣子位置
-            self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.1
-            self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.05
+            self.object_pose("jujube")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.1, 0.05])
             # 随机 杯子位置
-            self.mj_data.qpos[self.nj+7+1+0] += 2.*(np.random.random() - 0.5) * 0.1
-            self.mj_data.qpos[self.nj+7+1+1] += 2.*(np.random.random() - 0.5) * 0.05
+            self.object_pose("coffeecup_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.1, 0.05])
             wood_base_bias = 2.*(np.random.random(2) - 0.5) * 0.05
             # 随机 盘子位置
-            self.mj_data.qpos[self.nj+7*2+1+0] += 2.*(np.random.random() - 0.5) * 0.0625 + wood_base_bias[0]
-            self.mj_data.qpos[self.nj+7*2+1+1] += 2.*(np.random.random() - 0.5) * 0.02   + wood_base_bias[1]
+            self.object_pose("plate_white")[:2] += 2.*(np.random.random(2) - 0.5) * np.array([0.0625, 0.02]) + wood_base_bias[:2]
             # 随机 木板位置
-            self.mj_data.qpos[self.nj+7*3+1+0] += wood_base_bias[0]
-            self.mj_data.qpos[self.nj+7*3+1+1] += 2.*(np.random.random() - 0.5) * 0.02 + wood_base_bias[1]
-
+            self.object_pose("wood")[:2] += wood_base_bias[:2]
+            self.object_pose("wood")[1] += 2.*(np.random.random() - 0.5) * 0.02
 
     def check_success(self):
         tmat_cup = get_body_tmat(self.mj_data, "coffeecup_white")
@@ -86,7 +73,7 @@ cfg.gs_model_dict["wood"]            = "object/wood.ply"
 cfg.gs_model_dict["jujube"]          = "object/jujube.ply"
 cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
-cfg.mjcf_file_path = "mjcf/tasks_airbot_play/jujube_coffeecup_place.xml"
+cfg.mjcf_file_path = "mjcf/tasks_airbot_play/place_jujube_coffeecup.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "jujube", "plate_white", "coffeecup_white", "wood"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
@@ -116,7 +103,7 @@ if __name__ == "__main__":
         cfg.sync = False
     cfg.use_gaussian_renderer = args.use_gs
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/jujube_coffeecup_place")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data", os.path.splitext(os.path.basename(__file__))[0])
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

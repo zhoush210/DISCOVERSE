@@ -1,14 +1,10 @@
-<mujoco model="jujube_pick">
+<mujoco model="open_drawer">
 
   <include file="../scene.xml"/>
   <include file="../airbot_play/airbot_play_options.xml"/>
   <include file="../airbot_play/airbot_play_dependencies.xml"/>
 
   <compiler meshdir="../../meshes/" texturedir="../../meshes/"/>
-
-  <include file="../object/coffeecup_dependencies.xml"/>
-  <include file="../object/plate_white_dependencies.xml"/>
-  <include file="../object/jujube_dependencies.xml"/>
   <include file="../object/table_cloth_dependencies.xml"/>
 
 
@@ -20,16 +16,10 @@
     </body>
 
     <!-- ======= EYE SIDE ======= -->
-    <camera name="eye_side" fovy="72.02" pos="-0.324 0.697 1.02" xyaxes=" 0.828 -0.561 0.    0.394 0.582 0.702"/>
-
-    <!-- ======= jujube ======= -->
-    <body name="jujube" pos="0 0.92 0.69928" euler="0 0 1.5708">
-      <joint type="free" frictionloss="0.00005" />
-      <include file="../object/jujube.xml"/>
-    </body>
+    <camera name="eye_side" fovy="72.02" pos="0.1 0.5 0.947" xyaxes="0.415 -0.910 0.000 0.233 0.106 0.967"/>
+    <site name="eye_side_site" pos="0.1 0.5 0.947" quat="1 0 0 0"/>
 
     <body name="cabinet" pos="0.915 0.58 0.01">
-      <joint type="free" frictionloss="0.00005" />
       <include file="../object/cabinet.xml"/>
     </body>
 

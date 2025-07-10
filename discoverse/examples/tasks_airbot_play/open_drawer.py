@@ -13,35 +13,20 @@ from discoverse.utils import get_body_tmat, get_site_tmat, step_func, SimpleStat
 from discoverse.task_base import AirbotPlayTaskBase, recoder_airbot_play, copypy2
 
 class SimNode(AirbotPlayTaskBase):
-    def __init__(self, config: AirbotPlayCfg):
-        super().__init__(config)
-        self.camera_0_pose = (self.mj_model.camera("eye_side").pos.copy(), self.mj_model.camera("eye_side").quat.copy())
-
     def domain_randomization(self):
-        # 随机 枣位置
-        self.mj_data.qpos[self.nj+1+0] += 2.*(np.random.random() - 0.5) * 0.15
-        self.mj_data.qpos[self.nj+1+1] += 2.*(np.random.random() - 0.5) * 0.1
-
-        # 随机 eye side 视角
-        # camera = self.mj_model.camera("eye_side")
-        # camera.pos[:] = self.camera_0_pose[0] + 2.*(np.random.random(3) - 0.5) * 0.05
-        # euler = Rotation.from_quat(self.camera_0_pose[1][[1,2,3,0]]).as_euler("xyz", degrees=False) + 2.*(np.random.random(3) - 0.5) * 0.05
-        # camera.quat[:] = Rotation.from_euler("xyz", euler, degrees=False).as_quat()[[3,0,1,2]]
+        pass
 
     def check_success(self):
-        tmat_jujube = get_body_tmat(self.mj_data, "jujube")
-        tmat_gripper = get_site_tmat(self.mj_data, "endpoint")
-        return (np.linalg.norm(tmat_jujube[:3, 3] - tmat_gripper[:3, 3]) < 0.03)
+        return (self.mj_data.qpos[9] > 0.15)
 
 cfg = AirbotPlayCfg()
 cfg.gs_model_dict["background"] = "scene/lab3/point_cloud.ply"
 cfg.gs_model_dict["drawer_1"]   = "hinge/drawer_1.ply"
 cfg.gs_model_dict["drawer_2"]   = "hinge/drawer_2.ply"
-cfg.gs_model_dict["jujube"]     = "object/jujube.ply"
-cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
+cfg.init_qpos[:] = [1.713, -1.782,  0.932,  0.107,  1.477, -2.426,  0.]
 
-cfg.mjcf_file_path = "mjcf/tasks_airbot_play/jujube_pick.xml"
-cfg.obj_list     = ["drawer_1", "drawer_2", "jujube"]
+cfg.mjcf_file_path = "mjcf/tasks_airbot_play/open_drawer.xml"
+cfg.obj_list     = ["drawer_1", "drawer_2"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
 cfg.sync         = True
@@ -70,7 +55,7 @@ if __name__ == "__main__":
         cfg.sync = False
     cfg.use_gaussian_renderer = args.use_gs
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/jujube_pick")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data", os.path.splitext(os.path.basename(__file__))[0])
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -81,15 +66,14 @@ if __name__ == "__main__":
         
     arm_ik = AirbotPlayIK()
 
-    trmat = Rotation.from_euler("xyz", [0., np.pi/2, 0.], degrees=False).as_matrix()
+    trmat = Rotation.from_euler("xyz", [-np.pi/2., 0., np.pi], degrees=False).as_matrix()
     tmat_armbase_2_world = np.linalg.inv(get_body_tmat(sim_node.mj_data, "arm_base"))
 
     stm = SimpleStateMachine()
-    stm.max_state_cnt = 5
-    max_time = 10.0 #s
+    stm.max_state_cnt = 7
+    max_time = 15.0 #s
 
     action = np.zeros(7)
-    act_lst, obs_lst = [], []
     process_list = []
 
     move_speed = 0.75
@@ -102,24 +86,34 @@ if __name__ == "__main__":
             act_lst, obs_lst = [], []
 
         try:
-            if stm.trigger():
-                if stm.state_idx == 0: # 伸到枣上方
-                    tmat_jujube = get_body_tmat(sim_node.mj_data, "jujube")
-                    tmat_jujube[:3, 3] = tmat_jujube[:3, 3] + 0.1 * tmat_jujube[:3, 2]
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_jujube
+            if stm.trigger(): 
+                if stm.state_idx == 0: # 伸到柜子前
+                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
+                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.1 * tmat_handle[:3, 0]
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
-                    sim_node.target_control[6] = 1.
-                elif stm.state_idx == 1: # 伸到枣
-                    tmat_jujube = get_body_tmat(sim_node.mj_data, "jujube")
-                    tmat_jujube[:3, 3] = tmat_jujube[:3, 3] + 0.027 * tmat_jujube[:3, 2]
-                    tmat_tgt_local = tmat_armbase_2_world @ tmat_jujube
+                    sim_node.target_control[6] = 1
+                    move_speed = 1.5
+                elif stm.state_idx == 1: # 伸到把手位置
+                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
-                elif stm.state_idx == 2: # 抓住枣
-                    sim_node.target_control[6] = 0.
-                elif stm.state_idx == 3: # 抓稳枣
-                    sim_node.delay_cnt = int(0.35/sim_node.delta_t)
-                elif stm.state_idx == 4: # 提起来枣
-                    tmat_tgt_local[2,3] += 0.07
+                    move_speed = 0.5
+                elif stm.state_idx == 2: # 抓住把手
+                    sim_node.target_control[6] = 0
+                elif stm.state_idx == 3: # 抓稳把手 sleep 0.5s
+                    sim_node.delay_cnt = int(0.5/sim_node.delta_t)
+                elif stm.state_idx == 4: # 拉开抽屉
+                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
+                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.2 * tmat_handle[:3, 0]
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
+                    sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
+                elif stm.state_idx == 5: # 松开把手
+                    sim_node.target_control[6] = 1
+                elif stm.state_idx == 6: # 离开抽屉
+                    tmat_handle = get_site_tmat(sim_node.mj_data, "drawer_2_handle")
+                    tmat_handle[:3, 3] = tmat_handle[:3, 3] + 0.025 * tmat_handle[:3, 0]
+                    tmat_tgt_local = tmat_armbase_2_world @ tmat_handle
                     sim_node.target_control[:6] = arm_ik.properIK(tmat_tgt_local[:3,3], trmat, sim_node.mj_data.qpos[:6])
 
                 dif = np.abs(action - sim_node.target_control)

@@ -98,7 +98,7 @@ if __name__ == "__main__":
         cfg.sync = False
     cfg.use_gaussian_renderer = args.use_gs
 
-    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data/stack_block")
+    save_dir = os.path.join(DISCOVERSE_ROOT_DIR, "data", os.path.splitext(os.path.basename(__file__))[0])
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
