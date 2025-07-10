@@ -2,11 +2,12 @@ import os
 import sys
 import time
 import platform
+import argparse
 import mujoco
 import mujoco.viewer
 import numpy as np
 
-from discoverse.examples.mink.mink_utils import \
+from discoverse.examples.mocap_ik.mocap_ik_utils import \
     mj_quat2mat, \
     add_mocup_body_to_mjcf, \
     move_mocap_to_frame, \
@@ -23,6 +24,24 @@ if __name__ == "__main__":
     该程序创建一个MMK2机器人模型的MuJoCo仿真环境，添加运动捕捉(mocap)目标，
     并使用逆运动学(IK)控制机器人的双臂跟踪目标位置和姿态。
     """
+
+    parser = argparse.ArgumentParser(
+        description="Airbot Play 机器人MuJoCo仿真主程序\n"
+                    "用法示例：\n"
+                    "  python mocap_ik_airbot_play.py [--mjcf]\n"
+                    "参数说明：\n"
+                    "  mjcf  (可选) 指定MJCF模型文件路径，若不指定则使用默认模型。"
+    )
+    parser.add_argument(
+        "-m",
+        "--mjcf",
+        type=str,
+        default=None,
+        help="输入MJCF文件的路径（可选）。如未指定，则使用默认的airbot_play_floor.xml。"
+    )
+    args = parser.parse_args()
+    mjcf_path = args.mjcf
+
     # 检查是否在macOS上运行并给出适当的提示
     if platform.system() == "Darwin":
         print("\n===================================================")
@@ -35,11 +54,35 @@ if __name__ == "__main__":
         if user_input.lower() != 'y':
             print("退出程序。")
             sys.exit(0)
-    
+    # 打印MuJoCo查看器的使用提示信息
+    print("\n===================== MuJoCo 查看器使用说明 =====================")
+    print("1. 双击选中机械臂末端的绿色方块，按下ctrl和鼠标左键，拖动鼠标可以旋转机械臂")
+    print("   按下ctrl和鼠标右键，拖动鼠标可以平移机械臂末端")
+    print("2. 按 Tab 键切换左侧 UI 的可视化界面。")
+    print("   按 Shift+Tab 键切换右侧 UI 的可视化界面。")
+    print("3. 在左侧 UI 中点击 'Copy State' 可以当前的机器人状态复制到剪贴板。")
+    print("4. 在右侧 UI 的 control 面板中可以调节 gripper 滑块控制夹爪的开合。")
+    print("================================================================\n")
+    # 设置numpy输出格式
     np.set_printoptions(precision=5, suppress=True, linewidth=500)
 
     # 加载MMK2机器人模型的MJCF文件
-    mjcf_path = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "mmk2_floor.xml")
+    # 加载Airbot Play机器人模型的MJCF文件
+    if mjcf_path is None:
+        mjcf_path = os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", "mmk2_floor.xml")
+    else:
+        if not os.path.exists(mjcf_path):
+            paths = [
+                os.path.join(DISCOVERSE_ASSETS_DIR, "mjcf", mjcf_path),
+                os.path.join(DISCOVERSE_ASSETS_DIR, mjcf_path),
+                os.path.join(os.getcwd(), mjcf_path),
+            ]
+            for path in paths:
+                if os.path.exists(path) and os.path.isfile(path) and (path.endswith(".xml") or path.endswith(".mjb")):
+                    mjcf_path = path
+                    break
+        if mjcf_path is None:
+            raise FileNotFoundError(f"MJCF file not found: {mjcf_path}")
     print("mjcf_path : " , mjcf_path)
 
     # 设置渲染帧率
@@ -135,7 +178,7 @@ if __name__ == "__main__":
                     mj_model.geom(lft_mocap_box_name).rgba = (0.3, 0.6, 0.3, 0.2)
                 except ValueError as e:
                     # 捕获逆运动学计算异常
-                    print(e)
+                    # print(e)
                     # 将左臂目标移动到左臂末端执行器位置
                     move_mocap_to_frame(mj_model, mj_data, lft_mocap_name, "lft_endpoint", "site")
                     # 设置左臂目标框为红色（表示IK计算失败）
@@ -150,7 +193,7 @@ if __name__ == "__main__":
                     mj_model.geom(rgt_mocap_box_name).rgba = (0.3, 0.6, 0.3, 0.2)
                 except ValueError as e:
                     # 捕获逆运动学计算异常
-                    print(e)
+                    # print(e)
                     # 将右臂目标移动到右臂末端执行器位置
                     move_mocap_to_frame(mj_model, mj_data, rgt_mocap_name, "rgt_endpoint", "site")
                     # 设置右臂目标框为红色（表示IK计算失败）

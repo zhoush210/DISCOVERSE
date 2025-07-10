@@ -67,6 +67,7 @@
     <mesh name="link5_0" file="airbot_play/link5_0.obj"/>
     <mesh name="link5_1" file="airbot_play/link5_1.obj"/>
     <mesh name="link6" file="airbot_play/link6.obj"/>
+    <mesh name="camera_stand" file="airbot_play/camera_stand.obj"/>
     <mesh name="left" file="airbot_play/left.obj"/>
     <mesh name="right" file="airbot_play/right.obj"/>
   </asset>

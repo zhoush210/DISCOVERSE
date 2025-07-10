@@ -45,7 +45,7 @@ cfg.gs_model_dict["bowl_pink"]   = "object/bowl_pink.ply"
 cfg.gs_model_dict["block_green"] = "object/block_green.ply"
 cfg.init_qpos[:] = [-0.055, -0.547, 0.905, 1.599, -1.398, -1.599,  0.0]
 
-cfg.mjcf_file_path = "mjcf/tasks_airbot_play/block_place.xml"
+cfg.mjcf_file_path = "mjcf/tasks_airbot_play/place_block.xml"
 cfg.obj_list     = ["drawer_1", "drawer_2", "bowl_pink", "block_green"]
 cfg.timestep     = 1/240
 cfg.decimation   = 4
