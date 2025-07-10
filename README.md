@@ -64,14 +64,14 @@ pip install -e ".[full]"      # Full features (not recommended)
 
 3. Download submodules on-demand (based on installed feature modules)
 ```bash
-python setup_submodules.py        # Auto-detect and download required submodules
-# python setup_submodules.py --module lidar act  # Manually specify modules
-# python setup_submodules.py --all  # Download all submodules
+python scripts/setup_submodules.py        # Auto-detect and download required submodules
+# python scripts/setup_submodules.py --module lidar act  # Manually specify modules
+# python scripts/setup_submodules.py --all  # Download all submodules
 ```
 
 4. Verify installation
 ```bash
-python check_installation.py
+python scripts/check_installation.py
 ```
 
 5. Update Assets
@@ -163,8 +163,8 @@ pip install -e ".[full]"
 Check installation status
 
 ```bash
-python check_installation.py           # Basic check
-python check_installation.py --verbose # Detailed information
+python scripts/check_installation.py           # Basic check
+python scripts/check_installation.py --verbose # Detailed information
 ```
 
 ### 📊 Module Feature Overview
@@ -191,7 +191,7 @@ The fastest way to get started with DISCOVERSE:
 # Or build from source (recommended)
 git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
-python setup_submodules.py --all  # Docker image needs all submodules
+python scripts/setup_submodules.py --all  # Docker image needs all submodules
 docker build -t discoverse:latest .
 
 # Run with GPU support

@@ -264,8 +264,7 @@ def main():
         if missing_features:
             print(f"📦 缺失功能模块的submodules: {', '.join(missing_features)}")
             print(f"💡 运行以下命令来按需下载:")
-            print(f"   python setup_submodules.py --module {' '.join(missing_features)}")
-            print(f"   # 或下载全部: python setup_submodules.py --all")
+            print(f"   python scripts/setup_submodules.py --module {' '.join(missing_features)}")
     
     # 生成安装建议
     print(f"\n{'='*50}")

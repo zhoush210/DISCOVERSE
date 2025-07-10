@@ -88,9 +88,9 @@ pip install PyQt5>=5.15.0
 
 ```bash
 # Method 1: On-demand initialization (recommended)
-python setup_submodules.py --list              # Check status
-python setup_submodules.py --module lidar act  # Initialize specific modules
-python setup_submodules.py --all               # Initialize all modules
+python scripts/setup_submodules.py --list              # Check status
+python scripts/setup_submodules.py --module lidar act  # Initialize specific modules
+python scripts/setup_submodules.py --all               # Initialize all modules
 
 # Method 2: Traditional Git approach
 git submodule update --init --recursive

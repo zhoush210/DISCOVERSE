@@ -61,14 +61,14 @@ pip install -e ".[full]"      # 完整功能（不推荐）
 
 3. 按需下载submodules（根据安装的功能模块）
 ```bash
-python setup_submodules.py        # 自动检测并下载需要的submodules
-# python setup_submodules.py --module lidar act  # 手动指定模块
-# python setup_submodules.py --all  # 下载所有submodules
+python scripts/setup_submodules.py        # 自动检测并下载需要的submodules
+# python scripts/setup_submodules.py --module lidar act  # 手动指定模块
+# python scripts/setup_submodules.py --all  # 下载所有submodules
 ```
 
 4. 验证安装
 ```bash
-python check_installation.py
+python scripts/check_installation.py
 ```
 
 5. 更新资产
@@ -160,8 +160,8 @@ pip install -e ".[full]"
 检查安装状态
 
 ```bash
-python check_installation.py           # 基础检查
-python check_installation.py --verbose # 详细信息
+python scripts/check_installation.py           # 基础检查
+python scripts/check_installation.py --verbose # 详细信息
 ```
 
 ### 模块功能速览
@@ -188,7 +188,7 @@ python check_installation.py --verbose # 详细信息
 # 或从源码构建（推荐）
 git clone https://github.com/TATP-233/DISCOVERSE.git
 cd DISCOVERSE
-python setup_submodules.py --all  # Docker镜像需要所有submodules
+python scripts/setup_submodules.py --all  # Docker镜像需要所有submodules
 docker build -t discoverse:latest .
 
 # 使用GPU支持运行
